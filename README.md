@@ -79,8 +79,4 @@ Puedes verificar que la configuración sea correcta de las siguientes maneras:
 
 ## 🗃 Base de Datos
 
--   **Sistema**: SQLite
--   **Ventajas**:
-    -   Configuración sencilla (no requiere servidor externo).
-    -   Bajo requerimiento de recursos.
-    -   La base de datos se almacena como un archivo local dentro del proyecto.
+-   **Sistema**: MySQL
