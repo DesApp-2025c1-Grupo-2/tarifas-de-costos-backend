@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class ZonaViajeService {
@@ -21,6 +22,10 @@ public class ZonaViajeService {
 
     @Autowired
     private TarifaCostoRepository tarifaRepository;
+
+    public List<ZonaViaje> getZonas() {return zonaRepository.findAll();}
+
+    public Optional<ZonaViaje> getZonaById(Long id) {return zonaRepository.findById(id);}
 
     public Map<String, Object> obtenerComparativaCostos() {
         Map<String, Object> resultado = new HashMap<>();

@@ -1,30 +1,44 @@
-package com.acme.tarifas.gestion.controller;
+    package com.acme.tarifas.gestion.controller;
 
-import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.service.ZonaViajeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+    import com.acme.tarifas.gestion.entity.TarifaCosto;
+    import com.acme.tarifas.gestion.entity.Transportista;
+    import com.acme.tarifas.gestion.entity.ZonaViaje;
+    import com.acme.tarifas.gestion.service.ZonaViajeService;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.web.bind.annotation.GetMapping;
+    import org.springframework.web.bind.annotation.PathVariable;
+    import org.springframework.web.bind.annotation.RequestMapping;
+    import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/zonas")
-public class ZonaViajeController {
+    @RestController
+    @RequestMapping("/api/zonas")
+    public class ZonaViajeController {
 
-    @Autowired
-    private ZonaViajeService zonaService;
+        @Autowired
+        private ZonaViajeService zonaService;
 
-    @GetMapping("/comparativa-costos")
-    public Map<String, Object> compararCostosPorZona() {
-        return zonaService.obtenerComparativaCostos();
+        @GetMapping
+        public List<ZonaViaje> obtenerTodasLasZonas(){return zonaService.getZonas();}
+
+        @GetMapping("/{id}")
+        public ResponseEntity<ZonaViaje> obtenerZonaPorId(@PathVariable Long id) {
+            return zonaService.getZonaById(id)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        }
+
+        @GetMapping("/comparativa-costos")
+        public Map<String, Object> compararCostosPorZona() {
+            return zonaService.obtenerComparativaCostos();
+        }
+
+        @GetMapping("/{id}/tarifas")
+        public List<TarifaCosto> obtenerTarifasPorZona(@PathVariable Long id) {
+            return zonaService.obtenerTarifasZona(id);
+        }
     }
-
-    @GetMapping("/{id}/tarifas")
-    public List<TarifaCosto> obtenerTarifasPorZona(@PathVariable Long id) {
-        return zonaService.obtenerTarifasZona(id);
-    }
-}
