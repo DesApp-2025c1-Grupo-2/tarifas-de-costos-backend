@@ -1,15 +1,14 @@
     package com.acme.tarifas.gestion.controller;
 
+    import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
     import com.acme.tarifas.gestion.entity.TarifaCosto;
     import com.acme.tarifas.gestion.entity.Transportista;
     import com.acme.tarifas.gestion.entity.ZonaViaje;
     import com.acme.tarifas.gestion.service.ZonaViajeService;
     import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
-    import org.springframework.web.bind.annotation.GetMapping;
-    import org.springframework.web.bind.annotation.PathVariable;
-    import org.springframework.web.bind.annotation.RequestMapping;
-    import org.springframework.web.bind.annotation.RestController;
+    import org.springframework.web.bind.annotation.*;
 
     import java.util.List;
     import java.util.Map;
@@ -30,6 +29,18 @@
             return zonaService.getZonaById(id)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
+        }
+
+        @PostMapping
+        public ResponseEntity<ZonaViaje> crearZona(@RequestBody ZonaViaje zona){
+            ZonaViaje nuevaZona = zonaService.guardarZona(zona);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaZona);
+        }
+
+        @DeleteMapping("/{id}")
+        public ResponseEntity<?> eliminarZona(@PathVariable Long id) {
+            zonaService.eliminarZona(id);
+            return ResponseEntity.noContent().build();
         }
 
         @GetMapping("/comparativa-costos")
