@@ -52,6 +52,15 @@ public class ZonaViajeService {
         return resultado;
     }
 
+    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos){
+        return zonaRepository.findById(zonaId).map(existente -> {
+            existente.setNombre(nuevosDatos.getNombre());
+            existente.setDescripcion(nuevosDatos.getDescripcion());
+            existente.setRegionMapa(nuevosDatos.getRegionMapa());
+            return zonaRepository.save(existente);
+        });
+    };
+
     public List<TarifaCosto> obtenerTarifasZona(Long zonaId) {
         return tarifaRepository.findByZonaViajeId(zonaId);
     }

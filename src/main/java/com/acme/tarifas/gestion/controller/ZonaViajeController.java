@@ -52,4 +52,11 @@
         public List<TarifaCosto> obtenerTarifasPorZona(@PathVariable Long id) {
             return zonaService.obtenerTarifasZona(id);
         }
+
+        @PutMapping("/{id}")
+        public ResponseEntity<ZonaViaje> actualizarZona(@PathVariable Long id,@RequestBody ZonaViaje zona){
+            return zonaService.actualizarZona(id, zona)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().buil  d());
+        }
     }
