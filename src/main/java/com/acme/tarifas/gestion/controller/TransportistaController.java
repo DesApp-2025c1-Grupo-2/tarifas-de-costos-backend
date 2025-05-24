@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -43,7 +44,11 @@ public class TransportistaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarTransportista(@PathVariable Long id) {
-        transportistaService.eliminarTransportista(id);
-        return ResponseEntity.noContent().build();
+        try {
+            transportistaService.eliminarTransportista(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.acme.tarifas.gestion.service;
 import com.acme.tarifas.gestion.dao.TransportistaRepository;
 import com.acme.tarifas.gestion.entity.Transportista;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +42,10 @@ public class TransportistaService {
     }
 
     @Transactional
-    public void eliminarTransportista(Long id) {
-        transportistaRepository.deleteById(id);
+    public void eliminarTransportista(Long id) throws Exception {
+        Transportista transportista = transportistaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Transportista no encontrado"));
+
+        transportistaRepository.delete(transportista);
     }
 }
