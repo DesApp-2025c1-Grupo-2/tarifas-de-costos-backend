@@ -30,7 +30,11 @@ public class ZonaViajeService {
     public Optional<ZonaViaje> getZonaById(Long id) {return zonaRepository.findById(id);}
 
     @Transactional
-    public void eliminarZona(Long id){zonaRepository.deleteById(id);}
+    public void eliminarZona(Long id) throws Exception {
+        ZonaViaje zonaViaje = zonaRepository.findById(id)
+            .orElseThrow(() -> new Exception("Zona no encontrada"));
+        zonaRepository.deleteById(id);
+    }
 
     public ZonaViaje guardarZona(ZonaViaje zona) {
         return zonaRepository.save(zona);
@@ -42,11 +46,15 @@ public class ZonaViajeService {
         List<ZonaViaje> zonas = zonaRepository.findAll();
         zonas.forEach(zona -> {
             List<TarifaCosto> tarifas = tarifaRepository.findByZonaViaje(zona);
-            DoubleSummaryStatistics stats = tarifas.stream()
-                    .mapToDouble(TarifaCosto::getValorTotal)
-                    .summaryStatistics();
 
-            resultado.put(zona.getNombre(), stats);
+            if (tarifas.isEmpty()) {
+                resultado.put(zona.getNombre(), "No hay tarifas");
+            } else {
+                DoubleSummaryStatistics stats = tarifas.stream()
+                        .mapToDouble(TarifaCosto::getValorTotal)
+                        .summaryStatistics();
+                resultado.put(zona.getNombre(), stats);
+            }
         });
 
         return resultado;

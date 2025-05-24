@@ -39,8 +39,12 @@
 
         @DeleteMapping("/{id}")
         public ResponseEntity<?> eliminarZona(@PathVariable Long id) {
-            zonaService.eliminarZona(id);
-            return ResponseEntity.noContent().build();
+            try {
+                zonaService.eliminarZona(id);
+                return ResponseEntity.ok().build();
+            } catch (Exception e) {
+                return ResponseEntity.notFound().build();
+            }
         }
 
         @GetMapping("/comparativa-costos")
