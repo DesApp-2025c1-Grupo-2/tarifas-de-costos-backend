@@ -57,6 +57,6 @@
         public ResponseEntity<ZonaViaje> actualizarZona(@PathVariable Long id,@RequestBody ZonaViaje zona){
             return zonaService.actualizarZona(id, zona)
                     .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().buil  d());
+                    .orElse(ResponseEntity.notFound().build());
         }
     }
