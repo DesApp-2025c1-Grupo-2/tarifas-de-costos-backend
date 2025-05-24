@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ public class Viaje {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_TarifaCostoUtilizada", nullable = false)
+    @JsonIgnore
     private TarifaCosto tarifaCostoUtilizada;
 
     private Double precioFacturadoCliente;
