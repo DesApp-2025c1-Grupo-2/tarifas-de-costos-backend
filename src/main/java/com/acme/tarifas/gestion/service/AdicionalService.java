@@ -3,8 +3,11 @@ package com.acme.tarifas.gestion.service;
 import com.acme.tarifas.gestion.dao.AdicionalRepository;
 import com.acme.tarifas.gestion.entity.Adicional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,11 +27,25 @@ public class AdicionalService {
         return adicionalRepository.findAll();
     }
 
+    public Optional<Adicional> obtenerPorId(Long id) {
+        return adicionalRepository.findById(id);
+    }
+
     @Transactional
     public Optional<Adicional> actualizarCostoDefault(Long id, Double nuevoCosto) {
         return adicionalRepository.findById(id).map(adicional -> {
             adicional.setCostoDefault(nuevoCosto);
             return adicionalRepository.save(adicional);
         });
+    }
+
+    @Transactional
+    public boolean eliminarAdicional(Long id) {
+        return adicionalRepository.findById(id)
+                .map(adicional -> {
+                    adicionalRepository.delete(adicional);
+                    return true;
+                })
+                .orElse(false);
     }
 }

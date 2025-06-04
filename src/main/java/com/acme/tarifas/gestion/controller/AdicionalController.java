@@ -5,6 +5,7 @@ import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,13 @@ public class AdicionalController {
         return adicionalService.obtenerTodos();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Adicional> obtenerAdicionalPorId(@PathVariable Long id) {
+        return adicionalService.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/{id}/costo-default")
     public ResponseEntity<Adicional> actualizarCostoDefault(
             @PathVariable Long id,
@@ -34,5 +42,13 @@ public class AdicionalController {
         return adicionalService.actualizarCostoDefault(id, nuevoCosto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarAdicional(@PathVariable Long id) {
+        if (adicionalService.eliminarAdicional(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
