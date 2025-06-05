@@ -35,11 +35,11 @@ public class AdicionalController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}/costo-default")
-    public ResponseEntity<Adicional> actualizarCostoDefault(
+    @PutMapping("/{id}")
+    public ResponseEntity<Adicional> actualizarAdicional(
             @PathVariable Long id,
-            @RequestParam Double nuevoCosto) {
-        return adicionalService.actualizarCostoDefault(id, nuevoCosto)
+            @RequestBody Adicional adicionalActualizado) {
+        return adicionalService.actualizarAdicional(id, adicionalActualizado)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

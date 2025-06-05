@@ -32,11 +32,20 @@ public class AdicionalService {
     }
 
     @Transactional
-    public Optional<Adicional> actualizarCostoDefault(Long id, Double nuevoCosto) {
-        return adicionalRepository.findById(id).map(adicional -> {
-            adicional.setCostoDefault(nuevoCosto);
-            return adicionalRepository.save(adicional);
-        });
+    public Optional<Adicional> actualizarAdicional(Long id, Adicional adicionalActualizado) {
+        return adicionalRepository.findById(id)
+                .map(adicionalExistente -> {
+                    if (adicionalActualizado.getNombre() != null) {
+                        adicionalExistente.setNombre(adicionalActualizado.getNombre());
+                    }
+                    if (adicionalActualizado.getCostoDefault() != null) {
+                        adicionalExistente.setCostoDefault(adicionalActualizado.getCostoDefault());
+                    }
+                    if (adicionalActualizado.getDescripcion() != null) {
+                        adicionalExistente.setDescripcion(adicionalActualizado.getDescripcion());
+                    }
+                    return adicionalRepository.save(adicionalExistente);
+                });
     }
 
     @Transactional
