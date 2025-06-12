@@ -35,4 +35,39 @@ public interface TarifaCostoRepository extends JpaRepository<TarifaCosto, Long> 
 
     @EntityGraph(attributePaths = {"tipoVehiculo", "tipoCargaTarifa", "zonaViaje", "transportista"})
     Optional<TarifaCosto> findWithRelationsById(Long id);
+
+    @Query("SELECT AVG(t.valorBase), MIN(t.valorBase), MAX(t.valorBase), COUNT(t) " +
+            "FROM TarifaCosto t " +
+            "WHERE t.transportista.id = :idTransportista AND t.esVigente = true")
+    List<Object[]> obtenerEstadisticasTarifasPorTransportista(@Param("idTransportista") Long idTransportista);
+
+    @Query("SELECT t.transportista.id, t.transportista.nombreEmpresa, " +
+            "AVG(t.valorBase), MIN(t.valorBase), MAX(t.valorBase), COUNT(t) " +
+            "FROM TarifaCosto t " +
+            "WHERE t.esVigente = true " +
+            "GROUP BY t.transportista.id, t.transportista.nombreEmpresa")
+    List<Object[]> obtenerComparativaCostosTransportistas();
+
+    @Query("SELECT t.transportista.id " +
+            "FROM TarifaCosto t " +
+            "WHERE t.esVigente = true " +
+            "GROUP BY t.transportista.id " +
+            "ORDER BY AVG(t.valorBase)")
+    List<Long> obtenerIdsTransportistasOrdenadosPorCostoPromedio();
+
+    @Query("SELECT t.transportista.id, t.transportista.nombreEmpresa, " +
+            "t.transportista.evaluacionDesempeno, AVG(t.valorBase) " +
+            "FROM TarifaCosto t " +
+            "WHERE t.esVigente = true " +
+            "GROUP BY t.transportista.id, t.transportista.nombreEmpresa, t.transportista.evaluacionDesempeno")
+    List<Object[]> obtenerDatosParaRelacionPrecioCalidad();
+
+    @Query("SELECT t FROM TarifaCosto t WHERE t.transportista.id = :idTransportista AND t.esVigente = true")
+    List<TarifaCosto> findByTransportistaId(@Param("idTransportista") Long idTransportista);
+
+    @Query("SELECT t.tipoVehiculo.id, t.tipoVehiculo.nombre, AVG(t.valorBase) " +
+            "FROM TarifaCosto t " +
+            "WHERE t.transportista.id = :idTransportista AND t.esVigente = true " +
+            "GROUP BY t.tipoVehiculo.id, t.tipoVehiculo.nombre")
+    List<Object[]> obtenerCostosPromedioPorTipoVehiculo(@Param("idTransportista") Long idTransportista);
 }

@@ -5,10 +5,10 @@ import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/adicionales")
@@ -50,5 +50,17 @@ public class AdicionalController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/frecuencia-uso")
+    public ResponseEntity<List<Map<String, Object>>> obtenerFrecuenciaUsoAdicionales() {
+        List<Map<String, Object>> frecuencia = adicionalService.obtenerFrecuenciaUsoAdicionales();
+        return ResponseEntity.ok(frecuencia);
+    }
+
+    @GetMapping("/analisis-uso")
+    public ResponseEntity<Map<String, Object>> obtenerAnalisisUsoAdicionales() {
+        Map<String, Object> analisis = adicionalService.obtenerAnalisisUsoAdicionales();
+        return ResponseEntity.ok(analisis);
     }
 }
