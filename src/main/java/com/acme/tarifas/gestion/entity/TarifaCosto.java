@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -41,7 +42,8 @@ public class TarifaCosto {
     private Boolean esVigente;
     private Integer version;
 
-    @OneToMany(mappedBy = "tarifaCosto", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "tarifaCosto", fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<TarifaAdicional> adicionales = new ArrayList<>();
 
     @Transient
