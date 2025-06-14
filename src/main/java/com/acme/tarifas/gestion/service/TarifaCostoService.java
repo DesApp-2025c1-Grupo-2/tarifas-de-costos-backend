@@ -3,6 +3,7 @@ package com.acme.tarifas.gestion.service;
 import com.acme.tarifas.gestion.dao.AdicionalRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
+import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
@@ -36,15 +37,13 @@ public class TarifaCostoService {
         return tarifaRepository.save(tarifa);
     }
 
-    public List<TarifaCosto> filtrarTarifas(Long tipoVehiculo, Long zona, Long transportista) {
-        if (tipoVehiculo != null || zona != null || transportista != null) {
-            return tarifaRepository.findByFilters(tipoVehiculo, zona, transportista);
+    public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
+        return tarifaRepository.findByFilters(tipoVehiculo, zona, tipoCarga, transportista);
         }
-        return tarifaRepository.findAll();
-    }
 
-    public Optional<TarifaCosto> obtenerPorId(Long id) {
-        return tarifaRepository.findById(id);
+
+    public Optional<TarifaCostoDTO> obtenerTarifaPorId(Long id) {
+        return tarifaRepository.findTarifaDTOById(id);
     }
 
     @Transactional

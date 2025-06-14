@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 
+import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.service.TarifaCostoService;
@@ -24,17 +25,18 @@ public class TarifaCostoController {
     }
 
     @GetMapping
-    public List<TarifaCosto> obtenerTodasTarifas(
+    public List<TarifaCostoDTO> obtenerTodasTarifas(
             @RequestParam(required = false) Long tipoVehiculo,
             @RequestParam(required = false) Long zona,
-            @RequestParam(required = false) Long transportista) {
+            @RequestParam(required = false) Long tipoCarga,
+            @RequestParam(required = false) Long transportista){
 
-        return tarifaService.filtrarTarifas(tipoVehiculo, zona, transportista);
+        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga,transportista);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TarifaCosto> obtenerTarifaPorId(@PathVariable Long id) {
-        return tarifaService.obtenerPorId(id)
+    public ResponseEntity<TarifaCostoDTO> getTarifaPorId(@PathVariable Long id) {
+        return tarifaService.obtenerTarifaPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
