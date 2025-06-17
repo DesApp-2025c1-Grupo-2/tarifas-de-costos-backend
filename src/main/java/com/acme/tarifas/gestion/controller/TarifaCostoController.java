@@ -1,6 +1,7 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
+import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.service.TarifaCostoService;
@@ -57,5 +58,14 @@ public class TarifaCostoController {
         return tarifaService.actualizarValorBase(id, nuevoValor)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/adicionales")
+    public ResponseEntity<List<TarifaAdicional>>getAdicionalesPorTarifa(@PathVariable Long id){
+        List<TarifaAdicional> adicionales = tarifaService.obtenerAdicionalesPorTarifa(id);
+        if(adicionales.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adicionales);
     }
 }

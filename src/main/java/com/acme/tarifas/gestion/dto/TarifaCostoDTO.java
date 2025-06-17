@@ -15,7 +15,7 @@ public class TarifaCostoDTO {
     private String codigo;
     private String nombre;
     private Double valorBase;
-
+    private Boolean esVigente;
     private Long transportistaId;
     private String transportistaNombre;
 

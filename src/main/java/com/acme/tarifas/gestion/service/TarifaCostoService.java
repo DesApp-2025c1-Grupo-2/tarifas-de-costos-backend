@@ -1,6 +1,7 @@
 package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.AdicionalRepository;
+import com.acme.tarifas.gestion.dao.TarifaAdicionalRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
@@ -23,6 +24,9 @@ public class TarifaCostoService {
 
     @Autowired
     private AdicionalRepository adicionalRepository;
+
+    @Autowired
+    private TarifaAdicionalRepository tarifaAdicionalRepository;
 
     @Autowired
     private TarifaHistorialRepository historialRepository;
@@ -48,13 +52,30 @@ public class TarifaCostoService {
 
     @Transactional
     public Optional<TarifaAdicional> agregarAdicional(Long tarifaId, TarifaAdicional nuevoAdicional) {
-        return tarifaRepository.findById(tarifaId).map(tarifa -> {
-            nuevoAdicional.setTarifaCosto(tarifa);
-            tarifa.getAdicionales().add(nuevoAdicional);
-            tarifaRepository.save(tarifa);
-            return nuevoAdicional;
+        return tarifaRepository.findById(tarifaId).flatMap(tarifa -> {
+            Long adicionalId = nuevoAdicional.getAdicional().getId();
+
+            if (adicionalId == null) {
+                throw new IllegalArgumentException("Debe especificarse el ID del adicional.");
+            }
+
+            return adicionalRepository.findById(adicionalId).map(adicionalExistente -> {
+                boolean yaExiste = tarifaAdicionalRepository.existsByTarifaCostoIdAndAdicionalId(tarifaId, adicionalId);
+                if (yaExiste) {
+                    throw new IllegalArgumentException("Ya existe este adicional en la tarifa.");
+                }
+
+                nuevoAdicional.setTarifaCosto(tarifa);
+                nuevoAdicional.setAdicional(adicionalExistente);
+
+                tarifa.getAdicionales().add(nuevoAdicional);
+                tarifaRepository.save(tarifa);
+
+                return nuevoAdicional;
+            });
         });
     }
+
 
     @Transactional
     public Optional<TarifaCosto> actualizarValorBase(Long id, Double nuevoValor) {
@@ -88,5 +109,9 @@ public class TarifaCostoService {
                 tarifa.getAdicionales().stream()
                         .mapToDouble(TarifaAdicional::getCostoEspecifico)
                         .sum();
+    }
+
+    public List<TarifaAdicional> obtenerAdicionalesPorTarifa(Long idTarifa){
+        return tarifaAdicionalRepository.findByTarifaCostoId(idTarifa);
     }
 }
