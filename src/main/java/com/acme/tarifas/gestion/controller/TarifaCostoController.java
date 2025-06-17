@@ -68,4 +68,10 @@ public class TarifaCostoController {
         }
         return ResponseEntity.ok(adicionales);
     }
+
+    @PutMapping("/{id}/vigencia")
+    public ResponseEntity<Void> cambiarVigencia(@PathVariable Long id) {
+        tarifaService.cambiarVigencia(id);
+        return ResponseEntity.noContent().build();
+    }
 }

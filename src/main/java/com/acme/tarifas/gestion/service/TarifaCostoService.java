@@ -114,4 +114,10 @@ public class TarifaCostoService {
     public List<TarifaAdicional> obtenerAdicionalesPorTarifa(Long idTarifa){
         return tarifaAdicionalRepository.findByTarifaCostoId(idTarifa);
     }
+
+    @Transactional
+    public void cambiarVigencia(Long id) {
+        tarifaRepository.findById(id).ifPresent(t -> t.setEsVigente(!t.getEsVigente()));
+    }
+
 }
