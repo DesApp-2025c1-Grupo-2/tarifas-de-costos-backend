@@ -65,6 +65,10 @@ public class TarifaCostoService {
                     throw new IllegalArgumentException("Ya existe este adicional en la tarifa.");
                 }
 
+                if (nuevoAdicional.getCostoEspecifico() == null) {
+                    nuevoAdicional.setCostoEspecifico(adicionalExistente.getCostoDefault());
+                }
+
                 nuevoAdicional.setTarifaCosto(tarifa);
                 nuevoAdicional.setAdicional(adicionalExistente);
 
@@ -119,5 +123,7 @@ public class TarifaCostoService {
     public void cambiarVigencia(Long id) {
         tarifaRepository.findById(id).ifPresent(t -> t.setEsVigente(!t.getEsVigente()));
     }
+
+    
 
 }
