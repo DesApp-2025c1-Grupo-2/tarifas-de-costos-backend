@@ -13,14 +13,17 @@ public class TipoCargaTarifa {
     private String nombre;
     private String descripcion;
 
+    @Column(name="Activo")
+    private Boolean activo;
 
     public TipoCargaTarifa() {
     }
 
-    public TipoCargaTarifa(Long id, String nombre, String descripcion) {
+    public TipoCargaTarifa(Long id, String nombre, String descripcion,Boolean activo) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
+        this.activo = activo;
     }
 
     public Long getId() {
@@ -46,4 +49,8 @@ public class TipoCargaTarifa {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
+
+    public Boolean getActivo() {return activo;}
+
+    public void setActivo(Boolean activo) {this.activo = activo;}
 }

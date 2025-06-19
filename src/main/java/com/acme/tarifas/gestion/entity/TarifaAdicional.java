@@ -23,14 +23,18 @@ public class TarifaAdicional {
 
     private Double costoEspecifico;
 
+    @Column(name="Activo")
+    private Boolean activo;
+
     public TarifaAdicional() {
     }
 
-    public TarifaAdicional(Long id, TarifaCosto tarifaCosto, Adicional adicional, Double costoEspecifico) {
+    public TarifaAdicional(Long id, TarifaCosto tarifaCosto, Adicional adicional, Double costoEspecifico, Boolean activo) {
         this.id = id;
         this.tarifaCosto = tarifaCosto;
         this.adicional = adicional;
         this.costoEspecifico = costoEspecifico;
+        this.activo = activo;
     }
 
     public Long getId() {
@@ -64,4 +68,8 @@ public class TarifaAdicional {
     public void setCostoEspecifico(Double costoEspecifico) {
         this.costoEspecifico = costoEspecifico;
     }
+
+    public Boolean getActivo() {return activo;}
+
+    public void setActivo(Boolean activo) {this.activo = activo;}
 }

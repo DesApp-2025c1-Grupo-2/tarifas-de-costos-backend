@@ -17,15 +17,19 @@ public class TipoVehiculo {
     private Float capacidadVolumenM3;
     private String descripcion;
 
+    @Column(name="Activo")
+    private Boolean activo;
+
     public TipoVehiculo() {
     }
 
-    public TipoVehiculo(Long id, String nombre, Float capacidadPesoKG, Float capacidadVolumenM3, String descripcion) {
+    public TipoVehiculo(Long id, String nombre, Float capacidadPesoKG, Float capacidadVolumenM3, String descripcion, Boolean activo) {
         this.id = id;
         this.nombre = nombre;
         this.capacidadPesoKG = capacidadPesoKG;
         this.capacidadVolumenM3 = capacidadVolumenM3;
         this.descripcion = descripcion;
+        this.activo = activo;
     }
 
     public Long getId() {
@@ -67,4 +71,8 @@ public class TipoVehiculo {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
+
+    public Boolean getActivo() {return activo;}
+
+    public void setActivo(Boolean activo) {this.activo = activo;}
 }

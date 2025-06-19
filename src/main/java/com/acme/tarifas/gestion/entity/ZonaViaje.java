@@ -15,15 +15,18 @@ public class ZonaViaje {
 
     private String regionMapa;
 
+    @Column(name="Activo")
+    private Boolean activo;
 
     public ZonaViaje() {
     }
 
-    public ZonaViaje(Long id, String nombre, String descripcion, String regionMapa) {
+    public ZonaViaje(Long id, String nombre, String descripcion, String regionMapa, Boolean activo) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.regionMapa = regionMapa;
+        this.activo = activo;
     }
 
     public Long getId() {
@@ -57,4 +60,8 @@ public class ZonaViaje {
     public void setRegionMapa(String regionMapa) {
         this.regionMapa = regionMapa;
     }
+
+    public Boolean getActivo() {return activo;}
+
+    public void setActivo(Boolean activo) {this.activo = activo;}
 }

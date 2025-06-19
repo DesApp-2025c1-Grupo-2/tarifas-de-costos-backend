@@ -24,6 +24,9 @@ public class Transportista {
     @Column(name = "ContactoEmail")
     private String contactoEmail;
 
+    @Column(name = "Activo")
+    private Boolean activo;
+
     @Column(name = "ContactoTelefono")
     private String contactoTelefono;
 
@@ -46,11 +49,12 @@ public class Transportista {
     public Transportista() {
     }
 
-    public Transportista(Long id, String nombreEmpresa, String contactoNombre, String contactoEmail, String contactoTelefono, String evaluacionDesempeno, LocalDateTime fechaRegistro, List<ZonaViaje> zonasOperacion) {
+    public Transportista(Long id, String nombreEmpresa, String contactoNombre, String contactoEmail, Boolean activo, String contactoTelefono, String evaluacionDesempeno, LocalDateTime fechaRegistro, List<ZonaViaje> zonasOperacion) {
         this.id = id;
         this.nombreEmpresa = nombreEmpresa;
         this.contactoNombre = contactoNombre;
         this.contactoEmail = contactoEmail;
+        this.activo = activo;
         this.contactoTelefono = contactoTelefono;
         this.evaluacionDesempeno = evaluacionDesempeno;
         this.fechaRegistro = fechaRegistro;
@@ -120,4 +124,8 @@ public class Transportista {
     public void setZonasOperacion(List<ZonaViaje> zonasOperacion) {
         this.zonasOperacion = zonasOperacion;
     }
+
+    public Boolean getActivo() {return activo;    }
+
+    public void setActivo(Boolean activo) {this.activo = activo;}
 }

@@ -14,14 +14,17 @@ public class Adicional {
     private Double costoDefault;
     private String descripcion;
 
+    @Column(name="Activo")
+    private Boolean activo;
     public Adicional() {
     }
 
-    public Adicional(Long id, String nombre, Double costoDefault, String descripcion) {
+    public Adicional(Long id, String nombre, Double costoDefault, String descripcion, Boolean activo) {
         this.id = id;
         this.nombre = nombre;
         this.costoDefault = costoDefault;
         this.descripcion = descripcion;
+        this.activo = activo;
     }
 
     public Long getId() {
@@ -55,4 +58,8 @@ public class Adicional {
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
+
+    public Boolean getActivo() {return activo;}
+
+    public void setActivo(Boolean activo) {this.activo = activo;}
 }
