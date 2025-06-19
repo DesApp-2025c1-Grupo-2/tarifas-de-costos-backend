@@ -48,4 +48,16 @@ public class TransportistaService {
 
         transportistaRepository.delete(transportista);
     }
+
+    public Transportista baja(Long id) throws Exception{
+        Transportista transportista = transportistaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Transportista no encontrado"));
+
+        if(transportista.getActivo()){
+            transportista.setActivo(false);
+            return transportistaRepository.save(transportista);
+        }else{
+            throw new Exception("El transportista ya está inactivo");
+        }
+    }
 }

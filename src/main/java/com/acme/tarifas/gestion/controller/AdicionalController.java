@@ -1,12 +1,14 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.entity.Adicional;
+import com.acme.tarifas.gestion.entity.ZonaViaje;
 import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -50,5 +52,15 @@ public class AdicionalController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}/baja")
+    public ResponseEntity<Adicional> baja(@PathVariable Long id) {
+        try {
+            Adicional adicional = adicionalService.baja(id);
+            return ResponseEntity.ok(adicional);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }

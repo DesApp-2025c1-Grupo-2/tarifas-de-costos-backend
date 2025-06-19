@@ -2,6 +2,7 @@ package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.AdicionalRepository;
 import com.acme.tarifas.gestion.entity.Adicional;
+import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -47,5 +48,17 @@ public class AdicionalService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    public Adicional baja(Long id) throws Exception{
+        Adicional adicional = adicionalRepository.findById(id)
+                .orElseThrow(() -> new Exception("Adicional no encontrado"));
+
+        if(adicional.getActivo()){
+            adicional.setActivo(false);
+            return adicionalRepository.save(adicional);
+        }else{
+            throw new Exception("El adicional ya está inactivo");
+        }
     }
 }

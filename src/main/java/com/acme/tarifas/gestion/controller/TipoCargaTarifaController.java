@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,4 +46,14 @@ public class TipoCargaTarifaController {
         TipoCargaTarifa nuevo = tipoCargaTarifaService.guardarTipoCargaTarifa(tipo);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     };
+
+    @PutMapping("/{id}/baja")
+    public ResponseEntity<TipoCargaTarifa> baja(@PathVariable Long id) {
+        try {
+            TipoCargaTarifa tipoCarga = tipoCargaTarifaService.baja(id);
+            return ResponseEntity.ok(tipoCarga);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

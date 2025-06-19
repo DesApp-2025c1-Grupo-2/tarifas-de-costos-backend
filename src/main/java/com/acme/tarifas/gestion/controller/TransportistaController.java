@@ -51,4 +51,14 @@ public class TransportistaController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PutMapping("/{id}/baja")
+    public ResponseEntity<Transportista> baja(@PathVariable Long id) {
+        try {
+            Transportista transportista = transportistaService.baja(id);
+            return ResponseEntity.ok(transportista);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

@@ -72,4 +72,17 @@ public class ZonaViajeService {
     public List<TarifaCosto> obtenerTarifasZona(Long zonaId) {
         return tarifaRepository.findByZonaViajeId(zonaId);
     }
+
+    public ZonaViaje baja(Long id) throws Exception{
+        ZonaViaje zona = zonaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Zona no encontrada"));
+
+        if(zona.getActivo()){
+            zona.setActivo(false);
+            return zonaRepository.save(zona);
+        }else{
+            throw new Exception("La zona ya está inactiva");
+        }
+    }
+
 }

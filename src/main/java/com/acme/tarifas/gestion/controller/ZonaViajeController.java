@@ -9,6 +9,7 @@
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.web.bind.annotation.*;
+    import org.springframework.web.server.ResponseStatusException;
 
     import java.util.List;
     import java.util.Map;
@@ -62,5 +63,15 @@
             return zonaService.actualizarZona(id, zona)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
+        }
+
+        @PutMapping("/{id}/baja")
+        public ResponseEntity<ZonaViaje> baja(@PathVariable Long id) {
+            try {
+                ZonaViaje zona = zonaService.baja(id);
+                return ResponseEntity.ok(zona);
+            } catch (Exception e){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+            }
         }
     }
