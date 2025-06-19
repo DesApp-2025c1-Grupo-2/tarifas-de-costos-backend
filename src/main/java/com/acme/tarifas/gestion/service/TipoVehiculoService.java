@@ -35,6 +35,7 @@ public class TipoVehiculoService {
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setNombre(nuevosDatos.getNombre());
             existente.setCapacidadVolumenM3(nuevosDatos.getCapacidadVolumenM3());
+            existente.setActivo(nuevosDatos.getActivo());
             return tipoVehiculoRepository.save(existente);
         });
     }

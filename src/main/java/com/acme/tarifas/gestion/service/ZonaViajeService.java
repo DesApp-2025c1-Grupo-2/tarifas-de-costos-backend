@@ -65,6 +65,7 @@ public class ZonaViajeService {
             existente.setNombre(nuevosDatos.getNombre());
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
+            existente.setActivo(nuevosDatos.getActivo());
             return zonaRepository.save(existente);
         });
     };

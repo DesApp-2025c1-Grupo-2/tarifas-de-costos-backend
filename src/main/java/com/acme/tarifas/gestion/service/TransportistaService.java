@@ -37,6 +37,7 @@ public class TransportistaService {
             existente.setContactoEmail(nuevosDatos.getContactoEmail());
             existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
             existente.setEvaluacionDesempeno(nuevosDatos.getEvaluacionDesempeno());
+            existente.setActivo(nuevosDatos.getActivo());
             return transportistaRepository.save(existente);
         });
     }
