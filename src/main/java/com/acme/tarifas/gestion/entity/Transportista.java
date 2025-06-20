@@ -25,7 +25,7 @@ public class Transportista {
     private String contactoEmail;
 
     @Column(name = "Activo")
-    private Boolean activo;
+    private Boolean activo = true;
 
     @Column(name = "ContactoTelefono")
     private String contactoTelefono;

@@ -16,7 +16,7 @@ public class ZonaViaje {
     private String regionMapa;
 
     @Column(name="Activo")
-    private Boolean activo;
+    private Boolean activo = true;
 
     public ZonaViaje() {
     }

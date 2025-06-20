@@ -38,7 +38,8 @@ public class TarifaCosto {
     private Double valorBase;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaUltimaModificacion;
-    private Boolean esVigente;
+    @Column(name="esVigente")
+    private Boolean esVigente = true;
     private Integer version;
 
     @OneToMany(mappedBy = "tarifaCosto", cascade = CascadeType.ALL)

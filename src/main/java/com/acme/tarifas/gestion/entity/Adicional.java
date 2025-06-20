@@ -15,7 +15,7 @@ public class Adicional {
     private String descripcion;
 
     @Column(name="Activo")
-    private Boolean activo;
+    private Boolean activo = true;
     public Adicional() {
     }
 

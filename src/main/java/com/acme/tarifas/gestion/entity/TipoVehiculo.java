@@ -18,7 +18,7 @@ public class TipoVehiculo {
     private String descripcion;
 
     @Column(name="Activo")
-    private Boolean activo;
+    private Boolean activo = true;
 
     public TipoVehiculo() {
     }

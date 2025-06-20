@@ -24,7 +24,7 @@ public class TarifaAdicional {
     private Double costoEspecifico;
 
     @Column(name="Activo")
-    private Boolean activo;
+    private Boolean activo = true;
 
     public TarifaAdicional() {
     }
