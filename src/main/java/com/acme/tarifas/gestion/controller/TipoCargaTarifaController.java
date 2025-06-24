@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 
+import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
 import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.service.TipoCargaTarifaService;
@@ -56,4 +57,11 @@ public class TipoCargaTarifaController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
-}
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TipoCargaTarifa> actualizarTipo(@PathVariable Long id, @RequestBody TipoCargaTarifa tipo) {
+        return tipoCargaTarifaService.actualizarTipo(id, tipo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+

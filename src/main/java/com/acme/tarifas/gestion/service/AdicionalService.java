@@ -3,6 +3,7 @@ package com.acme.tarifas.gestion.service;
 import com.acme.tarifas.gestion.dao.AdicionalRepository;
 import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
+import com.acme.tarifas.gestion.entity.Transportista;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,5 +61,16 @@ public class AdicionalService {
         }else{
             throw new Exception("El adicional ya está inactivo");
         }
+    }
+
+    @Transactional
+    public Optional<Adicional> actualizarAdicional(Long id, Adicional nuevosDatos) {
+        return adicionalRepository.findById(id).map(existente -> {
+            existente.setDescripcion(nuevosDatos.getDescripcion());
+            existente.setCostoDefault(nuevosDatos.getCostoDefault());
+            existente.setNombre(nuevosDatos.getNombre());
+            existente.setActivo(nuevosDatos.getActivo());
+            return adicionalRepository.save(existente);
+        });
     }
 }

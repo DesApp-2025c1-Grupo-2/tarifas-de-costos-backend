@@ -46,4 +46,13 @@ public class TipoCargaTarifaService {
             throw new Exception("El tipo de carga ya está inactivo");
         }
     }
+
+    public Optional<TipoCargaTarifa> actualizarTipo(Long zonaId, TipoCargaTarifa nuevosDatos){
+        return tipoCargaTarifaRepository.findById(zonaId).map(existente -> {
+            existente.setNombre(nuevosDatos.getNombre());
+            existente.setDescripcion(nuevosDatos.getDescripcion());
+            existente.setActivo(nuevosDatos.getActivo());
+            return tipoCargaTarifaRepository.save(existente);
+        });
+    };
 }
