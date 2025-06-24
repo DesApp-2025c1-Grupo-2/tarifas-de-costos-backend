@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/transportistas")
 public class TransportistaController {
@@ -43,7 +46,31 @@ public class TransportistaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarTransportista(@PathVariable Long id) {
-        transportistaService.eliminarTransportista(id);
-        return ResponseEntity.noContent().build();
+        try {
+            transportistaService.eliminarTransportista(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/analisis-tarifas")
+    public ResponseEntity<Map<String, Object>> obtenerAnalisisTarifasTransportista(@PathVariable Long id) {
+        return ResponseEntity.ok(transportistaService.analizarTarifasTransportista(id));
+    }
+
+    @GetMapping("/comparativa-costos")
+    public ResponseEntity<List<Map<String, Object>>> obtenerComparativaCostosTransportistas() {
+        return ResponseEntity.ok(transportistaService.compararCostosTransportistas());
+    }
+
+    @GetMapping("/ranking-economicos")
+    public ResponseEntity<List<Transportista>> obtenerRankingEconomicos() {
+        return ResponseEntity.ok(transportistaService.obtenerTransportistasOrdenadosPorCostoPromedio());
+    }
+
+    @GetMapping("/relacion-precio-calidad")
+    public ResponseEntity<List<Map<String, Object>>> analizarRelacionPrecioCalidad() {
+        return ResponseEntity.ok(transportistaService.analizarRelacionPrecioCalidad());
     }
 }

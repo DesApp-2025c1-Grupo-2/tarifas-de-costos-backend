@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/adicionales")
 public class AdicionalController {
@@ -27,12 +29,39 @@ public class AdicionalController {
         return adicionalService.obtenerTodos();
     }
 
-    @PutMapping("/{id}/costo-default")
-    public ResponseEntity<Adicional> actualizarCostoDefault(
-            @PathVariable Long id,
-            @RequestParam Double nuevoCosto) {
-        return adicionalService.actualizarCostoDefault(id, nuevoCosto)
+    @GetMapping("/{id}")
+    public ResponseEntity<Adicional> obtenerAdicionalPorId(@PathVariable Long id) {
+        return adicionalService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Adicional> actualizarAdicional(
+            @PathVariable Long id,
+            @RequestBody Adicional adicionalActualizado) {
+        return adicionalService.actualizarAdicional(id, adicionalActualizado)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarAdicional(@PathVariable Long id) {
+        if (adicionalService.eliminarAdicional(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/frecuencia-uso")
+    public ResponseEntity<List<Map<String, Object>>> obtenerFrecuenciaUsoAdicionales() {
+        List<Map<String, Object>> frecuencia = adicionalService.obtenerFrecuenciaUsoAdicionales();
+        return ResponseEntity.ok(frecuencia);
+    }
+
+    @GetMapping("/analisis-uso")
+    public ResponseEntity<Map<String, Object>> obtenerAnalisisUsoAdicionales() {
+        Map<String, Object> analisis = adicionalService.obtenerAnalisisUsoAdicionales();
+        return ResponseEntity.ok(analisis);
     }
 }

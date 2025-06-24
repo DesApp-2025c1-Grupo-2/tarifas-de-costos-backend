@@ -1,6 +1,7 @@
 package com.acme.tarifas.gestion.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +25,8 @@ public class Cliente {
     @Column(name = "ContactoTelefono", nullable = false)
     private String contactoTelefono;
 
-    @Column(name = "FechaRegistro", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    @CreationTimestamp
+    @Column(name = "FechaRegistro")
     private LocalDateTime fechaRegistro;
 
     public Cliente() {

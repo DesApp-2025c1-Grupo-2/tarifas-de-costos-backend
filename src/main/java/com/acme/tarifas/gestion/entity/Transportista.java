@@ -2,7 +2,7 @@ package com.acme.tarifas.gestion.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +30,7 @@ public class Transportista {
     @Column(name = "EvaluacionDesempeno")
     private String evaluacionDesempeno;
 
+    @CreationTimestamp
     @Column(name = "FechaRegistro")
     private LocalDateTime fechaRegistro;
 

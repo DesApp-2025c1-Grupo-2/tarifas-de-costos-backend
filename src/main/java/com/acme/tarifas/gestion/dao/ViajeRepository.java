@@ -15,5 +15,6 @@ public interface ViajeRepository extends JpaRepository<Viaje, Long> {
             @Param("inicio") LocalDate inicio,
             @Param("fin") LocalDate fin);
 
-    List<Viaje> findByClienteId(Long clienteId);
+    @Query("SELECT v FROM Viaje v JOIN FETCH v.cliente WHERE v.cliente.id = :clienteId")
+    List<Viaje> findByClienteId(@Param("clienteId") Long clienteId);
 }

@@ -28,6 +28,16 @@ public class TipoVehiculoService {
         return tipoVehiculoRepository.findById(id);
     }
 
+    public Optional<TipoVehiculo> actualizarTipo(Long id, TipoVehiculo nuevosDatos){
+        return tipoVehiculoRepository.findById(id).map( existente ->{
+            existente.setCapacidadPesoKG(nuevosDatos.getCapacidadPesoKG());
+            existente.setDescripcion(nuevosDatos.getDescripcion());
+            existente.setNombre(nuevosDatos.getNombre());
+            existente.setCapacidadVolumenM3(nuevosDatos.getCapacidadVolumenM3());
+            return tipoVehiculoRepository.save(existente);
+        });
+    }
+
     @Transactional
     public void eliminarTipo(Long id) {
         tipoVehiculoRepository.deleteById(id);

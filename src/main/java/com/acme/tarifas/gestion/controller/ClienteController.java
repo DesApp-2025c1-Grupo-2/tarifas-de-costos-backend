@@ -33,4 +33,28 @@ public class ClienteController {
     public List<Viaje> obtenerViajesPorCliente(@PathVariable Long id) {
         return clienteService.obtenerViajesCliente(id);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Cliente> obtenerClientePorId(@PathVariable Long id){
+        return clienteService.obtenerClientePorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Cliente> actualizarCliente(@PathVariable Long id, @RequestBody Cliente cliente){
+        return clienteService.actualizarCliente(id, cliente)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarCliente(@PathVariable Long id) {
+        try {
+            clienteService.eliminarCliente(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

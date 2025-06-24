@@ -2,10 +2,12 @@ package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.TipoCargaTarifaRepository;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
+import com.acme.tarifas.gestion.entity.Transportista;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TipoCargaTarifaService {
@@ -20,4 +22,16 @@ public class TipoCargaTarifaService {
     public List<TipoCargaTarifa> obtenerTodosTiposCargaTarifa() {
         return tipoCargaTarifaRepository.findAll();
     }
+
+    public Optional<TipoCargaTarifa> obtenerPorId(Long id){
+        return tipoCargaTarifaRepository.findById(id);
+    }
+
+    public void eliminarTipoCargaTarifa(Long id)throws Exception{
+        TipoCargaTarifa tipo = tipoCargaTarifaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Tipo de carga no encontrado"));
+
+        tipoCargaTarifaRepository.delete(tipo);
+    }
+
 }

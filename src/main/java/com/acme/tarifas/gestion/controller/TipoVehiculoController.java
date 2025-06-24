@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tipos-vehiculo")
 public class TipoVehiculoController {
@@ -32,5 +32,23 @@ public class TipoVehiculoController {
         return tipoVehiculoService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TipoVehiculo> actualizarTipoVehiculo(@PathVariable Long id, @RequestBody TipoVehiculo tipo){
+        return tipoVehiculoService.actualizarTipo(id, tipo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarTipoVehiculo(@PathVariable Long id){
+        try {
+            tipoVehiculoService.eliminarTipo(id);
+            return ResponseEntity.ok().build();
+        }
+        catch(Exception e){
+            return ResponseEntity.notFound().build();
+        }
     }
 }
