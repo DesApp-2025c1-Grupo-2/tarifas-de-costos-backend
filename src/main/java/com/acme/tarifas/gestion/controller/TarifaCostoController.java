@@ -1,5 +1,7 @@
 package com.acme.tarifas.gestion.controller;
 
+import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
+import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.service.TarifaCostoService;
@@ -36,21 +38,25 @@ public class TarifaCostoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TarifaCosto>> obtenerTodasTarifas(
+    public List<TarifaCostoDTO> obtenerTodasTarifas(
+
+    
+
             @RequestParam(required = false) Long tipoVehiculo,
             @RequestParam(required = false) Long zona,
-            @RequestParam(required = false) Long transportista) {
+            @RequestParam(required = false) Long tipoCarga,
+            @RequestParam(required = false) Long transportista){
 
-        List<TarifaCosto> tarifas = tarifaService.filtrarTarifas(tipoVehiculo, zona, transportista);
-        return ResponseEntity.ok(tarifas);
+
+        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga,transportista);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerTarifaPorId(@PathVariable Long id) {
-        return tarifaService.obtenerPorIdConAdicionales(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<TarifaCostoDTO> getTarifaPorId(@PathVariable Long id) {
+        return tarifaService.obtenerTarifaPorId(id);
     }
+
+
 
     @PostMapping("/{id}/adicionales")
     public ResponseEntity<?> agregarAdicional(
@@ -85,5 +91,20 @@ public class TarifaCostoController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{id}/adicionales")
+    public ResponseEntity<List<TarifaAdicional>>getAdicionalesPorTarifa(@PathVariable Long id){
+        List<TarifaAdicional> adicionales = tarifaService.obtenerAdicionalesPorTarifa(id);
+        if(adicionales.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adicionales);
+    }
+
+    @PutMapping("/{id}/vigencia")
+    public ResponseEntity<Void> cambiarVigencia(@PathVariable Long id) {
+        tarifaService.cambiarVigencia(id);
+        return ResponseEntity.noContent().build();
     }
 }

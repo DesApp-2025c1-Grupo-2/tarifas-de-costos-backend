@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,6 +14,7 @@ public class TarifaAdicional {
 
     @ManyToOne
     @JoinColumn(name = "ID_TarifaCosto")
+    @JsonIgnore
     private TarifaCosto tarifaCosto;
 
     @ManyToOne
