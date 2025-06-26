@@ -1,8 +1,14 @@
 package com.acme.tarifas.gestion.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Tarifas_Adicionales", uniqueConstraints = @UniqueConstraint(columnNames = { "ID_TarifaCosto",
         "ID_Adicional" }))
@@ -14,7 +20,7 @@ public class TarifaAdicional {
 
     @ManyToOne
     @JoinColumn(name = "ID_TarifaCosto")
-    @JsonIgnore
+    @JsonBackReference
     private TarifaCosto tarifaCosto;
 
     @ManyToOne
@@ -24,45 +30,6 @@ public class TarifaAdicional {
     @Column(name = "costoEspecifico")
     private Double costoEspecifico;
 
-    public TarifaAdicional() {
-    }
-
-    public TarifaAdicional(Long id, TarifaCosto tarifaCosto, Adicional adicional, Double costoEspecifico) {
-        this.id = id;
-        this.tarifaCosto = tarifaCosto;
-        this.adicional = adicional;
-        this.costoEspecifico = costoEspecifico;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TarifaCosto getTarifaCosto() {
-        return tarifaCosto;
-    }
-
-    public void setTarifaCosto(TarifaCosto tarifaCosto) {
-        this.tarifaCosto = tarifaCosto;
-    }
-
-    public Adicional getAdicional() {
-        return adicional;
-    }
-
-    public void setAdicional(Adicional adicional) {
-        this.adicional = adicional;
-    }
-
-    public Double getCostoEspecifico() {
-        return costoEspecifico;
-    }
-
-    public void setCostoEspecifico(Double costoEspecifico) {
-        this.costoEspecifico = costoEspecifico;
-    }
+    @Column(name = "Activo")
+    private Boolean activo = true;
 }

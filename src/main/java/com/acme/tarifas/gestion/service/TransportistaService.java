@@ -41,6 +41,7 @@ public class TransportistaService {
             existente.setContactoEmail(nuevosDatos.getContactoEmail());
             existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
             existente.setEvaluacionDesempeno(nuevosDatos.getEvaluacionDesempeno());
+            existente.setActivo(nuevosDatos.getActivo());
             return transportistaRepository.save(existente);
         });
     }
@@ -51,6 +52,19 @@ public class TransportistaService {
                 .orElseThrow(() -> new Exception("Transportista no encontrado"));
 
         transportistaRepository.delete(transportista);
+    }
+
+    @Transactional
+    public Transportista baja(Long id) throws Exception {
+        Transportista transportista = transportistaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Transportista no encontrado"));
+
+        if (Boolean.TRUE.equals(transportista.getActivo())) {
+            transportista.setActivo(false);
+            return transportistaRepository.save(transportista);
+        } else {
+            throw new Exception("El transportista ya estÃ¡ inactivo");
+        }
     }
 
     public Map<String, Object> analizarTarifasTransportista(Long idTransportista) {
@@ -108,14 +122,19 @@ public class TransportistaService {
             map.put("transportistaId", item[0]);
             map.put("nombreEmpresa", item[1]);
             map.put("evaluacionDesempeno", item[2]);
-            map.put("promedioTarifas", item[3]);
+            
+            // Aseguramos que el promedio no sea null y casteamos bien
+            double promedio = 0.0;
+            if (item[3] != null) {
+                if (item[3] instanceof Number) {
+                    promedio = ((Number) item[3]).doubleValue();
+                }
+            }
+            map.put("promedioTarifas", promedio);
 
-            // Calcular índice de relación precio/calidad (ejemplo simple)
-            double promedio = (double) item[3];
             String evaluacion = (String) item[2];
             double indice = promedio;
 
-            // Ajustar según evaluación de desempeño (esto es un ejemplo)
             if (evaluacion != null) {
                 if (evaluacion.contains("Excelente")) {
                     indice = promedio * 0.8;

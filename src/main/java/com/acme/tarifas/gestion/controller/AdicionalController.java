@@ -1,11 +1,14 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.entity.Adicional;
+import com.acme.tarifas.gestion.entity.Transportista;
+import com.acme.tarifas.gestion.entity.ZonaViaje;
 import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +55,23 @@ public class AdicionalController {
         }
         return ResponseEntity.notFound().build();
     }
+
+
+    @PutMapping("/{id}/baja")
+    public ResponseEntity<Adicional> baja(@PathVariable Long id) {
+        try {
+            Adicional adicional = adicionalService.baja(id);
+            return ResponseEntity.ok(adicional);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Adicional> actualizarAdicional(@PathVariable Long id, @RequestBody Adicional adicional) {
+        return adicionalService.actualizarAdicional(id, adicional)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
 
     @GetMapping("/frecuencia-uso")
     public ResponseEntity<List<Map<String, Object>>> obtenerFrecuenciaUsoAdicionales() {

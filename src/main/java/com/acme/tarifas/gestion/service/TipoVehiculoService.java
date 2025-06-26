@@ -2,6 +2,7 @@ package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.TipoVehiculoRepository;
 import com.acme.tarifas.gestion.entity.TipoVehiculo;
+import com.acme.tarifas.gestion.entity.Transportista;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class TipoVehiculoService {
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setNombre(nuevosDatos.getNombre());
             existente.setCapacidadVolumenM3(nuevosDatos.getCapacidadVolumenM3());
+            existente.setActivo(nuevosDatos.getActivo());
             return tipoVehiculoRepository.save(existente);
         });
     }
@@ -41,5 +43,17 @@ public class TipoVehiculoService {
     @Transactional
     public void eliminarTipo(Long id) {
         tipoVehiculoRepository.deleteById(id);
+    }
+
+    public TipoVehiculo baja(Long id) throws Exception{
+        TipoVehiculo tipoVehiculo = tipoVehiculoRepository.findById(id)
+                .orElseThrow(() -> new Exception("Tipo de vehiculo no encontrado"));
+
+        if(tipoVehiculo.getActivo()){
+            tipoVehiculo.setActivo(false);
+            return tipoVehiculoRepository.save(tipoVehiculo);
+        }else{
+            throw new Exception("El tipo de vehiculo ya está inactivo");
+        }
     }
 }

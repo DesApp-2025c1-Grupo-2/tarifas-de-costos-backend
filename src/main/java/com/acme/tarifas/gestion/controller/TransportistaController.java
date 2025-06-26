@@ -54,6 +54,17 @@ public class TransportistaController {
         }
     }
 
+
+    @PutMapping("/{id}/baja")
+    public ResponseEntity<Transportista> baja(@PathVariable Long id) {
+        try {
+            Transportista transportista = transportistaService.baja(id);
+            return ResponseEntity.ok(transportista);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @GetMapping("/{id}/analisis-tarifas")
     public ResponseEntity<Map<String, Object>> obtenerAnalisisTarifasTransportista(@PathVariable Long id) {
         return ResponseEntity.ok(transportistaService.analizarTarifasTransportista(id));
@@ -72,5 +83,6 @@ public class TransportistaController {
     @GetMapping("/relacion-precio-calidad")
     public ResponseEntity<List<Map<String, Object>>> analizarRelacionPrecioCalidad() {
         return ResponseEntity.ok(transportistaService.analizarRelacionPrecioCalidad());
+
     }
 }

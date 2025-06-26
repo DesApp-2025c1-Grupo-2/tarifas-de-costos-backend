@@ -10,7 +10,11 @@ import java.util.List;
 public interface TarifaAdicionalRepository extends JpaRepository<TarifaAdicional, Long> {
 
     List<TarifaAdicional> findByTarifaCostoId(Long tarifaCostoId);
+
     boolean existsByTarifaCostoIdAndAdicionalId(Long tarifaCostoId, Long adicionalId);
+
+
+    void deleteByTarifaCostoId(Long tarifaCostoId);
 
 
     @Query("SELECT a.id, a.nombre, COUNT(ta) " +
@@ -20,5 +24,6 @@ public interface TarifaAdicionalRepository extends JpaRepository<TarifaAdicional
 
     @Query("SELECT ta FROM TarifaAdicional ta WHERE ta.adicional.id = :idAdicional")
     List<TarifaAdicional> findByAdicionalId(Long idAdicional);
+
 
 }

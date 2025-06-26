@@ -1,5 +1,12 @@
 package com.acme.tarifas.gestion.dao;
 
+
+import com.acme.tarifas.gestion.entity.TarifaCosto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+
+
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
@@ -11,6 +18,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface TarifaCostoRepository extends JpaRepository<TarifaCosto, Long> {
 
     // Filtros con DTO
@@ -94,3 +102,4 @@ public interface TarifaCostoRepository extends JpaRepository<TarifaCosto, Long> 
             "GROUP BY t.tipoVehiculo.id, t.tipoVehiculo.nombre")
     List<Object[]> obtenerCostosPromedioPorTipoVehiculo(@Param("idTransportista") Long idTransportista);
 }
+

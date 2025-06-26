@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -21,8 +21,9 @@ public class ZonaViajeController {
     private ZonaViajeService zonaService;
 
     @GetMapping
-    public List<ZonaViaje> obtenerTodasLasZonas() {
-        return zonaService.getZonas();
+    public ResponseEntity<List<ZonaViaje>> obtenerTodasLasZonas() {
+        List<ZonaViaje> zonas = zonaService.getZonas();
+        return ResponseEntity.ok(zonas);
     }
 
     @GetMapping("/{id}")
@@ -39,7 +40,7 @@ public class ZonaViajeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarZona(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarZona(@PathVariable Long id) {
         try {
             zonaService.eliminarZona(id);
             return ResponseEntity.ok().build();
@@ -49,18 +50,15 @@ public class ZonaViajeController {
     }
 
     @GetMapping("/comparativa-costos")
-    public Map<String, Object> compararCostosPorZona() {
-        return zonaService.obtenerComparativaCostos();
+    public ResponseEntity<Map<String, Object>> compararCostosPorZona() {
+        Map<String, Object> comparativa = zonaService.obtenerComparativaCostos();
+        return ResponseEntity.ok(comparativa);
     }
 
     @GetMapping("/costos-extremos")
-    public Map<String, Object> obtenerZonasCostosExtremos() {
-        return zonaService.identificarZonasCostosExtremos();
-    }
-
-    @GetMapping("/{id}/tarifas")
-    public List<TarifaCosto> obtenerTarifasPorZona(@PathVariable Long id) {
-        return zonaService.obtenerTarifasZona(id);
+    public ResponseEntity<Map<String, Object>> obtenerZonasCostosExtremos() {
+        Map<String, Object> extremos = zonaService.identificarZonasCostosExtremos();
+        return ResponseEntity.ok(extremos);
     }
 
     @PutMapping("/{id}")
@@ -69,4 +67,21 @@ public class ZonaViajeController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/baja")
+    public ResponseEntity<ZonaViaje> baja(@PathVariable Long id) {
+        try {
+            ZonaViaje zona = zonaService.baja(id);
+            return ResponseEntity.ok(zona);
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping("/{id}/tarifas")
+    public ResponseEntity<List<TarifaCosto>> obtenerTarifasPorZona(@PathVariable Long id) {
+        List<TarifaCosto> tarifas = zonaService.obtenerTarifasZona(id);
+        return ResponseEntity.ok(tarifas);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.acme.tarifas.gestion.service;
 import com.acme.tarifas.gestion.dao.TipoCargaTarifaRepository;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
 import com.acme.tarifas.gestion.entity.Transportista;
+import com.acme.tarifas.gestion.entity.ZonaViaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,4 +35,24 @@ public class TipoCargaTarifaService {
         tipoCargaTarifaRepository.delete(tipo);
     }
 
+    public TipoCargaTarifa baja(Long id) throws Exception{
+        TipoCargaTarifa tipoCarga = tipoCargaTarifaRepository.findById(id)
+                .orElseThrow(() -> new Exception("tipo de carga no encontrada"));
+
+        if(tipoCarga.getActivo()){
+            tipoCarga.setActivo(false);
+            return tipoCargaTarifaRepository.save(tipoCarga);
+        }else{
+            throw new Exception("El tipo de carga ya está inactivo");
+        }
+    }
+
+    public Optional<TipoCargaTarifa> actualizarTipo(Long zonaId, TipoCargaTarifa nuevosDatos){
+        return tipoCargaTarifaRepository.findById(zonaId).map(existente -> {
+            existente.setNombre(nuevosDatos.getNombre());
+            existente.setDescripcion(nuevosDatos.getDescripcion());
+            existente.setActivo(nuevosDatos.getActivo());
+            return tipoCargaTarifaRepository.save(existente);
+        });
+    };
 }

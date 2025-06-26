@@ -8,7 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.util.DoubleSummaryStatistics;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import java.util.*;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -38,38 +46,37 @@ public class ZonaViajeService {
     public ZonaViaje guardarZona(ZonaViaje zona) {
         return zonaRepository.save(zona);
     }
+public Map<String, Object> obtenerComparativaCostos() {
+    Map<String, Object> resultado = new LinkedHashMap<>();
 
-    public Map<String, Object> obtenerComparativaCostos() {
-        Map<String, Object> resultado = new LinkedHashMap<>();
+    List<ZonaViaje> zonas = zonaRepository.findAll(); // Orden simple
 
-        List<ZonaViaje> zonas = zonaRepository.findAll(); // Orden simple
+    zonas.forEach(zona -> {
+        List<TarifaCosto> tarifas = tarifaRepository.findByZonaViaje(zona);
 
-        zonas.forEach(zona -> {
-            List<TarifaCosto> tarifas = tarifaRepository.findByZonaViaje(zona);
+        if (tarifas.isEmpty()) {
+            resultado.put(zona.getNombre(), "No hay tarifas disponibles");
+        } else {
+            Map<String, Object> estadisticas = new LinkedHashMap<>();
 
-            if (tarifas.isEmpty()) {
-                resultado.put(zona.getNombre(), "No hay tarifas disponibles");
-            } else {
-                Map<String, Object> estadisticas = new LinkedHashMap<>();
+            double suma = tarifas.stream().mapToDouble(TarifaCosto::getValorBase).sum();
+            double minimo = tarifas.stream().mapToDouble(TarifaCosto::getValorBase).min().orElse(0);
+            double maximo = tarifas.stream().mapToDouble(TarifaCosto::getValorBase).max().orElse(0);
+            double promedio = suma / tarifas.size();
 
-                // Cálculos básicos sin desviación estándar
-                double suma = tarifas.stream().mapToDouble(TarifaCosto::getValorBase).sum();
-                double minimo = tarifas.stream().mapToDouble(TarifaCosto::getValorBase).min().orElse(0);
-                double maximo = tarifas.stream().mapToDouble(TarifaCosto::getValorBase).max().orElse(0);
-                double promedio = suma / tarifas.size();
+            estadisticas.put("cantidad", tarifas.size());
+            estadisticas.put("total", suma);
+            estadisticas.put("minimo", minimo);
+            estadisticas.put("maximo", maximo);
+            estadisticas.put("promedio", promedio);
 
-                estadisticas.put("cantidad", tarifas.size());
-                estadisticas.put("total", suma);
-                estadisticas.put("minimo", minimo);
-                estadisticas.put("maximo", maximo);
-                estadisticas.put("promedio", promedio);
+            resultado.put(zona.getNombre(), estadisticas);
+        }
+    });
 
-                resultado.put(zona.getNombre(), estadisticas);
-            }
-        });
+    return resultado;
+}
 
-        return resultado;
-    }
     public Map<String, Object> identificarZonasCostosExtremos() {
         List<ZonaViaje> zonas = zonaRepository.findAll();
         Map<String, Object> resultado = new HashMap<>();
@@ -117,12 +124,28 @@ public class ZonaViajeService {
         return tarifaRepository.findByZonaViajeId(zonaId);
     }
 
+
     public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos) {
         return zonaRepository.findById(zonaId).map(existente -> {
             existente.setNombre(nuevosDatos.getNombre());
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
+            existente.setActivo(nuevosDatos.getActivo());
             return zonaRepository.save(existente);
         });
+    }
+
+   
+
+    public ZonaViaje baja(Long id) throws Exception {
+        ZonaViaje zona = zonaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Zona no encontrada"));
+
+        if (zona.getActivo()) {
+            zona.setActivo(false);
+            return zonaRepository.save(zona);
+        } else {
+            throw new Exception("La zona ya está inactiva");
+        }
     }
 }
