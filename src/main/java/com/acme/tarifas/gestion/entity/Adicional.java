@@ -7,21 +7,25 @@ import jakarta.persistence.*;
 public class Adicional {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_Adicional")
+    @Column(name = "id")
     private Long id;
 
     private String nombre;
+    @Column(name = "costoDefault")
     private Double costoDefault;
     private String descripcion;
+    @Column(name = "precio")
+    private Double precio;
 
     public Adicional() {
     }
 
-    public Adicional(Long id, String nombre, Double costoDefault, String descripcion) {
+    public Adicional(Long id, String nombre, Double costoDefault, String descripcion, Double precio) {
         this.id = id;
         this.nombre = nombre;
         this.costoDefault = costoDefault;
         this.descripcion = descripcion;
+        this.precio = precio;
     }
 
     public Long getId() {
@@ -54,5 +58,13 @@ public class Adicional {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public Double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(Double precio) {
+        this.precio = precio;
     }
 }

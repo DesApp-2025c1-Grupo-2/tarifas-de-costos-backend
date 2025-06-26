@@ -5,9 +5,11 @@ import com.acme.tarifas.gestion.dao.TarifaAdicionalRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
+import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,34 +19,38 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class TarifaCostoService {
 
-    @Autowired
-    private TarifaCostoRepository tarifaRepository;
+    private final TarifaCostoRepository tarifaRepository;
+    private final TarifaAdicionalRepository adicionalRepository;
+    private final TarifaHistorialRepository historialRepository;
+    private final TarifaAdicionalRepository tarifaAdicionalRepository;
 
     @Autowired
-    private AdicionalRepository adicionalRepository;
+    public TarifaCostoService(TarifaCostoRepository tarifaRepository,
+                              TarifaAdicionalRepository adicionalRepository,
+                              TarifaHistorialRepository historialRepository,
+                              TarifaAdicionalRepository tarifaAdicionalRepository) {
+        this.tarifaRepository = tarifaRepository;
+        this.adicionalRepository = adicionalRepository;
+        this.historialRepository = historialRepository;
+        this.tarifaAdicionalRepository = tarifaAdicionalRepository;
+    }
 
-    @Autowired
-    private TarifaAdicionalRepository tarifaAdicionalRepository;
-
-    @Autowired
-    private TarifaHistorialRepository historialRepository;
-
-    @Transactional
     public TarifaCosto crearTarifa(TarifaCosto tarifa) {
         if (tarifa.getValorBase() <= 0) {
             throw new IllegalArgumentException("El valor base debe ser positivo");
         }
-        tarifa.setFechaCreacion(LocalDateTime.now());
-        tarifa.setFechaUltimaModificacion(LocalDateTime.now());
+        if (tarifaRepository.existsByCodigoTarifa(tarifa.getCodigoTarifa())) {
+            throw new IllegalStateException("Ya existe una tarifa con este código");
+        }
         return tarifaRepository.save(tarifa);
     }
 
     public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
         return tarifaRepository.findByFilters(tipoVehiculo, zona, tipoCarga, transportista);
-        }
-
+    }
 
     public Optional<TarifaCostoDTO> obtenerTarifaPorId(Long id) {
         return tarifaRepository.findTarifaDTOById(id);
@@ -80,39 +86,40 @@ public class TarifaCostoService {
         });
     }
 
+    @Transactional(readOnly = true)
+    public Optional<TarifaCosto> obtenerPorId(Long id) {
+        return tarifaRepository.findById(id);
+    }
 
-    @Transactional
-    public Optional<TarifaCosto> actualizarValorBase(Long id, Double nuevoValor) {
-        return tarifaRepository.findById(id).map(tarifa -> {
-            crearRegistroHistorial(tarifa);
-            tarifa.setValorBase(nuevoValor);
-            tarifa.setFechaUltimaModificacion(LocalDateTime.now());
-            tarifa.setVersion(tarifa.getVersion() + 1);
-            return tarifaRepository.save(tarifa);
-        });
+    @Transactional(readOnly = true)
+    public Optional<TarifaCosto> obtenerPorIdConAdicionales(Long id) {
+        return tarifaRepository.findByIdWithAdicionales(id);
+    }
+
+    public TarifaCosto actualizarValorBase(Long id, Double nuevoValor) {
+        TarifaCosto tarifa = tarifaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tarifa no encontrada"));
+
+        crearRegistroHistorial(tarifa);
+        tarifa.setValorBase(nuevoValor);
+        tarifa.setFechaUltimaModificacion(LocalDateTime.now());
+        tarifa.setVersion(tarifa.getVersion() + 1);
+
+        return tarifaRepository.save(tarifa);
     }
 
     private void crearRegistroHistorial(TarifaCosto tarifa) {
         TarifaCostoHistorial historial = new TarifaCostoHistorial();
-        // Copiar todos los campos relevantes
-        historial.setTarifaOriginal(tarifa);
-        historial.setCodigoTarifa(tarifa.getCodigoTarifa());
-        historial.setValorBase(tarifa.getValorBase());
-        historial.setFechaModificacion(LocalDateTime.now());
+        // Acá deberías completar con los datos reales que querés guardar en el historial
         historialRepository.save(historial);
     }
 
+    @Transactional(readOnly = true)
     public double calcularTotalTarifa(Long tarifaId) {
-        return tarifaRepository.findById(tarifaId)
-                .map(this::calcularCostoTotal)
-                .orElseThrow(() -> new RuntimeException("Tarifa no encontrada"));
-    }
+        TarifaCosto tarifa = tarifaRepository.findByIdWithAdicionales(tarifaId)
+                .orElseThrow(() -> new EntityNotFoundException("Tarifa no encontrada"));
 
-    private double calcularCostoTotal(TarifaCosto tarifa) {
-        return tarifa.getValorBase() +
-                tarifa.getAdicionales().stream()
-                        .mapToDouble(TarifaAdicional::getCostoEspecifico)
-                        .sum();
+        return tarifa.getValorTotal();
     }
 
     public List<TarifaAdicional> obtenerAdicionalesPorTarifa(Long idTarifa){
@@ -123,7 +130,4 @@ public class TarifaCostoService {
     public void cambiarVigencia(Long id) {
         tarifaRepository.findById(id).ifPresent(t -> t.setEsVigente(!t.getEsVigente()));
     }
-
-    
-
 }

@@ -5,11 +5,12 @@ import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/adicionales")
 public class AdicionalController {
@@ -35,11 +36,11 @@ public class AdicionalController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}/costo-default")
-    public ResponseEntity<Adicional> actualizarCostoDefault(
+    @PutMapping("/{id}")
+    public ResponseEntity<Adicional> actualizarAdicional(
             @PathVariable Long id,
-            @RequestParam Double nuevoCosto) {
-        return adicionalService.actualizarCostoDefault(id, nuevoCosto)
+            @RequestBody Adicional adicionalActualizado) {
+        return adicionalService.actualizarAdicional(id, adicionalActualizado)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -50,5 +51,17 @@ public class AdicionalController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/frecuencia-uso")
+    public ResponseEntity<List<Map<String, Object>>> obtenerFrecuenciaUsoAdicionales() {
+        List<Map<String, Object>> frecuencia = adicionalService.obtenerFrecuenciaUsoAdicionales();
+        return ResponseEntity.ok(frecuencia);
+    }
+
+    @GetMapping("/analisis-uso")
+    public ResponseEntity<Map<String, Object>> obtenerAnalisisUsoAdicionales() {
+        Map<String, Object> analisis = adicionalService.obtenerAnalisisUsoAdicionales();
+        return ResponseEntity.ok(analisis);
     }
 }
