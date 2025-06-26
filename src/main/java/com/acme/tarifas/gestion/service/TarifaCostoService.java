@@ -51,7 +51,6 @@ public class TarifaCostoService {
         }
     }
 
-
     @Transactional
     public TarifaCosto crearTarifa(TarifaCosto tarifa) {
         if (tarifa.getValorBase() <= 0) {
@@ -60,30 +59,45 @@ public class TarifaCostoService {
         tarifa.setFechaCreacion(LocalDateTime.now());
         tarifa.setFechaUltimaModificacion(LocalDateTime.now());
 
-
         procesarYAsociarAdicionales(tarifa);
 
         return tarifaRepository.save(tarifa);
     }
 
     @Transactional
-    public Optional<TarifaCosto> actualizarTarifa(Long id, TarifaCosto tarifaActualizada) {
+    public Optional<TarifaCosto> actualizarTarifa(Long id, TarifaCosto datosNuevos) {
         return tarifaRepository.findById(id).map(tarifaExistente -> {
 
-            tarifaExistente.setNombreTarifa(tarifaActualizada.getNombreTarifa());
-            tarifaExistente.setTransportista(tarifaActualizada.getTransportista());
-            tarifaExistente.setTipoVehiculo(tarifaActualizada.getTipoVehiculo());
-            tarifaExistente.setZonaViaje(tarifaActualizada.getZonaViaje());
-            tarifaExistente.setTipoCargaTarifa(tarifaActualizada.getTipoCargaTarifa());
-            tarifaExistente.setValorBase(tarifaActualizada.getValorBase());
+            // Lógica defensiva: solo actualiza si el dato nuevo no es nulo
+            if (datosNuevos.getNombreTarifa() != null) {
+                tarifaExistente.setNombreTarifa(datosNuevos.getNombreTarifa());
+            }
+            if (datosNuevos.getValorBase() != null) {
+                tarifaExistente.setValorBase(datosNuevos.getValorBase());
+            }
+            if (datosNuevos.getTransportista() != null) {
+                tarifaExistente.setTransportista(datosNuevos.getTransportista());
+            }
+            if (datosNuevos.getTipoVehiculo() != null) {
+                tarifaExistente.setTipoVehiculo(datosNuevos.getTipoVehiculo());
+            }
+            if (datosNuevos.getZonaViaje() != null) {
+                tarifaExistente.setZonaViaje(datosNuevos.getZonaViaje());
+            }
+            if (datosNuevos.getTipoCargaTarifa() != null) {
+                tarifaExistente.setTipoCargaTarifa(datosNuevos.getTipoCargaTarifa());
+            }
+
             tarifaExistente.setFechaUltimaModificacion(LocalDateTime.now());
             tarifaExistente.setVersion(tarifaExistente.getVersion() != null ? tarifaExistente.getVersion() + 1 : 1);
 
+            // Estrategia de actualización de adicionales
+            tarifaAdicionalRepository.deleteByTarifaCostoId(tarifaExistente.getId());
             tarifaExistente.getAdicionales().clear();
-            tarifaAdicionalRepository.deleteByTarifaCostoId(id);
-            procesarYAsociarAdicionales(tarifaActualizada);
-            if (tarifaActualizada.getAdicionales() != null) {
-                tarifaExistente.getAdicionales().addAll(tarifaActualizada.getAdicionales());
+
+            if (datosNuevos.getAdicionales() != null && !datosNuevos.getAdicionales().isEmpty()) {
+                procesarYAsociarAdicionales(datosNuevos);
+                tarifaExistente.getAdicionales().addAll(datosNuevos.getAdicionales());
             }
 
             return tarifaRepository.save(tarifaExistente);

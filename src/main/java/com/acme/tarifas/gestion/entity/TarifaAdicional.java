@@ -24,9 +24,10 @@ public class TarifaAdicional {
     private TarifaCosto tarifaCosto;
 
     @ManyToOne
-    @JoinColumn(name = "ID_Adicional")
+    @JoinColumn(name = "ID_Adicional", referencedColumnName = "id") // Cambiado para referenciar id
     private Adicional adicional;
 
+    @Column(name = "costoEspecifico")
     private Double costoEspecifico;
 
     @Column(name = "Activo")

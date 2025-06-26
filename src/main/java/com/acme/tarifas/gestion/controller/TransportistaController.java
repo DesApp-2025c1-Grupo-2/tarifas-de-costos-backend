@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/transportistas")
 public class TransportistaController {
@@ -52,6 +54,7 @@ public class TransportistaController {
         }
     }
 
+
     @PutMapping("/{id}/baja")
     public ResponseEntity<Transportista> baja(@PathVariable Long id) {
         try {
@@ -60,5 +63,26 @@ public class TransportistaController {
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    @GetMapping("/{id}/analisis-tarifas")
+    public ResponseEntity<Map<String, Object>> obtenerAnalisisTarifasTransportista(@PathVariable Long id) {
+        return ResponseEntity.ok(transportistaService.analizarTarifasTransportista(id));
+    }
+
+    @GetMapping("/comparativa-costos")
+    public ResponseEntity<List<Map<String, Object>>> obtenerComparativaCostosTransportistas() {
+        return ResponseEntity.ok(transportistaService.compararCostosTransportistas());
+    }
+
+    @GetMapping("/ranking-economicos")
+    public ResponseEntity<List<Transportista>> obtenerRankingEconomicos() {
+        return ResponseEntity.ok(transportistaService.obtenerTransportistasOrdenadosPorCostoPromedio());
+    }
+
+    @GetMapping("/relacion-precio-calidad")
+    public ResponseEntity<List<Map<String, Object>>> analizarRelacionPrecioCalidad() {
+        return ResponseEntity.ok(transportistaService.analizarRelacionPrecioCalidad());
+
     }
 }

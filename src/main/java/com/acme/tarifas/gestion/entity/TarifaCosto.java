@@ -1,6 +1,10 @@
 package com.acme.tarifas.gestion.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,6 +55,7 @@ public class TarifaCosto {
     private Boolean esVigente = true;
 
     private Integer version;
+
 
     @OneToMany(mappedBy = "tarifaCosto", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference

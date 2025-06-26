@@ -59,7 +59,7 @@ public class AdicionalService {
             adicional.setActivo(false);
             return adicionalRepository.save(adicional);
         }else{
-            throw new Exception("El adicional ya está inactivo");
+            throw new Exception("El adicional ya estÃ¡ inactivo");
         }
     }
 
