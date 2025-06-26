@@ -1,7 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
-import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.service.TarifaCostoService;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tarifas")
@@ -25,14 +25,21 @@ public class TarifaCostoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<TarifaCosto> actualizarTarifa(@PathVariable Long id, @RequestBody TarifaCosto tarifa) {
+        return tarifaService.actualizarTarifa(id, tarifa)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping
     public List<TarifaCostoDTO> obtenerTodasTarifas(
             @RequestParam(required = false) Long tipoVehiculo,
             @RequestParam(required = false) Long zona,
             @RequestParam(required = false) Long tipoCarga,
-            @RequestParam(required = false) Long transportista){
+            @RequestParam(required = false) Long transportista) {
 
-        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga,transportista);
+        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga, transportista);
     }
 
     @GetMapping("/{id}")
@@ -61,9 +68,9 @@ public class TarifaCostoController {
     }
 
     @GetMapping("/{id}/adicionales")
-    public ResponseEntity<List<TarifaAdicional>>getAdicionalesPorTarifa(@PathVariable Long id){
+    public ResponseEntity<List<TarifaAdicional>> getAdicionalesPorTarifa(@PathVariable Long id) {
         List<TarifaAdicional> adicionales = tarifaService.obtenerAdicionalesPorTarifa(id);
-        if(adicionales.isEmpty()){
+        if (adicionales.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(adicionales);
@@ -71,7 +78,6 @@ public class TarifaCostoController {
 
     @PutMapping("/{id}/baja")
     public ResponseEntity<Void> cambiarVigencia(@PathVariable Long id) {
-        //Modifica EsVigencia aunque sea false; corregir.
         tarifaService.cambiarVigencia(id);
         return ResponseEntity.noContent().build();
     }

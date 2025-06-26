@@ -21,19 +21,19 @@ public class TipoCargaTarifaController {
     TipoCargaTarifaService tipoCargaTarifaService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<TipoCargaTarifa> obtenerTipoCargaPorId(@PathVariable Long id){
+    public ResponseEntity<TipoCargaTarifa> obtenerTipoCargaPorId(@PathVariable Long id) {
         return tipoCargaTarifaService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public List<TipoCargaTarifa> obtenerTodos(){
+    public List<TipoCargaTarifa> obtenerTodos() {
         return tipoCargaTarifaService.obtenerTodosTiposCargaTarifa();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarTipoCargaTarifa(@PathVariable Long id){
+    public ResponseEntity<?> eliminarTipoCargaTarifa(@PathVariable Long id) {
         try {
             tipoCargaTarifaService.eliminarTipoCargaTarifa(id);
             return ResponseEntity.ok().build();
@@ -43,7 +43,7 @@ public class TipoCargaTarifaController {
     }
 
     @PostMapping
-    public ResponseEntity<TipoCargaTarifa> crearTipoCargaTarifa(@RequestBody TipoCargaTarifa tipo){
+    public ResponseEntity<TipoCargaTarifa> crearTipoCargaTarifa(@RequestBody TipoCargaTarifa tipo) {
         TipoCargaTarifa nuevo = tipoCargaTarifaService.guardarTipoCargaTarifa(tipo);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     };
@@ -53,7 +53,7 @@ public class TipoCargaTarifaController {
         try {
             TipoCargaTarifa tipoCarga = tipoCargaTarifaService.baja(id);
             return ResponseEntity.ok(tipoCarga);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
@@ -64,4 +64,4 @@ public class TipoCargaTarifaController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
+}

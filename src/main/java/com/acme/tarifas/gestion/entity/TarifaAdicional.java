@@ -1,11 +1,17 @@
 package com.acme.tarifas.gestion.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "Tarifas_Adicionales",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"ID_TarifaCosto", "ID_Adicional"}))
+@Table(name = "Tarifas_Adicionales", uniqueConstraints = @UniqueConstraint(columnNames = { "ID_TarifaCosto",
+        "ID_Adicional" }))
 public class TarifaAdicional {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,7 +20,7 @@ public class TarifaAdicional {
 
     @ManyToOne
     @JoinColumn(name = "ID_TarifaCosto")
-    @JsonIgnore
+    @JsonBackReference
     private TarifaCosto tarifaCosto;
 
     @ManyToOne
@@ -23,53 +29,6 @@ public class TarifaAdicional {
 
     private Double costoEspecifico;
 
-    @Column(name="Activo")
+    @Column(name = "Activo")
     private Boolean activo = true;
-
-    public TarifaAdicional() {
-    }
-
-    public TarifaAdicional(Long id, TarifaCosto tarifaCosto, Adicional adicional, Double costoEspecifico, Boolean activo) {
-        this.id = id;
-        this.tarifaCosto = tarifaCosto;
-        this.adicional = adicional;
-        this.costoEspecifico = costoEspecifico;
-        this.activo = activo;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TarifaCosto getTarifaCosto() {
-        return tarifaCosto;
-    }
-
-    public void setTarifaCosto(TarifaCosto tarifaCosto) {
-        this.tarifaCosto = tarifaCosto;
-    }
-
-    public Adicional getAdicional() {
-        return adicional;
-    }
-
-    public void setAdicional(Adicional adicional) {
-        this.adicional = adicional;
-    }
-
-    public Double getCostoEspecifico() {
-        return costoEspecifico;
-    }
-
-    public void setCostoEspecifico(Double costoEspecifico) {
-        this.costoEspecifico = costoEspecifico;
-    }
-
-    public Boolean getActivo() {return activo;}
-
-    public void setActivo(Boolean activo) {this.activo = activo;}
 }
