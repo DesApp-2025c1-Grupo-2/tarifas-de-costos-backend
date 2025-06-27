@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/api/tipos-vehiculo")
 public class TipoVehiculoController {
@@ -37,19 +37,18 @@ public class TipoVehiculoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TipoVehiculo> actualizarTipoVehiculo(@PathVariable Long id, @RequestBody TipoVehiculo tipo){
+    public ResponseEntity<TipoVehiculo> actualizarTipoVehiculo(@PathVariable Long id, @RequestBody TipoVehiculo tipo) {
         return tipoVehiculoService.actualizarTipo(id, tipo)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarTipoVehiculo(@PathVariable Long id){
+    public ResponseEntity<?> eliminarTipoVehiculo(@PathVariable Long id) {
         try {
             tipoVehiculoService.eliminarTipo(id);
             return ResponseEntity.ok().build();
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -59,7 +58,7 @@ public class TipoVehiculoController {
         try {
             TipoVehiculo tipoVehiculo = tipoVehiculoService.baja(id);
             return ResponseEntity.ok(tipoVehiculo);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

@@ -7,13 +7,12 @@ import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Map;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/adicionales")
 public class AdicionalController {
@@ -39,11 +38,11 @@ public class AdicionalController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Adicional> actualizarAdicional(
+    @PutMapping("/{id}/costo-default")
+    public ResponseEntity<Adicional> actualizarCostoDefault(
             @PathVariable Long id,
-            @RequestBody Adicional adicionalActualizado) {
-        return adicionalService.actualizarAdicional(id, adicionalActualizado)
+            @RequestParam Double nuevoCosto) {
+        return adicionalService.actualizarCostoDefault(id, nuevoCosto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -56,13 +55,12 @@ public class AdicionalController {
         return ResponseEntity.notFound().build();
     }
 
-
     @PutMapping("/{id}/baja")
     public ResponseEntity<Adicional> baja(@PathVariable Long id) {
         try {
             Adicional adicional = adicionalService.baja(id);
             return ResponseEntity.ok(adicional);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
@@ -72,16 +70,5 @@ public class AdicionalController {
         return adicionalService.actualizarAdicional(id, adicional)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-
-    @GetMapping("/frecuencia-uso")
-    public ResponseEntity<List<Map<String, Object>>> obtenerFrecuenciaUsoAdicionales() {
-        List<Map<String, Object>> frecuencia = adicionalService.obtenerFrecuenciaUsoAdicionales();
-        return ResponseEntity.ok(frecuencia);
-    }
-
-    @GetMapping("/analisis-uso")
-    public ResponseEntity<Map<String, Object>> obtenerAnalisisUsoAdicionales() {
-        Map<String, Object> analisis = adicionalService.obtenerAnalisisUsoAdicionales();
-        return ResponseEntity.ok(analisis);
     }
 }

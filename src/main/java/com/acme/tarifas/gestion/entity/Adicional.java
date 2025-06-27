@@ -11,21 +11,14 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "Adicionales")
 public class Adicional {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "ID_Adicional")
     private Long id;
 
     private String nombre;
-
-    @Column(name = "costoDefault")
     private Double costoDefault;
-
     private String descripcion;
-
-    @Column(name = "precio")
-    private Double precio;
 
     @Column(name = "Activo")
     private Boolean activo = true;

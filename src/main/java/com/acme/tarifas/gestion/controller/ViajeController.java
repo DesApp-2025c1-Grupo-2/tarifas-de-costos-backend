@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Map;
-@CrossOrigin(origins = "*")
+
 @RestController
 @RequestMapping("/api/viajes")
 public class ViajeController {
