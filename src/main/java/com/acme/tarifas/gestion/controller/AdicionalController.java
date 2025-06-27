@@ -60,7 +60,7 @@ public class AdicionalController {
         try {
             Adicional adicional = adicionalService.baja(id);
             return ResponseEntity.ok(adicional);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

@@ -36,7 +36,8 @@ public class TransportistaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Transportista> actualizarTransportista(@PathVariable Long id, @RequestBody Transportista transportista) {
+    public ResponseEntity<Transportista> actualizarTransportista(@PathVariable Long id,
+            @RequestBody Transportista transportista) {
         return transportistaService.actualizarTransportista(id, transportista)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -57,7 +58,7 @@ public class TransportistaController {
         try {
             Transportista transportista = transportistaService.baja(id);
             return ResponseEntity.ok(transportista);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

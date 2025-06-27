@@ -51,14 +51,14 @@ public class AdicionalService {
                 .orElse(false);
     }
 
-    public Adicional baja(Long id) throws Exception{
+    public Adicional baja(Long id) throws Exception {
         Adicional adicional = adicionalRepository.findById(id)
                 .orElseThrow(() -> new Exception("Adicional no encontrado"));
 
-        if(adicional.getActivo()){
+        if (adicional.getActivo()) {
             adicional.setActivo(false);
             return adicionalRepository.save(adicional);
-        }else{
+        } else {
             throw new Exception("El adicional ya está inactivo");
         }
     }
