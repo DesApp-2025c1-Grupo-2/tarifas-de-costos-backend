@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ZonaViajeService {
 
@@ -45,7 +46,8 @@ public class ZonaViajeService {
 
     public Map<String, Object> obtenerComparativaCostos() {
         Map<String, Object> resultado = new HashMap<>();
-        List<ZonaViaje> zonas = zonaRepository.findAll();
+        List<ZonaViaje> zonas = getZonasActivas();
+
         List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll(); // Obtenemos todas las tarifas una sola vez
 
         zonas.forEach(zona -> {
@@ -92,5 +94,11 @@ public class ZonaViajeService {
         } else {
             throw new Exception("La zona ya está inactiva");
         }
+    }
+
+    public List<ZonaViaje> getZonasActivas(){
+        return zonaRepository.findAll().stream()
+                .filter(ZonaViaje::isActivo)
+                .collect(Collectors.toList());
     }
 }

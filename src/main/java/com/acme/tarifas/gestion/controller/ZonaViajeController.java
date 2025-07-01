@@ -23,9 +23,8 @@ public class ZonaViajeController {
     private ZonaViajeService zonaService;
 
     @GetMapping
-    public List<ZonaViaje> obtenerTodasLasZonas() {
-        return zonaService.getZonas();
-    }
+    public List<ZonaViaje> obtenerTodasLasZonas() {return zonaService.getZonas();}
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ZonaViaje> obtenerZonaPorId(@PathVariable Long id) {

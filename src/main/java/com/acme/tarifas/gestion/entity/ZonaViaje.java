@@ -22,4 +22,10 @@ public class ZonaViaje {
 
     @Column(name = "Activo")
     private Boolean activo = true;
+
+    public boolean isActivo() {
+        return Boolean.TRUE.equals(this.activo);
+    }
+
+
 }
