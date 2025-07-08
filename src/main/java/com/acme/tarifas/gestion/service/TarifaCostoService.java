@@ -5,10 +5,7 @@ import com.acme.tarifas.gestion.dao.TarifaAdicionalRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
-import com.acme.tarifas.gestion.entity.Adicional;
-import com.acme.tarifas.gestion.entity.TarifaAdicional;
-import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
+import com.acme.tarifas.gestion.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -200,5 +197,11 @@ public class TarifaCostoService {
             tarifa.setEsVigente(false);
             tarifaRepository.save(tarifa);
         });
+    }
+
+    public List<TarifaCosto> getTarifasActivas(){
+        return tarifaRepository.findAll().stream()
+                .filter(TarifaCosto::isEsVigente)
+                .collect(Collectors.toList());
     }
 }

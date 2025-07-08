@@ -66,4 +66,8 @@ public class TarifaCosto {
                         .sum();
         return this.valorBase + adicionalesTotal;
     }
+
+    public boolean isEsVigente() {
+        return Boolean.TRUE.equals(this.esVigente);
+    }
 }

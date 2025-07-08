@@ -7,7 +7,7 @@ import com.acme.tarifas.gestion.entity.ZonaViaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.acme.tarifas.gestion.service.TarifaCostoService;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class ZonaViajeService {
+
+    @Autowired
+    private TarifaCostoService tarifaCostoService;
 
     @Autowired
     private ZonaViajeRepository zonaRepository;
@@ -48,7 +51,7 @@ public class ZonaViajeService {
         Map<String, Object> resultado = new HashMap<>();
         List<ZonaViaje> zonas = getZonasActivas();
 
-        List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll(); // Obtenemos todas las tarifas una sola vez
+        List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas(); // Obtenemos todas las tarifas una sola vez
 
         zonas.forEach(zona -> {
             List<TarifaCosto> tarifasDeLaZona = todasLasTarifas.stream()
