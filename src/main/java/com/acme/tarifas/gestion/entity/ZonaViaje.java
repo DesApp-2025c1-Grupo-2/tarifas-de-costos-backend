@@ -20,6 +20,6 @@ public class ZonaViaje {
     private String descripcion;
     private String regionMapa;
 
-    @Column(name = "Activo")
-    private Boolean activo = true;
+    @Column(name = "Activo", nullable = false)
+    private boolean activo = true;
 }

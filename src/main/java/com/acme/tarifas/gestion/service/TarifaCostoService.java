@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,12 +41,9 @@ public class TarifaCostoService {
                 Adicional adicional = tarifaAdicional.getAdicional();
 
                 if (adicional != null && adicional.getId() == null) {
-
                     Adicional adicionalGuardado = adicionalRepository.save(adicional);
-
                     tarifaAdicional.setAdicional(adicionalGuardado);
                 }
-
                 tarifaAdicional.setTarifaCosto(tarifa);
             }
         }
@@ -58,9 +56,7 @@ public class TarifaCostoService {
         }
         tarifa.setFechaCreacion(LocalDateTime.now());
         tarifa.setFechaUltimaModificacion(LocalDateTime.now());
-
         procesarYAsociarAdicionales(tarifa);
-
         return tarifaRepository.save(tarifa);
     }
 
@@ -68,36 +64,38 @@ public class TarifaCostoService {
     public Optional<TarifaCosto> actualizarTarifa(Long id, TarifaCosto datosNuevos) {
         return tarifaRepository.findById(id).map(tarifaExistente -> {
 
-            // Lógica defensiva: solo actualiza si el dato nuevo no es nulo
-            if (datosNuevos.getNombreTarifa() != null) {
-                tarifaExistente.setNombreTarifa(datosNuevos.getNombreTarifa());
-            }
-            if (datosNuevos.getValorBase() != null) {
-                tarifaExistente.setValorBase(datosNuevos.getValorBase());
-            }
-            if (datosNuevos.getTransportista() != null) {
-                tarifaExistente.setTransportista(datosNuevos.getTransportista());
-            }
-            if (datosNuevos.getTipoVehiculo() != null) {
-                tarifaExistente.setTipoVehiculo(datosNuevos.getTipoVehiculo());
-            }
-            if (datosNuevos.getZonaViaje() != null) {
-                tarifaExistente.setZonaViaje(datosNuevos.getZonaViaje());
-            }
-            if (datosNuevos.getTipoCargaTarifa() != null) {
-                tarifaExistente.setTipoCargaTarifa(datosNuevos.getTipoCargaTarifa());
-            }
-
+            tarifaExistente.setNombreTarifa(datosNuevos.getNombreTarifa());
+            tarifaExistente.setValorBase(datosNuevos.getValorBase());
+            tarifaExistente.setTransportista(datosNuevos.getTransportista());
+            tarifaExistente.setTipoVehiculo(datosNuevos.getTipoVehiculo());
+            tarifaExistente.setZonaViaje(datosNuevos.getZonaViaje());
+            tarifaExistente.setTipoCargaTarifa(datosNuevos.getTipoCargaTarifa());
             tarifaExistente.setFechaUltimaModificacion(LocalDateTime.now());
             tarifaExistente.setVersion(tarifaExistente.getVersion() != null ? tarifaExistente.getVersion() + 1 : 1);
 
-            // Estrategia de actualización de adicionales
-            tarifaAdicionalRepository.deleteByTarifaCostoId(tarifaExistente.getId());
-            tarifaExistente.getAdicionales().clear();
+            // --- INICIO DE LA CORRECCIÓN ---
+            // Aseguramos que el estado se actualice usando el getter correcto
+            tarifaExistente.setEsVigente(datosNuevos.isEsVigente());
+            // --- FIN DE LA CORRECCIÓN ---
 
-            if (datosNuevos.getAdicionales() != null && !datosNuevos.getAdicionales().isEmpty()) {
-                procesarYAsociarAdicionales(datosNuevos);
-                tarifaExistente.getAdicionales().addAll(datosNuevos.getAdicionales());
+            List<TarifaAdicional> nuevosAdicionales = new ArrayList<>();
+            if (datosNuevos.getAdicionales() != null) {
+                for (TarifaAdicional nuevo : datosNuevos.getAdicionales()) {
+                    nuevo.setTarifaCosto(tarifaExistente);
+                    nuevosAdicionales.add(nuevo);
+                }
+            }
+
+            tarifaExistente.getAdicionales().removeIf(existente -> !nuevosAdicionales.contains(existente));
+
+            for (TarifaAdicional nuevo : nuevosAdicionales) {
+                if (tarifaExistente.getAdicionales().contains(nuevo)) {
+                    int index = tarifaExistente.getAdicionales().indexOf(nuevo);
+                    TarifaAdicional existente = tarifaExistente.getAdicionales().get(index);
+                    existente.setCostoEspecifico(nuevo.getCostoEspecifico());
+                } else {
+                    tarifaExistente.getAdicionales().add(nuevo);
+                }
             }
 
             return tarifaRepository.save(tarifaExistente);

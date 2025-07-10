@@ -37,7 +37,7 @@ public class TransportistaService {
             existente.setContactoEmail(nuevosDatos.getContactoEmail());
             existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
             existente.setEvaluacionDesempeno(nuevosDatos.getEvaluacionDesempeno());
-            existente.setActivo(nuevosDatos.getActivo());
+            existente.setActivo(nuevosDatos.isActivo());
             return transportistaRepository.save(existente);
         });
     }
@@ -54,7 +54,7 @@ public class TransportistaService {
         Transportista transportista = transportistaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Transportista no encontrado"));
 
-        if (transportista.getActivo()) {
+        if (transportista.isActivo()) {
             transportista.setActivo(false);
             return transportistaRepository.save(transportista);
         } else {

@@ -46,7 +46,7 @@ public class ZonaViajeService {
     public Map<String, Object> obtenerComparativaCostos() {
         Map<String, Object> resultado = new HashMap<>();
         List<ZonaViaje> zonas = zonaRepository.findAll();
-        List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll(); // Obtenemos todas las tarifas una sola vez
+        List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
 
         zonas.forEach(zona -> {
             List<TarifaCosto> tarifasDeLaZona = todasLasTarifas.stream()
@@ -66,12 +66,13 @@ public class ZonaViajeService {
         return resultado;
     }
 
+    @Transactional
     public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos) {
         return zonaRepository.findById(zonaId).map(existente -> {
             existente.setNombre(nuevosDatos.getNombre());
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
-            existente.setActivo(nuevosDatos.getActivo());
+            existente.setActivo(nuevosDatos.isActivo());
             return zonaRepository.save(existente);
         });
     }
@@ -85,8 +86,7 @@ public class ZonaViajeService {
     public ZonaViaje baja(Long id) throws Exception {
         ZonaViaje zona = zonaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Zona no encontrada"));
-
-        if (zona.getActivo()) {
+        if (zona.isActivo()) {
             zona.setActivo(false);
             return zonaRepository.save(zona);
         } else {

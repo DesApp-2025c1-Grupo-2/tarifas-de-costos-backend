@@ -2,8 +2,6 @@ package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.TipoCargaTarifaRepository;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
-import com.acme.tarifas.gestion.entity.Transportista;
-import com.acme.tarifas.gestion.entity.ZonaViaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,35 +22,34 @@ public class TipoCargaTarifaService {
         return tipoCargaTarifaRepository.findAll();
     }
 
-    public Optional<TipoCargaTarifa> obtenerPorId(Long id){
+    public Optional<TipoCargaTarifa> obtenerPorId(Long id) {
         return tipoCargaTarifaRepository.findById(id);
     }
 
-    public void eliminarTipoCargaTarifa(Long id)throws Exception{
+    public void eliminarTipoCargaTarifa(Long id) throws Exception {
         TipoCargaTarifa tipo = tipoCargaTarifaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Tipo de carga no encontrado"));
 
         tipoCargaTarifaRepository.delete(tipo);
     }
 
-    public TipoCargaTarifa baja(Long id) throws Exception{
+    public TipoCargaTarifa baja(Long id) throws Exception {
         TipoCargaTarifa tipoCarga = tipoCargaTarifaRepository.findById(id)
                 .orElseThrow(() -> new Exception("tipo de carga no encontrada"));
-
-        if(tipoCarga.getActivo()){
+        if (tipoCarga.isActivo()) {
             tipoCarga.setActivo(false);
             return tipoCargaTarifaRepository.save(tipoCarga);
-        }else{
+        } else {
             throw new Exception("El tipo de carga ya está inactivo");
         }
     }
 
-    public Optional<TipoCargaTarifa> actualizarTipo(Long zonaId, TipoCargaTarifa nuevosDatos){
-        return tipoCargaTarifaRepository.findById(zonaId).map(existente -> {
+    public Optional<TipoCargaTarifa> actualizarTipo(Long id, TipoCargaTarifa nuevosDatos) {
+        return tipoCargaTarifaRepository.findById(id).map(existente -> {
             existente.setNombre(nuevosDatos.getNombre());
             existente.setDescripcion(nuevosDatos.getDescripcion());
-            existente.setActivo(nuevosDatos.getActivo());
+            existente.setActivo(nuevosDatos.isActivo());
             return tipoCargaTarifaRepository.save(existente);
         });
-    };
+    }
 }
