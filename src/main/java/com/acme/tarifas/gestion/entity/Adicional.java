@@ -20,6 +20,9 @@ public class Adicional {
     private Double costoDefault;
     private String descripcion;
 
-    @Column(name = "Activo")
-    private Boolean activo = true;
+    @Column(name = "Activo", nullable = false)
+    private boolean activo = true;
+
+    @Column(name = "EsGlobal", nullable = false)
+    private boolean esGlobal = true;
 }

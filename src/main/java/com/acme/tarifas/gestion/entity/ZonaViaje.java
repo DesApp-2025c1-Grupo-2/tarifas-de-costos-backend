@@ -27,5 +27,4 @@ public class ZonaViaje {
         return Boolean.TRUE.equals(this.activo);
     }
 
-
 }

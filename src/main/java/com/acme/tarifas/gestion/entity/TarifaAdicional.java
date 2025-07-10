@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -23,12 +24,32 @@ public class TarifaAdicional {
     @JsonBackReference
     private TarifaCosto tarifaCosto;
 
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "ID_Adicional")
     private Adicional adicional;
 
     private Double costoEspecifico;
 
-    @Column(name = "Activo")
-    private Boolean activo = true;
+    @Column(name = "Activo", nullable = false)
+    private boolean activo = true;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        TarifaAdicional that = (TarifaAdicional) o;
+        return Objects.equals(tarifaCosto != null ? tarifaCosto.getId() : null,
+                that.tarifaCosto != null ? that.tarifaCosto.getId() : null) &&
+                Objects.equals(adicional != null ? adicional.getId() : null,
+                        that.adicional != null ? that.adicional.getId() : null);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                tarifaCosto != null ? tarifaCosto.getId() : null,
+                adicional != null ? adicional.getId() : null);
+    }
 }

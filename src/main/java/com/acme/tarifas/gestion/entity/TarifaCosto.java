@@ -47,12 +47,14 @@ public class TarifaCosto {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaUltimaModificacion;
 
-    @Column(name = "esVigente")
-    private Boolean esVigente = true;
+    // --- INICIO DE LA CORRECCIÓN ---
+    @Column(name = "esVigente", nullable = false)
+    private boolean esVigente = true;
+    // --- FIN DE LA CORRECCIÓN ---
 
     private Integer version;
 
-    @OneToMany(mappedBy = "tarifaCosto", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "tarifaCosto", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonManagedReference
     private List<TarifaAdicional> adicionales = new ArrayList<>();
 

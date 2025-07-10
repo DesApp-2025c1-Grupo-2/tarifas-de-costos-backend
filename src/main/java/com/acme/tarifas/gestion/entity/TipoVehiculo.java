@@ -23,6 +23,6 @@ public class TipoVehiculo {
     private Float capacidadVolumenM3;
     private String descripcion;
 
-    @Column(name = "Activo")
-    private Boolean activo = true;
+    @Column(name = "Activo", nullable = false)
+    private boolean activo = true;
 }

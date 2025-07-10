@@ -30,8 +30,8 @@ public class Transportista {
     @Column(name = "ContactoEmail")
     private String contactoEmail;
 
-    @Column(name = "Activo")
-    private Boolean activo = true;
+    @Column(name = "Activo", nullable = false)
+    private boolean activo = true;
 
     @Column(name = "ContactoTelefono")
     private String contactoTelefono;

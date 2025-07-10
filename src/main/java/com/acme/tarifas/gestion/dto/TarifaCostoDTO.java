@@ -9,7 +9,7 @@ public class TarifaCostoDTO {
     private Long id;
     private String nombre;
     private Double valorBase;
-    private Boolean esVigente;
+    private boolean esVigente; // Corregido a primitivo boolean
     private String transportistaNombre;
     private String tipoVehiculoNombre;
     private String zonaNombre;
@@ -28,7 +28,11 @@ public class TarifaCostoDTO {
         this.id = tarifaCosto.getId();
         this.nombre = tarifaCosto.getNombreTarifa();
         this.valorBase = tarifaCosto.getValorBase();
-        this.esVigente = tarifaCosto.getEsVigente();
+
+        // --- ESTA ES LA LÍNEA MÁS IMPORTANTE ---
+        // Asegúrate de que aquí se llama a "isEsVigente()" y no a "getEsVigente()"
+        this.esVigente = tarifaCosto.isEsVigente();
+
         this.transportistaNombre = tarifaCosto.getTransportista() != null
                 ? tarifaCosto.getTransportista().getNombreEmpresa()
                 : null;
@@ -44,6 +48,8 @@ public class TarifaCostoDTO {
         this.total = tarifaCosto.getValorTotal();
         this.adicionales = tarifaCosto.getAdicionales();
     }
+
+    // --- Getters y Setters ---
 
     public Long getId() {
         return id;
@@ -69,11 +75,11 @@ public class TarifaCostoDTO {
         this.valorBase = valorBase;
     }
 
-    public Boolean getEsVigente() {
+    public boolean isEsVigente() {
         return esVigente;
     }
 
-    public void setEsVigente(Boolean esVigente) {
+    public void setEsVigente(boolean esVigente) {
         this.esVigente = esVigente;
     }
 
