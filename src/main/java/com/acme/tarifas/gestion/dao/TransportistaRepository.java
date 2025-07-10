@@ -15,4 +15,8 @@ public interface TransportistaRepository extends JpaRepository<Transportista, Lo
            "GROUP BY t.transportista.nombreEmpresa " +
            "ORDER BY COUNT(t) DESC")
     List<TransportistaTarifasDTO> findTransportistasMasUtilizados();
+
+
+
+    boolean existsByContactoNombreAndActivoTrue(String contactoNombre);
 }

@@ -44,6 +44,9 @@ public class ZonaViajeService {
     }
 
     public ZonaViaje guardarZona(ZonaViaje zona) {
+        if (zonaRepository.existsByNombreAndActivoTrue(zona.getNombre())) {
+            throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
+        }
         return zonaRepository.save(zona);
     }
 
@@ -75,6 +78,9 @@ public class ZonaViajeService {
     public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos) {
         return zonaRepository.findById(zonaId).map(existente -> {
             existente.setNombre(nuevosDatos.getNombre());
+            if (zonaRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
+                throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
+            }
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
             existente.setActivo(nuevosDatos.isActivo());
