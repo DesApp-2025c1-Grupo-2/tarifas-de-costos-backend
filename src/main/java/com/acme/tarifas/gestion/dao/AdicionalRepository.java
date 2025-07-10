@@ -9,4 +9,6 @@ import java.util.List;
 public interface AdicionalRepository extends JpaRepository<Adicional, Long> {
     @Query("SELECT a FROM Adicional a WHERE a.esGlobal = true")
     List<Adicional> findAllGlobales();
+
+    boolean existsByNombreAndActivoTrue(String nombre);
 }

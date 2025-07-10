@@ -17,6 +17,9 @@ public class TipoVehiculoService {
 
     @Transactional
     public TipoVehiculo guardarTipo(TipoVehiculo tipo) {
+        if (tipoVehiculoRepository.existsByNombreAndActivoTrue(tipo.getNombre())) {
+            throw new IllegalArgumentException("Ya existe un tipo de vehiculo con ese nombre");
+        }
         return tipoVehiculoRepository.save(tipo);
     }
 
@@ -34,6 +37,9 @@ public class TipoVehiculoService {
             existente.setCapacidadPesoKG(nuevosDatos.getCapacidadPesoKG());
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setNombre(nuevosDatos.getNombre());
+            if (tipoVehiculoRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
+                throw new IllegalArgumentException("Ya existe un tipo de vehiculo con ese nombre");
+            }
             existente.setCapacidadVolumenM3(nuevosDatos.getCapacidadVolumenM3());
             existente.setActivo(nuevosDatos.isActivo());
             return tipoVehiculoRepository.save(existente);

@@ -18,6 +18,9 @@ public class TransportistaService {
 
     @Transactional
     public Transportista guardarTransportista(Transportista transportista) {
+        if (transportistaRepository.existsByContactoNombreAndActivoTrue(transportista.getContactoNombre())) {
+            throw new IllegalArgumentException("Ya existe un transportista con ese nombre");
+        }
         return transportistaRepository.save(transportista);
     }
 
@@ -34,6 +37,9 @@ public class TransportistaService {
         return transportistaRepository.findById(id).map(existente -> {
             existente.setNombreEmpresa(nuevosDatos.getNombreEmpresa());
             existente.setContactoNombre(nuevosDatos.getContactoNombre());
+            if (transportistaRepository.existsByContactoNombreAndActivoTrue(nuevosDatos.getContactoNombre())) {
+                throw new IllegalArgumentException("Ya existe un transportista con ese nombre");
+            }
             existente.setContactoEmail(nuevosDatos.getContactoEmail());
             existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
             existente.setEvaluacionDesempeno(nuevosDatos.getEvaluacionDesempeno());

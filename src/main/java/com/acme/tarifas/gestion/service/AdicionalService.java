@@ -17,6 +17,9 @@ public class AdicionalService {
 
     @Transactional
     public Adicional guardarAdicional(Adicional adicional) {
+        if (adicionalRepository.existsByNombreAndActivoTrue(adicional.getNombre())) {
+            throw new IllegalArgumentException("Ya existe un adicional con ese nombre");
+        }
         return adicionalRepository.save(adicional);
     }
 
@@ -67,6 +70,9 @@ public class AdicionalService {
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setCostoDefault(nuevosDatos.getCostoDefault());
             existente.setNombre(nuevosDatos.getNombre());
+            if (adicionalRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
+                throw new IllegalArgumentException("Ya existe un adicional con ese nombre");
+            }
             existente.setActivo(nuevosDatos.isActivo());
             return adicionalRepository.save(existente);
         });

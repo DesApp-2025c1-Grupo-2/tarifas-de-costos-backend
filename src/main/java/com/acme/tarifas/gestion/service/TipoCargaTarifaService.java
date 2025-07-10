@@ -15,6 +15,9 @@ public class TipoCargaTarifaService {
     private TipoCargaTarifaRepository tipoCargaTarifaRepository;
 
     public TipoCargaTarifa guardarTipoCargaTarifa(TipoCargaTarifa tipo) {
+        if (tipoCargaTarifaRepository.existsByNombreAndActivoTrue(tipo.getNombre())) {
+            throw new IllegalArgumentException("Ya existe un tipo de carga con ese nombre");
+        }
         return tipoCargaTarifaRepository.save(tipo);
     }
 
@@ -47,6 +50,9 @@ public class TipoCargaTarifaService {
     public Optional<TipoCargaTarifa> actualizarTipo(Long id, TipoCargaTarifa nuevosDatos) {
         return tipoCargaTarifaRepository.findById(id).map(existente -> {
             existente.setNombre(nuevosDatos.getNombre());
+            if (tipoCargaTarifaRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
+                throw new IllegalArgumentException("Ya existe un tipo de carga con ese nombre");
+            }
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setActivo(nuevosDatos.isActivo());
             return tipoCargaTarifaRepository.save(existente);
