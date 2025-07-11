@@ -21,6 +21,9 @@ public class Transportista {
     @Column(name = "ID_Transportista")
     private Long id;
 
+    @Column(name = "CUIT", unique = true, nullable = false)
+    private String cuit;
+
     @Column(name = "NombreEmpresa")
     private String nombreEmpresa;
 

@@ -17,8 +17,7 @@ public interface TransportistaRepository extends JpaRepository<Transportista, Lo
             "ORDER BY COUNT(t) DESC")
     List<TransportistaTarifasDTO> findTransportistasMasUtilizados();
 
-    boolean existsByNombreEmpresaAndActivoTrue(String nombreEmpresa);
+    boolean existsByCuitAndActivoTrue(String cuit);
 
-    Optional<Transportista> findByNombreEmpresaAndActivoTrue(String nombreEmpresa);
-
+    Optional<Transportista> findByCuitAndActivoTrue(String cuit);
 }
