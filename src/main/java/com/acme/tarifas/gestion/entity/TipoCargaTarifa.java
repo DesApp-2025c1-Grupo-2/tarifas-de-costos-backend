@@ -19,8 +19,6 @@ public class TipoCargaTarifa {
     private String nombre;
     private String descripcion;
 
-    // --- INICIO DE LA CORRECCIÓN ---
     @Column(name = "Activo", nullable = false)
     private boolean activo = true;
-    // --- FIN DE LA CORRECCIÓN ---
 }

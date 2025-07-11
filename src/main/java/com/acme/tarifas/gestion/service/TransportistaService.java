@@ -3,11 +3,11 @@ package com.acme.tarifas.gestion.service;
 import com.acme.tarifas.gestion.dao.TransportistaRepository;
 import com.acme.tarifas.gestion.entity.Transportista;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -18,8 +18,8 @@ public class TransportistaService {
 
     @Transactional
     public Transportista guardarTransportista(Transportista transportista) {
-        if (transportistaRepository.existsByContactoNombreAndActivoTrue(transportista.getContactoNombre())) {
-            throw new IllegalArgumentException("Ya existe un transportista con ese nombre");
+        if (transportistaRepository.existsByNombreEmpresaAndActivoTrue(transportista.getNombreEmpresa())) {
+            throw new IllegalArgumentException("Ya existe un transportista activo con ese nombre de empresa");
         }
         return transportistaRepository.save(transportista);
     }
@@ -35,15 +35,20 @@ public class TransportistaService {
     @Transactional
     public Optional<Transportista> actualizarTransportista(Long id, Transportista nuevosDatos) {
         return transportistaRepository.findById(id).map(existente -> {
+            transportistaRepository.findByNombreEmpresaAndActivoTrue(nuevosDatos.getNombreEmpresa())
+                    .ifPresent(duplicado -> {
+                        if (!Objects.equals(duplicado.getId(), id)) {
+                            throw new IllegalArgumentException(
+                                    "Ya existe otro transportista activo con ese nombre de empresa");
+                        }
+                    });
+
             existente.setNombreEmpresa(nuevosDatos.getNombreEmpresa());
             existente.setContactoNombre(nuevosDatos.getContactoNombre());
-            if (transportistaRepository.existsByContactoNombreAndActivoTrue(nuevosDatos.getContactoNombre())) {
-                throw new IllegalArgumentException("Ya existe un transportista con ese nombre");
-            }
             existente.setContactoEmail(nuevosDatos.getContactoEmail());
             existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
-            existente.setEvaluacionDesempeno(nuevosDatos.getEvaluacionDesempeno());
             existente.setActivo(nuevosDatos.isActivo());
+
             return transportistaRepository.save(existente);
         });
     }
@@ -52,7 +57,6 @@ public class TransportistaService {
     public void eliminarTransportista(Long id) throws Exception {
         Transportista transportista = transportistaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Transportista no encontrado"));
-
         transportistaRepository.delete(transportista);
     }
 

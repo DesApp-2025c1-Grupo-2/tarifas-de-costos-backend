@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -16,7 +17,7 @@ public class TipoCargaTarifaService {
 
     public TipoCargaTarifa guardarTipoCargaTarifa(TipoCargaTarifa tipo) {
         if (tipoCargaTarifaRepository.existsByNombreAndActivoTrue(tipo.getNombre())) {
-            throw new IllegalArgumentException("Ya existe un tipo de carga con ese nombre");
+            throw new IllegalArgumentException("Ya existe un tipo de carga activo con ese nombre");
         }
         return tipoCargaTarifaRepository.save(tipo);
     }
@@ -32,7 +33,6 @@ public class TipoCargaTarifaService {
     public void eliminarTipoCargaTarifa(Long id) throws Exception {
         TipoCargaTarifa tipo = tipoCargaTarifaRepository.findById(id)
                 .orElseThrow(() -> new Exception("Tipo de carga no encontrado"));
-
         tipoCargaTarifaRepository.delete(tipo);
     }
 
@@ -49,12 +49,16 @@ public class TipoCargaTarifaService {
 
     public Optional<TipoCargaTarifa> actualizarTipo(Long id, TipoCargaTarifa nuevosDatos) {
         return tipoCargaTarifaRepository.findById(id).map(existente -> {
+            tipoCargaTarifaRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
+                if (!Objects.equals(duplicado.getId(), id)) {
+                    throw new IllegalArgumentException("Ya existe otro tipo de carga activo con ese nombre");
+                }
+            });
+
             existente.setNombre(nuevosDatos.getNombre());
-            if (tipoCargaTarifaRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
-                throw new IllegalArgumentException("Ya existe un tipo de carga con ese nombre");
-            }
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setActivo(nuevosDatos.isActivo());
+
             return tipoCargaTarifaRepository.save(existente);
         });
     }

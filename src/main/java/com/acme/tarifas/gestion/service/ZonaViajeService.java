@@ -7,14 +7,13 @@ import com.acme.tarifas.gestion.entity.ZonaViaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.acme.tarifas.gestion.service.TarifaCostoService;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Service
 public class ZonaViajeService {
@@ -54,7 +53,7 @@ public class ZonaViajeService {
         Map<String, Object> resultado = new HashMap<>();
         List<ZonaViaje> zonas = getZonasActivas();
 
-        List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas(); // Obtenemos todas las tarifas una sola vez
+        List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas();
 
         zonas.forEach(zona -> {
             List<TarifaCosto> tarifasDeLaZona = todasLasTarifas.stream()
@@ -77,10 +76,13 @@ public class ZonaViajeService {
     @Transactional
     public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos) {
         return zonaRepository.findById(zonaId).map(existente -> {
+            zonaRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
+                if (!Objects.equals(duplicado.getId(), zonaId)) {
+                    throw new IllegalArgumentException("Ya existe otra zona activa con ese nombre");
+                }
+            });
+
             existente.setNombre(nuevosDatos.getNombre());
-            if (zonaRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
-                throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
-            }
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
             existente.setActivo(nuevosDatos.isActivo());
@@ -105,7 +107,7 @@ public class ZonaViajeService {
         }
     }
 
-    public List<ZonaViaje> getZonasActivas(){
+    public List<ZonaViaje> getZonasActivas() {
         return zonaRepository.findAll().stream()
                 .filter(ZonaViaje::isActivo)
                 .collect(Collectors.toList());

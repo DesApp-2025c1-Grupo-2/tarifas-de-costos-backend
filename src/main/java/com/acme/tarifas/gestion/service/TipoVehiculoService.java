@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -34,12 +35,15 @@ public class TipoVehiculoService {
     @Transactional
     public Optional<TipoVehiculo> actualizarTipo(Long id, TipoVehiculo nuevosDatos) {
         return tipoVehiculoRepository.findById(id).map(existente -> {
-            existente.setCapacidadPesoKG(nuevosDatos.getCapacidadPesoKG());
-            existente.setDescripcion(nuevosDatos.getDescripcion());
+            tipoVehiculoRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
+                if (!Objects.equals(duplicado.getId(), id)) {
+                    throw new IllegalArgumentException("Ya existe otro tipo de vehículo activo con ese nombre");
+                }
+            });
+
             existente.setNombre(nuevosDatos.getNombre());
-            if (tipoVehiculoRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
-                throw new IllegalArgumentException("Ya existe un tipo de vehiculo con ese nombre");
-            }
+            existente.setDescripcion(nuevosDatos.getDescripcion());
+            existente.setCapacidadPesoKG(nuevosDatos.getCapacidadPesoKG());
             existente.setCapacidadVolumenM3(nuevosDatos.getCapacidadVolumenM3());
             existente.setActivo(nuevosDatos.isActivo());
             return tipoVehiculoRepository.save(existente);
