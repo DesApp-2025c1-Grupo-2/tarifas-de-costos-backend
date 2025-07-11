@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 
+import com.acme.tarifas.gestion.dto.ComparativaTransportistaDTO;
 import com.acme.tarifas.gestion.dto.FrecuenciaAdicionalDTO;
 import com.acme.tarifas.gestion.dto.TransportistaTarifasDTO;
 import com.acme.tarifas.gestion.service.ReporteService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -21,9 +23,6 @@ public class ReporteController {
         this.reporteService = reporteService;
     }
 
-    /**
-     * @return
-     */
     @GetMapping("/frecuencia-adicionales")
     public ResponseEntity<List<FrecuenciaAdicionalDTO>> getFrecuenciaAdicionales() {
         List<FrecuenciaAdicionalDTO> datos = reporteService.getFrecuenciaUsoAdicionales();
@@ -34,5 +33,21 @@ public class ReporteController {
     public ResponseEntity<List<TransportistaTarifasDTO>> getTransportistasMasUtilizados() {
         List<TransportistaTarifasDTO> datos = reporteService.getTransportistasMasUtilizados();
         return ResponseEntity.ok(datos);
+    }
+
+    @GetMapping("/comparativa-costos")
+    public ResponseEntity<ComparativaTransportistaDTO> getComparativaCostos(
+            @RequestParam(required = false) Long zonaId,
+            @RequestParam(required = false) Long tipoVehiculoId,
+            @RequestParam(required = false) Long tipoCargaId) {
+
+        ComparativaTransportistaDTO reporte = reporteService.generarComparativaPorServicio(zonaId, tipoVehiculoId,
+                tipoCargaId);
+
+        if (reporte.getComparativas() == null || reporte.getComparativas().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(reporte);
     }
 }

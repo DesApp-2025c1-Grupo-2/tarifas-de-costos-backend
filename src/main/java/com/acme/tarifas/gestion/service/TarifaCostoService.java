@@ -6,6 +6,7 @@ import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
 import com.acme.tarifas.gestion.entity.*;
+import jakarta.persistence.EntityNotFoundException; // <-- AÑADIR ESTA IMPORTACIÓN
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +36,14 @@ public class TarifaCostoService {
     private void procesarYAsociarAdicionales(TarifaCosto tarifa) {
         if (tarifa.getAdicionales() != null) {
             for (TarifaAdicional tarifaAdicional : tarifa.getAdicionales()) {
-                Adicional adicional = tarifaAdicional.getAdicional();
+                Adicional adicionalEnviado = tarifaAdicional.getAdicional();
 
-                if (adicional != null && adicional.getId() == null) {
-                    Adicional adicionalGuardado = adicionalRepository.save(adicional);
-                    tarifaAdicional.setAdicional(adicionalGuardado);
+                if (adicionalEnviado != null && adicionalEnviado.getId() != null) {
+                    Adicional adicionalGestionado = adicionalRepository.findById(adicionalEnviado.getId())
+                            .orElseThrow(() -> new EntityNotFoundException(
+                                    "No se encontró el Adicional con ID: " + adicionalEnviado.getId()));
+                    tarifaAdicional.setAdicional(adicionalGestionado);
+                } else {
                 }
                 tarifaAdicional.setTarifaCosto(tarifa);
             }
@@ -54,6 +58,7 @@ public class TarifaCostoService {
         tarifa.setFechaCreacion(LocalDateTime.now());
         tarifa.setFechaUltimaModificacion(LocalDateTime.now());
         procesarYAsociarAdicionales(tarifa);
+
         return tarifaRepository.save(tarifa);
     }
 
@@ -69,11 +74,7 @@ public class TarifaCostoService {
             tarifaExistente.setTipoCargaTarifa(datosNuevos.getTipoCargaTarifa());
             tarifaExistente.setFechaUltimaModificacion(LocalDateTime.now());
             tarifaExistente.setVersion(tarifaExistente.getVersion() != null ? tarifaExistente.getVersion() + 1 : 1);
-
-            // --- INICIO DE LA CORRECCIÓN ---
-            // Aseguramos que el estado se actualice usando el getter correcto
             tarifaExistente.setEsVigente(datosNuevos.isEsVigente());
-            // --- FIN DE LA CORRECCIÓN ---
 
             List<TarifaAdicional> nuevosAdicionales = new ArrayList<>();
             if (datosNuevos.getAdicionales() != null) {
@@ -197,7 +198,7 @@ public class TarifaCostoService {
         });
     }
 
-    public List<TarifaCosto> getTarifasActivas(){
+    public List<TarifaCosto> getTarifasActivas() {
         return tarifaRepository.findAll().stream()
                 .filter(TarifaCosto::isEsVigente)
                 .collect(Collectors.toList());

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,12 +24,12 @@ public class AdicionalService {
         return adicionalRepository.save(adicional);
     }
 
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // Ahora, por defecto, solo se obtienen los adicionales globales.
     public List<Adicional> obtenerTodos() {
-        return adicionalRepository.findAllGlobales();
+        // En tu versión anterior, esto llamaba a findAllGlobales(). Lo cambio a
+        // findAll()
+        // para que desde la gestión de adicionales puedas verlos todos.
+        return adicionalRepository.findAll();
     }
-    // --- FIN DE LA MODIFICACIÓN ---
 
     public Optional<Adicional> obtenerPorId(Long id) {
         return adicionalRepository.findById(id);
@@ -67,13 +68,18 @@ public class AdicionalService {
     @Transactional
     public Optional<Adicional> actualizarAdicional(Long id, Adicional nuevosDatos) {
         return adicionalRepository.findById(id).map(existente -> {
+            adicionalRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
+                if (!Objects.equals(duplicado.getId(), id)) {
+                    throw new IllegalArgumentException("Ya existe otro adicional activo con ese nombre");
+                }
+            });
+
+            existente.setNombre(nuevosDatos.getNombre());
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setCostoDefault(nuevosDatos.getCostoDefault());
-            existente.setNombre(nuevosDatos.getNombre());
-            if (adicionalRepository.existsByNombreAndActivoTrue(nuevosDatos.getNombre())) {
-                throw new IllegalArgumentException("Ya existe un adicional con ese nombre");
-            }
             existente.setActivo(nuevosDatos.isActivo());
+            existente.setEsGlobal(nuevosDatos.isEsGlobal());
+
             return adicionalRepository.save(existente);
         });
     }
