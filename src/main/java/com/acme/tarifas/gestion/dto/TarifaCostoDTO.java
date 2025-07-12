@@ -29,8 +29,6 @@ public class TarifaCostoDTO {
         this.nombre = tarifaCosto.getNombreTarifa();
         this.valorBase = tarifaCosto.getValorBase();
 
-        // --- ESTA ES LA LÍNEA MÁS IMPORTANTE ---
-        // Asegúrate de que aquí se llama a "isEsVigente()" y no a "getEsVigente()"
         this.esVigente = tarifaCosto.isEsVigente();
 
         this.transportistaNombre = tarifaCosto.getTransportista() != null
