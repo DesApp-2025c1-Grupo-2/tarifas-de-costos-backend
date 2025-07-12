@@ -6,7 +6,7 @@ import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
 import com.acme.tarifas.gestion.entity.*;
-import jakarta.persistence.EntityNotFoundException; // <-- AÑADIR ESTA IMPORTACIÓN
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +65,9 @@ public class TarifaCostoService {
     @Transactional
     public Optional<TarifaCosto> actualizarTarifa(Long id, TarifaCosto datosNuevos) {
         return tarifaRepository.findById(id).map(tarifaExistente -> {
+
+
+            crearRegistroHistorial(tarifaExistente, "Actualización general de la tarifa.");
 
             tarifaExistente.setNombreTarifa(datosNuevos.getNombreTarifa());
             tarifaExistente.setValorBase(datosNuevos.getValorBase());
@@ -153,23 +156,29 @@ public class TarifaCostoService {
     @Transactional
     public Optional<TarifaCosto> actualizarValorBase(Long id, Double nuevoValor) {
         return tarifaRepository.findById(id).map(tarifa -> {
-            crearRegistroHistorial(tarifa);
+
+            crearRegistroHistorial(tarifa, "Actualización del valor base.");
             tarifa.setValorBase(nuevoValor);
             tarifa.setFechaUltimaModificacion(LocalDateTime.now());
-            tarifa.setVersion(tarifa.getVersion() + 1);
+            tarifa.setVersion(tarifa.getVersion() != null ? tarifa.getVersion() + 1 : 1);
             return tarifaRepository.save(tarifa);
         });
     }
 
-    private void crearRegistroHistorial(TarifaCosto tarifa) {
+    private void crearRegistroHistorial(TarifaCosto tarifa, String comentario) {
         TarifaCostoHistorial historial = new TarifaCostoHistorial();
         historial.setTarifaOriginal(tarifa);
         historial.setCodigoTarifa(tarifa.getCodigoTarifa());
+        historial.setNombreTarifa(tarifa.getNombreTarifa());
+        historial.setTipoVehiculo(tarifa.getTipoVehiculo());
+        historial.setTipoCargaTarifa(tarifa.getTipoCargaTarifa());
+        historial.setZonaViaje(tarifa.getZonaViaje());
+        historial.setTransportista(tarifa.getTransportista());
         historial.setValorBase(tarifa.getValorBase());
         historial.setFechaModificacion(LocalDateTime.now());
+        historial.setComentarioCambio(comentario);
         historialRepository.save(historial);
     }
-
     public double calcularTotalTarifa(Long tarifaId) {
         return tarifaRepository.findById(tarifaId)
                 .map(this::calcularCostoTotal)
