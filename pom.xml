@@ -41,7 +41,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Dependencia explícita de Jackson para asegurar el soporte de JSON -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
