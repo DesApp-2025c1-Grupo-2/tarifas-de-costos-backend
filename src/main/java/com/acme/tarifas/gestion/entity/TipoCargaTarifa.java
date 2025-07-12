@@ -22,7 +22,6 @@ public class TipoCargaTarifa {
     @NotBlank(message = "El nombre es obligatorio.")
     private String nombre;
 
-    @Size(max=75, message = "'descripcion' no puede tener mas de 75 caracteres")
     private String descripcion;
 
     @NotNull

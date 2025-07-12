@@ -25,7 +25,7 @@ public class Adicional {
     @Positive(message = "El costo debe ser positivo")
     private Double costoDefault;
 
-    @Size(max=75, message = "'descripcion' No puede tener mas de 75 caracteres")
+
     private String descripcion;
 
     @Column(name = "Activo", nullable = false)

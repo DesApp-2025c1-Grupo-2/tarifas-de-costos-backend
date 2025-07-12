@@ -22,7 +22,7 @@ public class ZonaViaje {
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    @Size(max=75, message = "'Descripcion' no puede tener mas de 75 caracteres")
+
     private String descripcion;
 
     @NotBlank(message = "La region es obligatoria.")
