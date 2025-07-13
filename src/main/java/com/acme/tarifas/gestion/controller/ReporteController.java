@@ -1,7 +1,8 @@
 package com.acme.tarifas.gestion.controller;
 
+import com.acme.tarifas.gestion.dto.ComparativaTransportistaDTO;
 import com.acme.tarifas.gestion.dto.FrecuenciaAdicionalDTO;
-import com.acme.tarifas.gestion.dto.TransportistaTarifasDTO; 
+import com.acme.tarifas.gestion.dto.TransportistaTarifasDTO;
 import com.acme.tarifas.gestion.dto.VariacionTarifaDTO;
 import com.acme.tarifas.gestion.service.ReporteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,23 @@ public class ReporteController {
     public ResponseEntity<List<TransportistaTarifasDTO>> getTransportistasMasUtilizados() {
         List<TransportistaTarifasDTO> datos = reporteService.getTransportistasMasUtilizados();
         return ResponseEntity.ok(datos);
+    }
+    
+    // ENDPOINT RESTAURADO
+    @GetMapping("/comparativa-costos")
+    public ResponseEntity<ComparativaTransportistaDTO> getComparativaCostos(
+            @RequestParam(required = false) Long zonaId,
+            @RequestParam(required = false) Long tipoVehiculoId,
+            @RequestParam(required = false) Long tipoCargaId) {
+
+        ComparativaTransportistaDTO reporte = reporteService.generarComparativaPorServicio(zonaId, tipoVehiculoId,
+                tipoCargaId);
+
+        if (reporte.getComparativas() == null || reporte.getComparativas().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(reporte);
     }
 
     @GetMapping("/comparativa-aumentos")
