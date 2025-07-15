@@ -47,7 +47,6 @@ public class TarifaCostoDTO {
         this.adicionales = tarifaCosto.getAdicionales();
     }
 
-    // --- Getters y Setters ---
 
     public Long getId() {
         return id;

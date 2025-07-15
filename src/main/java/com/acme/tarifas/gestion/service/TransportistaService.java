@@ -1,7 +1,15 @@
 package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.TransportistaRepository;
+import com.acme.tarifas.gestion.dao.VehiculoRepository;
+import com.acme.tarifas.gestion.dao.ViajeRepository;
+import com.acme.tarifas.gestion.dto.HistorialServicioDTO;
 import com.acme.tarifas.gestion.entity.Transportista;
+import com.acme.tarifas.gestion.entity.Vehiculo;
+import com.acme.tarifas.gestion.entity.Viaje;
+import com.acme.tarifas.gestion.entity.ZonaViaje;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,20 +17,95 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TransportistaService {
 
+    private final TransportistaRepository transportistaRepository;
+    private final ViajeRepository viajeRepository;
+    private final VehiculoRepository vehiculoRepository;
+
     @Autowired
-    private TransportistaRepository transportistaRepository;
+    public TransportistaService(TransportistaRepository transportistaRepository,
+                                ViajeRepository viajeRepository,
+                                VehiculoRepository vehiculoRepository) {
+        this.transportistaRepository = transportistaRepository;
+        this.viajeRepository = viajeRepository;
+        this.vehiculoRepository = vehiculoRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<TransportistaProfile> getTransportistaProfile(Long id) {
+        return transportistaRepository.findById(id).map(transportista -> {
+            List<Vehiculo> vehiculos = vehiculoRepository.findByTransportistaPropietarioId(id);
+
+            List<Viaje> viajes = viajeRepository.findByTransportistaId(id);
+            List<HistorialServicioDTO> historial = viajes.stream()
+                    .map(HistorialServicioDTO::new)
+                    .collect(Collectors.toList());
+
+            return new TransportistaProfile(transportista, vehiculos, historial);
+        });
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class TransportistaProfile {
+        private Long id;
+        private String nombreEmpresa;
+        private String cuit;
+        private String contactoNombre;
+        private String contactoEmail;
+        private String contactoTelefono;
+        private List<VehiculoDTO> vehiculos;
+        private List<ZonaViajeDTO> zonasOperacion;
+        private List<HistorialServicioDTO> historialServicios;
+
+        public TransportistaProfile(Transportista transportista, List<Vehiculo> vehiculos, List<HistorialServicioDTO> historial) {
+            this.id = transportista.getId();
+            this.nombreEmpresa = transportista.getNombreEmpresa();
+            this.cuit = transportista.getCuit();
+            this.contactoNombre = transportista.getContactoNombre();
+            this.contactoEmail = transportista.getContactoEmail();
+            this.contactoTelefono = transportista.getContactoTelefono();
+            this.vehiculos = vehiculos.stream().map(VehiculoDTO::new).collect(Collectors.toList());
+            this.zonasOperacion = transportista.getZonasOperacion().stream().map(ZonaViajeDTO::new).collect(Collectors.toList());
+            this.historialServicios = historial;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class VehiculoDTO {
+        private Long id;
+        private String tipoVehiculo;
+
+        public VehiculoDTO(Vehiculo vehiculo) {
+            this.id = vehiculo.getId();
+            if (vehiculo.getTipoVehiculo() != null) {
+                this.tipoVehiculo = vehiculo.getTipoVehiculo().getNombre();
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ZonaViajeDTO {
+         private Long id;
+         private String nombre;
+
+         public ZonaViajeDTO(ZonaViaje zona) {
+             this.id = zona.getId();
+             this.nombre = zona.getNombre();
+         }
+    }
 
     @Transactional
     public Transportista guardarTransportista(Transportista transportista) {
-        // --- INICIO DE LA MODIFICACIÓN ---
         if (transportistaRepository.existsByCuitAndActivoTrue(transportista.getCuit())) {
             throw new IllegalArgumentException("Ya existe un transportista activo con ese CUIT");
         }
-        // --- FIN DE LA MODIFICACIÓN ---
         return transportistaRepository.save(transportista);
     }
 
@@ -37,17 +120,14 @@ public class TransportistaService {
     @Transactional
     public Optional<Transportista> actualizarTransportista(Long id, Transportista nuevosDatos) {
         return transportistaRepository.findById(id).map(existente -> {
-            // --- INICIO DE LA MODIFICACIÓN ---
             transportistaRepository.findByCuitAndActivoTrue(nuevosDatos.getCuit())
                     .ifPresent(duplicado -> {
                         if (!Objects.equals(duplicado.getId(), id)) {
-                            throw new IllegalArgumentException(
-                                    "Ya existe otro transportista activo con ese CUIT");
+                            throw new IllegalArgumentException("Ya existe otro transportista activo con ese CUIT");
                         }
                     });
 
             existente.setCuit(nuevosDatos.getCuit());
-            // --- FIN DE LA MODIFICACIÓN ---
             existente.setNombreEmpresa(nuevosDatos.getNombreEmpresa());
             existente.setContactoNombre(nuevosDatos.getContactoNombre());
             existente.setContactoEmail(nuevosDatos.getContactoEmail());

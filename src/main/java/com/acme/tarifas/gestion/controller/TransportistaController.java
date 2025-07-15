@@ -17,6 +17,13 @@ public class TransportistaController {
     @Autowired
     private TransportistaService transportistaService;
 
+    @GetMapping("/{id}/profile")
+    public ResponseEntity<TransportistaService.TransportistaProfile> getTransportistaProfile(@PathVariable Long id) {
+        return transportistaService.getTransportistaProfile(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<Transportista> crearTransportista(@RequestBody Transportista transportista) {
         Transportista nuevo = transportistaService.guardarTransportista(transportista);
@@ -62,4 +69,4 @@ public class TransportistaController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
-}
+} 

@@ -1,18 +1,14 @@
 package com.acme.tarifas.gestion.service;
 
-import com.acme.tarifas.gestion.dao.TarifaAdicionalRepository;
-import com.acme.tarifas.gestion.dao.TarifaCostoHistorialRepository;
-import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
-import com.acme.tarifas.gestion.dao.TransportistaRepository;
-import com.acme.tarifas.gestion.dto.ComparativaTransportistaDTO;
-import com.acme.tarifas.gestion.dto.FrecuenciaAdicionalDTO;
-import com.acme.tarifas.gestion.dto.TransportistaTarifasDTO;
-import com.acme.tarifas.gestion.dto.VariacionTarifaDTO;
+import com.acme.tarifas.gestion.dao.*;
+import com.acme.tarifas.gestion.dto.*;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
+import com.acme.tarifas.gestion.entity.Viaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Optional; 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -20,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,18 +26,32 @@ public class ReporteService {
     private final TarifaAdicionalRepository tarifaAdicionalRepository;
     private final TransportistaRepository transportistaRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
+    private final ViajeRepository viajeRepository;
 
     @Autowired
     public ReporteService(TarifaCostoHistorialRepository historialRepository,
                           TarifaAdicionalRepository tarifaAdicionalRepository,
                           TransportistaRepository transportistaRepository,
-                          TarifaCostoRepository tarifaCostoRepository) {
+                          TarifaCostoRepository tarifaCostoRepository,
+                          ViajeRepository viajeRepository) {
         this.historialRepository = historialRepository;
         this.tarifaAdicionalRepository = tarifaAdicionalRepository;
         this.transportistaRepository = transportistaRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
+        this.viajeRepository = viajeRepository;
     }
 
+    // --- INICIO DE LA MODIFICACIÓN ---
+    @Transactional(readOnly = true)
+    public List<HistorialServicioDTO> generarHistorialServiciosTransportista(Long transportistaId) {
+        List<Viaje> viajes = viajeRepository.findByTransportistaId(transportistaId);
+        return viajes.stream()
+                .map(HistorialServicioDTO::new)
+                .collect(Collectors.toList());
+    }
+    // --- FIN DE LA MODIFICACIÓN ---
+
+    // ... (resto de los métodos existentes)
     public List<FrecuenciaAdicionalDTO> getFrecuenciaUsoAdicionales() {
         return tarifaAdicionalRepository.findFrecuenciaUsoAdicionales();
     }
@@ -48,8 +59,7 @@ public class ReporteService {
     public List<TransportistaTarifasDTO> getTransportistasMasUtilizados() {
         return transportistaRepository.findTransportistasMasUtilizados();
     }
-    
-    // MÉTODO RESTAURADO
+
     public ComparativaTransportistaDTO generarComparativaPorServicio(Long zonaId, Long tipoVehiculoId, Long tipoCargaId) {
         List<TarifaCosto> tarifasCoincidentes = tarifaCostoRepository.findAll().stream()
                 .filter(TarifaCosto::isEsVigente)
@@ -73,12 +83,10 @@ public class ReporteService {
                 .collect(Collectors.toList());
 
         comparativaDTO.setComparativas(comparativas);
-
         return comparativaDTO;
     }
 
     public List<VariacionTarifaDTO> generarComparativaTarifas(LocalDate fechaInicio, LocalDate fechaFin) {
-        // (código sin cambios)
         List<TarifaCostoHistorial> historiales = historialRepository.findAll().stream()
                 .filter(h -> !h.getFechaModificacion().toLocalDate().isBefore(fechaInicio) && !h.getFechaModificacion().toLocalDate().isAfter(fechaFin))
                 .sorted(Comparator.comparing(TarifaCostoHistorial::getFechaModificacion))
@@ -92,19 +100,19 @@ public class ReporteService {
 
         for (Map.Entry<Long, List<TarifaCostoHistorial>> entry : historialesPorTarifa.entrySet()) {
             List<TarifaCostoHistorial> registros = entry.getValue();
-            if (registros.isEmpty()) continue; 
+            if (registros.isEmpty()) continue;
 
             Optional<TarifaCosto> tarifaActualOpt = tarifaCostoRepository.findById(entry.getKey());
             if (tarifaActualOpt.isEmpty()) continue;
-            
+
             TarifaCosto tarifaActual = tarifaActualOpt.get();
             TarifaCostoHistorial registroInicial = registros.get(0);
             TarifaCostoHistorial registroFinal = registros.get(registros.size() - 1);
-            
+
             VariacionTarifaDTO variacionDTO = new VariacionTarifaDTO(entry.getKey(), tarifaActual.getNombreTarifa());
             variacionDTO.setValorInicial(registroInicial.getValorBase());
             variacionDTO.setFechaInicial(registroInicial.getFechaModificacion());
-            variacionDTO.setValorFinal(tarifaActual.getValorBase()); 
+            variacionDTO.setValorFinal(tarifaActual.getValorBase());
             variacionDTO.setFechaFinal(registroFinal.getFechaModificacion());
 
             double variacionAbsoluta = tarifaActual.getValorBase() - registroInicial.getValorBase();

@@ -25,9 +25,7 @@ public class AdicionalService {
     }
 
     public List<Adicional> obtenerTodos() {
-        // En tu versión anterior, esto llamaba a findAllGlobales(). Lo cambio a
-        // findAll()
-        // para que desde la gestión de adicionales puedas verlos todos.
+
         return adicionalRepository.findAll();
     }
 
