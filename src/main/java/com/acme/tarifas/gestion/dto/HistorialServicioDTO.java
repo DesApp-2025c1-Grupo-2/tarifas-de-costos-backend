@@ -3,23 +3,25 @@ package com.acme.tarifas.gestion.dto;
 import com.acme.tarifas.gestion.entity.*;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class HistorialServicioDTO {
     private Long id;
-    private LocalDate fechaViaje;
+    private LocalDateTime fecha; 
     private String nombreTarifaUtilizada;
     private Double valorTotalTarifa;
     private String nombreCarga;
 
     public HistorialServicioDTO(Viaje viaje) {
         this.id = viaje.getId();
-        this.fechaViaje = viaje.getFechaViaje();
 
         try {
             TarifaCosto tarifa = viaje.getTarifaCostoUtilizada();
             if (tarifa != null) {
                 this.nombreTarifaUtilizada = tarifa.getNombreTarifa();
                 this.valorTotalTarifa = tarifa.getValorTotal();
+                
+                this.fecha = tarifa.getFechaCreacion(); 
 
 
                 if (tarifa.getTipoCargaTarifa() != null) {
@@ -33,13 +35,14 @@ public class HistorialServicioDTO {
             this.nombreTarifaUtilizada = "[Tarifa Eliminada]";
             this.valorTotalTarifa = 0.0;
             this.nombreCarga = "[Info no disponible]";
+            this.fecha = null;
         }
     }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public LocalDate getFechaViaje() { return fechaViaje; }
-    public void setFechaViaje(LocalDate fechaViaje) { this.fechaViaje = fechaViaje; }
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
     public String getNombreTarifaUtilizada() { return nombreTarifaUtilizada; }
     public void setNombreTarifaUtilizada(String nombreTarifaUtilizada) { this.nombreTarifaUtilizada = nombreTarifaUtilizada; }
     public Double getValorTotalTarifa() { return valorTotalTarifa; }
