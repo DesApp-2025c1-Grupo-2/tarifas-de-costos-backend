@@ -20,7 +20,7 @@ public class HistorialServicioDTO {
             if (tarifa != null) {
                 this.nombreTarifaUtilizada = tarifa.getNombreTarifa();
                 this.valorTotalTarifa = tarifa.getValorTotal();
-                
+
                 this.fecha = tarifa.getFechaCreacion(); 
 
 
