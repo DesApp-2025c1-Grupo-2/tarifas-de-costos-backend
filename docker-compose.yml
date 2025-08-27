@@ -1,0 +1,39 @@
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: acme_tarifas
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: .
+    container_name: backend-app
+    depends_on:
+      - db
+    ports:
+      - "7070:7070"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/acme_tarifas?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+
+  frontend:
+    build:
+      context: ../tarifas-de-costos-frontend
+    container_name: frontend-app
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
