@@ -14,13 +14,17 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        List<MediaType> supportedMediaTypes = new ArrayList<>();
-        supportedMediaTypes.add(new MediaType("application", "json", StandardCharsets.UTF_8));
-        supportedMediaTypes.add(new MediaType("application", "*+json", StandardCharsets.UTF_8));
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 
-        converter.setSupportedMediaTypes(supportedMediaTypes);
-        converters.add(0, converter);
+        for (HttpMessageConverter<?> converter : converters) {
+            if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
+
+                List<MediaType> mediaTypes = new ArrayList<>(jacksonConverter.getSupportedMediaTypes());
+
+                mediaTypes.add(new MediaType("application", "json", StandardCharsets.UTF_8));
+                mediaTypes.add(new MediaType("application", "*+json", StandardCharsets.UTF_8));
+                jacksonConverter.setSupportedMediaTypes(mediaTypes);
+            }
+        }
     }
 }
