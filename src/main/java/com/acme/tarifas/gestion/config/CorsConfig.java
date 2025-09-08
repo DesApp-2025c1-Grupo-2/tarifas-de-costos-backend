@@ -1,4 +1,4 @@
-package com.acme.tarifas.gestion.controller;
+package com.acme.tarifas.gestion.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

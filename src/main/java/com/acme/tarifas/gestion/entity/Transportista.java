@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+ //Eliminar, ahora lo va a 'hostear' el grupo VIAJES
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

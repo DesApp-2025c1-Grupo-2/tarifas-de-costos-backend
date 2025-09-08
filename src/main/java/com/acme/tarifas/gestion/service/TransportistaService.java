@@ -16,7 +16,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+//Refaccionar utilizando ViajesClient
+//Eliminar todo lo que sea para creación, modificacion y eliminación. Dejar solo visualizacion/filtrado
 @Service
 public class TransportistaService {
 
@@ -35,6 +36,7 @@ public class TransportistaService {
 
     @Transactional(readOnly = true)
     public Optional<TransportistaProfile> getTransportistaProfile(Long id) {
+        //Revisar
         return transportistaRepository.findById(id).map(transportista -> {
 
             List<TarifaCosto> tarifas = tarifaCostoRepository.findByTransportistaIdAndEsVigenteTrue(id);
@@ -111,13 +113,7 @@ public class TransportistaService {
          }
     }
 
-    @Transactional
-    public Transportista guardarTransportista(Transportista transportista) {
-        if (transportistaRepository.existsByCuitAndActivoTrue(transportista.getCuit())) {
-            throw new IllegalArgumentException("Ya existe un transportista activo con ese CUIT");
-        }
-        return transportistaRepository.save(transportista);
-    }
+
 
     public List<Transportista> obtenerTodos() {
         return transportistaRepository.findAll();
@@ -127,43 +123,8 @@ public class TransportistaService {
         return transportistaRepository.findById(id);
     }
 
-    @Transactional
-    public Optional<Transportista> actualizarTransportista(Long id, Transportista nuevosDatos) {
-        return transportistaRepository.findById(id).map(existente -> {
-            transportistaRepository.findByCuitAndActivoTrue(nuevosDatos.getCuit())
-                    .ifPresent(duplicado -> {
-                        if (!Objects.equals(duplicado.getId(), id)) {
-                            throw new IllegalArgumentException("Ya existe otro transportista activo con ese CUIT");
-                        }
-                    });
 
-            existente.setCuit(nuevosDatos.getCuit());
-            existente.setNombreEmpresa(nuevosDatos.getNombreEmpresa());
-            existente.setContactoNombre(nuevosDatos.getContactoNombre());
-            existente.setContactoEmail(nuevosDatos.getContactoEmail());
-            existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
-            existente.setActivo(nuevosDatos.isActivo());
 
-            return transportistaRepository.save(existente);
-        });
-    }
 
-    @Transactional
-    public void eliminarTransportista(Long id) throws Exception {
-        Transportista transportista = transportistaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Transportista no encontrado"));
-        transportistaRepository.delete(transportista);
-    }
 
-    public Transportista baja(Long id) throws Exception {
-        Transportista transportista = transportistaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Transportista no encontrado"));
-
-        if (transportista.isActivo()) {
-            transportista.setActivo(false);
-            return transportistaRepository.save(transportista);
-        } else {
-            throw new Exception("El transportista ya está inactivo");
-        }
-    }
 }
