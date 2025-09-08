@@ -11,5 +11,5 @@ public class ZonaViajeDTO {
     private String descripcion;
     private String regionMapa;
     private Boolean activo = true;
-    private Set<Long> provinciasIds;
+    private Set<String> provinciasNombres;
 }

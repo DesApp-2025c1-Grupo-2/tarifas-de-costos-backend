@@ -51,7 +51,7 @@ public class ZonaViajeController {
         zona.setDescripcion(zonaDto.getDescripcion());
         zona.setRegionMapa(zonaDto.getRegionMapa());
         zona.setActivo(zonaDto.getActivo());
-        ZonaViaje nuevaZona = zonaService.guardarZona(zona, zonaDto.getProvinciasIds());
+        ZonaViaje nuevaZona = zonaService.guardarZona(zona, zonaDto.getProvinciasNombres());
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaZona);
     }
 
@@ -82,7 +82,7 @@ public class ZonaViajeController {
         zona.setDescripcion(zonaDto.getDescripcion());
         zona.setRegionMapa(zonaDto.getRegionMapa());
         zona.setActivo(zonaDto.getActivo());
-        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasIds())
+        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasNombres()) 
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

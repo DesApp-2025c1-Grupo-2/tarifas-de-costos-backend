@@ -46,11 +46,14 @@ public class ZonaViajeService {
         zonaRepository.deleteById(id);
     }
 
-    public ZonaViaje guardarZona(ZonaViaje zona, Set<Long> provinciaIds) {
+    public ZonaViaje guardarZona(ZonaViaje zona, Set<String> provinciasNombres) {
         if (zonaRepository.existsByNombreAndActivoTrue(zona.getNombre())) {
             throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
         }
-        Set<Provincia> provincias = new HashSet<>(provinciaRepository.findAllById(provinciaIds));
+        Set<Provincia> provincias = provinciasNombres.stream()
+                .map(nombre -> provinciaRepository.findByNombre(nombre)
+                        .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
+                .collect(Collectors.toSet());
         zona.setProvincias(provincias);
         return zonaRepository.save(zona);
     }
@@ -80,7 +83,7 @@ public class ZonaViajeService {
     }
 
     @Transactional
-    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos, Set<Long> provinciaIds) {
+    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos, Set<String> provinciasNombres) {
         return zonaRepository.findById(zonaId).map(existente -> {
             zonaRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
                 if (!Objects.equals(duplicado.getId(), zonaId)) {
@@ -92,7 +95,10 @@ public class ZonaViajeService {
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
             existente.setActivo(nuevosDatos.isActivo());
-            Set<Provincia> provincias = new HashSet<>(provinciaRepository.findAllById(provinciaIds));
+            Set<Provincia> provincias = provinciasNombres.stream()
+                    .map(nombre -> provinciaRepository.findByNombre(nombre)
+                            .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
+                    .collect(Collectors.toSet());
             existente.setProvincias(provincias);
             return zonaRepository.save(existente);
         });

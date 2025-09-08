@@ -19,4 +19,7 @@ public class Provincia {
 
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
+
+    @Column(name = "Activo", nullable = false)
+    private Boolean activo = true;
 }
