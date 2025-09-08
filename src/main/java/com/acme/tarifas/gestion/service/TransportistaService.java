@@ -26,8 +26,8 @@ public class TransportistaService {
 
     @Autowired
     public TransportistaService(TransportistaRepository transportistaRepository,
-                                ViajeRepository viajeRepository,
-                                TarifaCostoRepository tarifaCostoRepository) {
+            ViajeRepository viajeRepository,
+            TarifaCostoRepository tarifaCostoRepository) {
         this.transportistaRepository = transportistaRepository;
         this.viajeRepository = viajeRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
@@ -51,7 +51,8 @@ public class TransportistaService {
                     .collect(Collectors.toSet());
 
             List<Viaje> viajes = viajeRepository.findByTransportistaId(id).stream()
-                    .filter(viaje -> viaje.getTarifaCostoUtilizada() != null && viaje.getTarifaCostoUtilizada().isEsVigente())
+                    .filter(viaje -> viaje.getTarifaCostoUtilizada() != null
+                            && viaje.getTarifaCostoUtilizada().isEsVigente())
                     .collect(Collectors.toList());
             List<HistorialServicioDTO> historial = viajes.stream()
                     .map(HistorialServicioDTO::new)
@@ -74,7 +75,8 @@ public class TransportistaService {
         private List<ZonaViajeDTO> zonasOperacion;
         private List<HistorialServicioDTO> historialServicios;
 
-        public TransportistaProfile(Transportista transportista, Set<TipoVehiculo> tiposVehiculo, Set<ZonaViaje> zonas, List<HistorialServicioDTO> historial) {
+        public TransportistaProfile(Transportista transportista, Set<TipoVehiculo> tiposVehiculo, Set<ZonaViaje> zonas,
+                List<HistorialServicioDTO> historial) {
             this.id = transportista.getId();
             this.nombreEmpresa = transportista.getNombreEmpresa();
             this.cuit = transportista.getCuit();
@@ -102,13 +104,13 @@ public class TransportistaService {
     @Data
     @NoArgsConstructor
     public static class ZonaViajeDTO {
-         private Long id;
-         private String nombre;
+        private Long id;
+        private String nombre;
 
-         public ZonaViajeDTO(ZonaViaje zona) {
-             this.id = zona.getId();
-             this.nombre = zona.getNombre();
-         }
+        public ZonaViajeDTO(ZonaViaje zona) {
+            this.id = zona.getId();
+            this.nombre = zona.getNombre();
+        }
     }
 
     @Transactional

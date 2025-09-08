@@ -1,6 +1,7 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
+import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +25,9 @@ public class ZonaViajeController {
     private ZonaViajeService zonaService;
 
     @GetMapping
-    public List<ZonaViaje> obtenerTodasLasZonas() {return zonaService.getZonas();}
-
+    public List<ZonaViaje> obtenerTodasLasZonas() {
+        return zonaService.getZonas();
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ZonaViaje> obtenerZonaPorId(@PathVariable Long id) {
@@ -33,9 +36,22 @@ public class ZonaViajeController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping(params = "nombre")
+    public ResponseEntity<ZonaViaje> obtenerZonaPorNombre(
+            @Parameter(description = "Nombre de la zona") @RequestParam String nombre) {
+        return zonaService.getZonaByNombre(nombre)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
-    public ResponseEntity<ZonaViaje> crearZona(@RequestBody ZonaViaje zona) {
-        ZonaViaje nuevaZona = zonaService.guardarZona(zona);
+    public ResponseEntity<ZonaViaje> crearZona(@RequestBody ZonaViajeDTO zonaDto) {
+        ZonaViaje zona = new ZonaViaje();
+        zona.setNombre(zonaDto.getNombre());
+        zona.setDescripcion(zonaDto.getDescripcion());
+        zona.setRegionMapa(zonaDto.getRegionMapa());
+        zona.setActivo(zonaDto.getActivo());
+        ZonaViaje nuevaZona = zonaService.guardarZona(zona, zonaDto.getProvinciasIds());
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaZona);
     }
 
@@ -60,8 +76,13 @@ public class ZonaViajeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ZonaViaje> actualizarZona(@PathVariable Long id, @RequestBody ZonaViaje zona) {
-        return zonaService.actualizarZona(id, zona)
+    public ResponseEntity<ZonaViaje> actualizarZona(@PathVariable Long id, @RequestBody ZonaViajeDTO zonaDto) {
+        ZonaViaje zona = new ZonaViaje();
+        zona.setNombre(zonaDto.getNombre());
+        zona.setDescripcion(zonaDto.getDescripcion());
+        zona.setRegionMapa(zonaDto.getRegionMapa());
+        zona.setActivo(zonaDto.getActivo());
+        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasIds())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

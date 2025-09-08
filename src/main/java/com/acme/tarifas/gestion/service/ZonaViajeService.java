@@ -1,18 +1,15 @@
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.dao.ProvinciaRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
+import com.acme.tarifas.gestion.entity.Provincia;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.DoubleSummaryStatistics;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,12 +24,19 @@ public class ZonaViajeService {
     @Autowired
     private TarifaCostoRepository tarifaRepository;
 
+    @Autowired
+    private ProvinciaRepository provinciaRepository;
+
     public List<ZonaViaje> getZonas() {
         return zonaRepository.findAll();
     }
 
     public Optional<ZonaViaje> getZonaById(Long id) {
         return zonaRepository.findById(id);
+    }
+
+    public Optional<ZonaViaje> getZonaByNombre(String nombre) {
+        return zonaRepository.findByNombreAndActivoTrue(nombre);
     }
 
     @Transactional
@@ -42,10 +46,12 @@ public class ZonaViajeService {
         zonaRepository.deleteById(id);
     }
 
-    public ZonaViaje guardarZona(ZonaViaje zona) {
+    public ZonaViaje guardarZona(ZonaViaje zona, Set<Long> provinciaIds) {
         if (zonaRepository.existsByNombreAndActivoTrue(zona.getNombre())) {
             throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
         }
+        Set<Provincia> provincias = new HashSet<>(provinciaRepository.findAllById(provinciaIds));
+        zona.setProvincias(provincias);
         return zonaRepository.save(zona);
     }
 
@@ -74,7 +80,7 @@ public class ZonaViajeService {
     }
 
     @Transactional
-    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos) {
+    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos, Set<Long> provinciaIds) {
         return zonaRepository.findById(zonaId).map(existente -> {
             zonaRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
                 if (!Objects.equals(duplicado.getId(), zonaId)) {
@@ -86,6 +92,8 @@ public class ZonaViajeService {
             existente.setDescripcion(nuevosDatos.getDescripcion());
             existente.setRegionMapa(nuevosDatos.getRegionMapa());
             existente.setActivo(nuevosDatos.isActivo());
+            Set<Provincia> provincias = new HashSet<>(provinciaRepository.findAllById(provinciaIds));
+            existente.setProvincias(provincias);
             return zonaRepository.save(existente);
         });
     }
