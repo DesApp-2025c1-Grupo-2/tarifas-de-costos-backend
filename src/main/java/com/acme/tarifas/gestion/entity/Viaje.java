@@ -8,6 +8,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/*
+"Viajes" debe venir de API de viajes,
+pero hay referencias a esta entidad en HistorialServicioDTO, asi que si se elimina ahora
+seguramente se rompan los reportes
+
+Eliminar esta entidad cuando se corrija HistorialServicioDTO
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,9 +32,13 @@ public class Viaje {
 
     private LocalDate fechaViaje;
 
+    /*
+    Se eliminó cliente. revisar
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_Cliente", nullable = false)
     private Cliente cliente;
+    */
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_TarifaCostoUtilizada", nullable = false)

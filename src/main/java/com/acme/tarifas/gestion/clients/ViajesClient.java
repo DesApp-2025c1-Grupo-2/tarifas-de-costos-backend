@@ -32,24 +32,13 @@ public class ViajesClient {
     }
 
     /*
-    Cuando necesite el campo 'telefono' hay que hacer lo siguiente:
+    Para concatenar el campo 'telefono':
     String numeroCompleto = "+" + contacto.getTelefono().getCodigoPais()
                        + "-" + contacto.getTelefono().getCodigoArea()
                        + "-" + contacto.getTelefono().getNumero();
 
-     porque VIAJES tiene 'telefono' como un objeto, osea que solo nos llega la referencia mediante un id de mongo
-
+     VIAJES tiene 'telefono' como una entidad aparte, osea que solo nos llega la referencia mediante un id de mongo
      */
 
-    /*
-    // Obtener un viaje por ID
-    public ViajeDto getViajePorId(Long id) {
-        return webClient.get()
-                .uri("/viajes/{id}", id)
-                .retrieve()
-                .bodyToMono(ViajeDto.class)
-                .block();
-    }
-    */
 
 }

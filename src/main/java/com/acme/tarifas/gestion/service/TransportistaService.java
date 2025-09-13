@@ -36,7 +36,8 @@ public class TransportistaService {
 
     @Transactional(readOnly = true)
     public Optional<TransportistaProfile> getTransportistaProfile(Long id) {
-        //Revisar
+        //Revisar porque se modificaron todos los transportistas. ahora se usan los de la api de viajes
+        //.clients/ViajesClient
         return transportistaRepository.findById(id).map(transportista -> {
 
             List<TarifaCosto> tarifas = tarifaCostoRepository.findByTransportistaIdAndEsVigenteTrue(id);

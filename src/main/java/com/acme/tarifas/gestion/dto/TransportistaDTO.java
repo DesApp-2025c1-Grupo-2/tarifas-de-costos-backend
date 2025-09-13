@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class TransportistaDTO {
+    //Viene de API Viajes
 
     @JsonProperty("_id")
     private String id;
