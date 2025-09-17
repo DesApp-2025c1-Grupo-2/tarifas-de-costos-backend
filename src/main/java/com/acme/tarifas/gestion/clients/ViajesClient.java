@@ -1,11 +1,9 @@
 package com.acme.tarifas.gestion.clients;
 
 
-import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
@@ -13,7 +11,7 @@ import java.util.List;
 
 @Service
 public class ViajesClient {
-    //Sirve para consumir todo lo de la API de viajes.
+    //Actua como service, pero sirve para consumir todo lo de la API de viajes.
     private final WebClient webClient;
 
     public ViajesClient(@Value("${VIAJES_URL}") String urlViajes, WebClient.Builder builder) {
@@ -25,11 +23,11 @@ public class ViajesClient {
     }
 
 
-    public List<TransportistaDTO> getTransportistas() {
+    public List<JsonNode> getTransportistas() {
         return webClient.get()
                 .uri("/empresa")
                 .retrieve()
-                .bodyToFlux(TransportistaDTO.class)
+                .bodyToFlux(JsonNode.class)
                 .collectList()
                 .block();
     }
@@ -51,5 +49,15 @@ public class ViajesClient {
                 .collectList()
                 .block();
          }
+
+    public List<JsonNode> getTiposVehiculo(){ //TIPOS de vehiculo
+        return webClient.get()
+                .uri("/tipo-vehiculo")
+                .retrieve()
+                .bodyToFlux(JsonNode.class)
+                .collectList()
+                .block();
+    }
+
 
 }

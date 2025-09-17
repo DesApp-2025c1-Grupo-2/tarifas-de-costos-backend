@@ -1,8 +1,10 @@
 package com.acme.tarifas.gestion.controller;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
 import com.acme.tarifas.gestion.entity.TipoVehiculo;
 import com.acme.tarifas.gestion.service.TipoVehiculoService;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,12 @@ public class TipoVehiculoController {
     @Autowired
     private TipoVehiculoService tipoVehiculoService;
 
+    private ViajesClient viajesClient;
+
+    public TipoVehiculoController(ViajesClient viajesClient){
+        this.viajesClient = viajesClient;
+    }
+
     @PostMapping
     public ResponseEntity<TipoVehiculo> crearTipoVehiculo(@RequestBody TipoVehiculo tipo) {
         TipoVehiculo nuevo = tipoVehiculoService.guardarTipo(tipo);
@@ -25,8 +33,8 @@ public class TipoVehiculoController {
     }
 
     @GetMapping
-    public List<TipoVehiculo> obtenerTodosTipos() {
-        return tipoVehiculoService.obtenerTodos();
+    public List<JsonNode> obtenerTodosTipos() {
+        return viajesClient.getTiposVehiculo();
     }
 
     @GetMapping("/{id}")

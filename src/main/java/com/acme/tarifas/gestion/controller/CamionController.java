@@ -23,5 +23,7 @@ public class CamionController {
         return viajesClient.getCamiones();
     }
 
+    //Falta getbyid
+
 
 }
