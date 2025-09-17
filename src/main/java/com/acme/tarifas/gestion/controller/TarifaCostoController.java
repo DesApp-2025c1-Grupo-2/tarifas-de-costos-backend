@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -20,9 +21,13 @@ public class TarifaCostoController {
     private TarifaCostoService tarifaService;
 
     @PostMapping
-    public ResponseEntity<TarifaCosto> crearTarifa(@RequestBody TarifaCosto tarifa) {
-        TarifaCosto nueva = tarifaService.crearTarifa(tarifa);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
+    public ResponseEntity<?> crearTarifa(@RequestBody TarifaCosto tarifa) {
+        try {
+            TarifaCosto nueva = tarifaService.crearTarifa(tarifa);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("mensaje", ex.getMessage()));
+        }
     }
 
     @PutMapping("/{id}")

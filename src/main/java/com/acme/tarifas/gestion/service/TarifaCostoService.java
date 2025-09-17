@@ -52,8 +52,12 @@ public class TarifaCostoService {
 
     @Transactional
     public TarifaCosto crearTarifa(TarifaCosto tarifa) {
-        if (tarifa.getValorBase() <= 0) {
-            throw new IllegalArgumentException("El valor base debe ser positivo");
+        Double valorBase = tarifa.getValorBase();
+        if (valorBase == null) {
+            throw new IllegalArgumentException("El valor base es obligatorio.");
+        }
+        if (valorBase <= 0) {
+            throw new IllegalArgumentException("El valor base debe ser mayor que cero.");
         }
         tarifa.setFechaCreacion(LocalDateTime.now());
         tarifa.setFechaUltimaModificacion(LocalDateTime.now());
@@ -65,7 +69,6 @@ public class TarifaCostoService {
     @Transactional
     public Optional<TarifaCosto> actualizarTarifa(Long id, TarifaCosto datosNuevos) {
         return tarifaRepository.findById(id).map(tarifaExistente -> {
-
 
             crearRegistroHistorial(tarifaExistente, "Actualización general de la tarifa.");
 
@@ -179,6 +182,7 @@ public class TarifaCostoService {
         historial.setComentarioCambio(comentario);
         historialRepository.save(historial);
     }
+
     public double calcularTotalTarifa(Long tarifaId) {
         return tarifaRepository.findById(tarifaId)
                 .map(this::calcularCostoTotal)
