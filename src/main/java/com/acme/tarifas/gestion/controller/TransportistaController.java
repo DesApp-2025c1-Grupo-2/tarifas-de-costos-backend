@@ -23,6 +23,19 @@ public class TransportistaController {
         this.viajesClient = viajesClient;
     }
 
+    @GetMapping
+    public List<JsonNode>getTransportistas(){
+        return viajesClient.getTransportistas();
+    }
+
+
+    @GetMapping("/{id}")
+    public JsonNode getTransportistaPorId(@PathVariable String id) {
+        return viajesClient.getTransportistaById(id);
+    }
+
+
+    // Revisar de aca para abajo
     @GetMapping("/{id}/profile") //Corregir
     public ResponseEntity<TransportistaService.TransportistaProfile> getTransportistaProfile(@PathVariable Long id) {
         return transportistaService.getTransportistaProfile(id)
@@ -30,26 +43,6 @@ public class TransportistaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping
-    public List<JsonNode>getTransportistas(){
-        return viajesClient.getTransportistas();
-    }
-
-    /*
-    con DTO
-    @GetMapping
-    public List<TransportistaDTO> obtenerTodosTransportistas() {
-        return viajesClient.getTransportistas();
-    } //Devuelve los transportistas de la api de viajes
-    */
-
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Transportista> obtenerTransportistaPorId(@PathVariable Long id) {
-        return transportistaService.obtenerPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 
 
 } 

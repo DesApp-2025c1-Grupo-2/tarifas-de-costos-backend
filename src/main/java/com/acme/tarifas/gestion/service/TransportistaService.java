@@ -1,10 +1,12 @@
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TransportistaRepository;
 import com.acme.tarifas.gestion.dao.ViajeRepository;
 import com.acme.tarifas.gestion.dto.HistorialServicioDTO;
 import com.acme.tarifas.gestion.entity.*;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ public class TransportistaService {
     private final TransportistaRepository transportistaRepository;
     private final ViajeRepository viajeRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
+
 
     @Autowired
     public TransportistaService(TransportistaRepository transportistaRepository,
@@ -91,7 +94,7 @@ public class TransportistaService {
     }
 
     @Data
-    @NoArgsConstructor
+    @NoArgsConstructor //Tipo vehiculo ahora viene de api viajes, revisar
     public static class TipoVehiculoDTO {
         private Long id;
         private String nombre;
@@ -113,19 +116,5 @@ public class TransportistaService {
              this.nombre = zona.getNombre();
          }
     }
-
-
-
-    public List<Transportista> obtenerTodos() {
-        return transportistaRepository.findAll();
-    }
-
-    public Optional<Transportista> obtenerPorId(Long id) {
-        return transportistaRepository.findById(id);
-    }
-
-
-
-
 
 }

@@ -3,6 +3,7 @@ package com.acme.tarifas.gestion.controller;
 import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +24,11 @@ public class CamionController {
         return viajesClient.getCamiones();
     }
 
-    //Falta getbyid
+
+    @GetMapping("/{id}")
+    public JsonNode getCamionById(@PathVariable String id){
+        return viajesClient.getCamionById(id);
+    }
 
 
 }
