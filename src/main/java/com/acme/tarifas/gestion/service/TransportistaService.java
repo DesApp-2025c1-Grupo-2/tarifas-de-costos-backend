@@ -5,13 +5,14 @@ import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.ViajeRepository;
 import com.acme.tarifas.gestion.dto.TelefonoDTO;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
+import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.*;
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class TransportistaService {
 
         List<TarifaCosto> tarifas = findByTransportistaIdAndEsVigenteTrue(id);
 
-        Set<TipoVehiculo> tiposVehiculo = tarifas.stream()
+        Set<TipoVehiculoDTO> tiposVehiculo = tarifas.stream()
                 .map(TarifaCosto::getTipoVehiculo)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -87,43 +88,36 @@ public class TransportistaService {
         private String contactoNombre;
         private String contactoEmail;
         private TelefonoDTO contactoTelefono;
-        private List<TipoVehiculoDTO> vehiculos;
+        private List<TipoVehiculoDTO> tiposVehiculo;
         private List<ZonaViajeDTO> zonasOperacion;
 
-        public TransportistaProfile(TransportistaDTO transportista, Set<TipoVehiculo> tiposVehiculo, Set<ZonaViaje> zonas) {
+        public TransportistaProfile(TransportistaDTO transportista, Set<TipoVehiculoDTO> tiposVehiculo, Set<ZonaViaje> zonas) {
             this.id = transportista.getId();
             this.nombreComercial = transportista.getNombreComercial();
             this.cuit = transportista.getCuit();
             this.contactoNombre = transportista.getContacto().getNombre();
             this.contactoEmail = transportista.getContacto().getEmail();
             this.contactoTelefono = transportista.getContacto().getTelefono();
-            this.vehiculos = tiposVehiculo.stream().map(TipoVehiculoDTO::new).collect(Collectors.toList()); //cambiar
-            this.zonasOperacion = zonas.stream().map(ZonaViajeDTO::new).collect(Collectors.toList()); //cambiar
+            this.tiposVehiculo = tiposVehiculo.stream()
+                    .filter(Objects::nonNull)
+                    .map(tv -> {
+                        TipoVehiculoDTO dto = new TipoVehiculoDTO();
+                        dto.setId(tv.getId());
+                        dto.setNombre(tv.getNombre());
+                        dto.setDescripcion(tv.getDescripcion());
+                        dto.setDeletedAt(tv.getDeletedAt());
+                        dto.setLicenciaPermitida(tv.getLicenciaPermitida());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+
+            this.zonasOperacion = zonas.stream()
+                    .filter(Objects::nonNull)
+                    .map(ZonaViajeDTO::new)
+                    .collect(Collectors.toList());
         }
     }
 
-    @Data
-    @NoArgsConstructor //Tipo vehiculo ahora viene de api viajes, revisar
-    public static class TipoVehiculoDTO {
-        private Long id;
-        private String nombre;
-
-        public TipoVehiculoDTO(TipoVehiculo tipoVehiculo) {
-            this.id = tipoVehiculo.getId();
-            this.nombre = tipoVehiculo.getNombre();
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class ZonaViajeDTO {
-         private Long id;
-         private String nombre;
-
-         public ZonaViajeDTO(ZonaViaje zona) {
-             this.id = zona.getId();
-             this.nombre = zona.getNombre();
-         }
-    }
 
 }

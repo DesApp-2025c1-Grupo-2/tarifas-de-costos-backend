@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.entity;
 
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -31,9 +32,8 @@ public class TarifaCosto {
     @NotBlank(message = "El nombre es obligatorio.")
     private String nombreTarifa;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_TipoVehiculo")
-    private TipoVehiculo tipoVehiculo;
+    @Transient
+    private TipoVehiculoDTO tipoVehiculo;
 
     @ManyToOne
     @JoinColumn(name = "ID_TipoCargaTarifa")

@@ -1,7 +1,10 @@
 package com.acme.tarifas.gestion.clients;
 
 
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
+import com.acme.tarifas.gestion.dto.VehiculoDTO;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,38 +46,39 @@ public class ViajesClient {
     }
 
 
-    public List<JsonNode> getCamiones(){ //Vehiculos
+    public List<VehiculoDTO> getVehiculos(){ //Vehiculos
         return webClient.get()
                 .uri("/vehiculo")
                 .retrieve()
-                .bodyToFlux(JsonNode.class)
+                .bodyToFlux(VehiculoDTO.class)
                 .collectList()
                 .block();
          }
 
-    public JsonNode getCamionById(String id){
+
+    public VehiculoDTO getVehiculoById(String id){
         return webClient.get()
                 .uri("/vehiculo/{id}", id)
                 .retrieve()
-                .bodyToMono(JsonNode.class)
+                .bodyToMono(VehiculoDTO.class)
                 .block();
     }
 
 
-    public List<JsonNode> getTiposVehiculo(){ //TIPOS de vehiculo
+    public List<TipoVehiculoDTO> getTiposVehiculo(){ //TIPOS de vehiculo
         return webClient.get()
                 .uri("/tipo-vehiculo")
                 .retrieve()
-                .bodyToFlux(JsonNode.class)
+                .bodyToFlux(TipoVehiculoDTO.class)
                 .collectList()
                 .block();
     }
 
-    public JsonNode getTiposVehiculoById(String id){
+    public TipoVehiculoDTO getTiposVehiculoById(String id){
         return webClient.get()
                 .uri("/tipo-vehiculo/{id}", id)
                 .retrieve()
-                .bodyToMono(JsonNode.class)
+                .bodyToMono(TipoVehiculoDTO.class)
                 .block();
     }
 

@@ -5,6 +5,8 @@ import com.acme.tarifas.gestion.service.TransportistaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class TransportistaController {
     }
 
     @GetMapping
-    public List<TransportistaDTO>getTransportistas(){
+    public List<TransportistaDTO> getTransportistas(){
         return viajesClient.getTransportistas();
     }
 
@@ -32,7 +34,6 @@ public class TransportistaController {
     public TransportistaDTO getTransportistaPorId(@PathVariable String id) {
         return viajesClient.getTransportistaById(id);
     }
-
 
 
     @GetMapping("/{id}/profile")
