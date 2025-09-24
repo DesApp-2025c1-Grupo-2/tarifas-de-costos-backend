@@ -1,6 +1,7 @@
 package com.acme.tarifas.gestion.clients;
 
 
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,21 +24,21 @@ public class ViajesClient {
     }
 
 
-    public List<JsonNode> getTransportistas() {
+    public List<TransportistaDTO> getTransportistas() {
         return webClient.get()
                 .uri("/empresa")
                 .retrieve()
-                .bodyToFlux(JsonNode.class)
+                .bodyToFlux(TransportistaDTO.class)
                 .collectList()
                 .block();
     }
 
 
-    public JsonNode getTransportistaById(String id){
+    public TransportistaDTO getTransportistaById(String id) {
         return webClient.get()
                 .uri("/empresa/{id}", id)
                 .retrieve()
-                .bodyToMono(JsonNode.class)
+                .bodyToMono(TransportistaDTO.class)
                 .block();
     }
 

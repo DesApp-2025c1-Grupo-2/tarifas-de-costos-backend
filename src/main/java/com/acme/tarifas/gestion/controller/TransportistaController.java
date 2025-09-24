@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 import com.acme.tarifas.gestion.clients.ViajesClient;
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.service.TransportistaService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,13 +25,13 @@ public class TransportistaController {
     }
 
     @GetMapping
-    public List<JsonNode>getTransportistas(){
+    public List<TransportistaDTO>getTransportistas(){
         return viajesClient.getTransportistas();
     }
 
 
     @GetMapping("/{id}")
-    public JsonNode getTransportistaPorId(@PathVariable String id) {
+    public TransportistaDTO getTransportistaPorId(@PathVariable String id) {
         return viajesClient.getTransportistaById(id);
     }
 
