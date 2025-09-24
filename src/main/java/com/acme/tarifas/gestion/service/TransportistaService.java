@@ -2,11 +2,10 @@ package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
-import com.acme.tarifas.gestion.dao.TransportistaRepository;
 import com.acme.tarifas.gestion.dao.ViajeRepository;
-import com.acme.tarifas.gestion.dto.HistorialServicioDTO;
+import com.acme.tarifas.gestion.dto.TelefonoDTO;
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.acme.tarifas.gestion.entity.*;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,73 +22,83 @@ import java.util.stream.Collectors;
 @Service
 public class TransportistaService {
 
-    private final TransportistaRepository transportistaRepository;
     private final ViajeRepository viajeRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
-
+    
+    private final ViajesClient viajesClient;
 
     @Autowired
-    public TransportistaService(TransportistaRepository transportistaRepository,
-                                ViajeRepository viajeRepository,
-                                TarifaCostoRepository tarifaCostoRepository) {
-        this.transportistaRepository = transportistaRepository;
+    public TransportistaService(ViajeRepository viajeRepository,
+                                TarifaCostoRepository tarifaCostoRepository,
+                                ViajesClient viajesClient) {
+
         this.viajeRepository = viajeRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
+        this.viajesClient = viajesClient;
+    }
+
+    public List<TarifaCosto> findByTransportistaIdAndEsVigenteTrue(String transportistaId) {
+
+        TransportistaDTO transportista = viajesClient.getTransportistaById(transportistaId);
+
+
+        List<TarifaCosto> vigentes = tarifaCostoRepository.findByEsVigenteTrue();
+
+
+        return vigentes.stream()
+                .filter(t -> t.getTransportista() != null &&
+                        t.getTransportista().getId().equals(transportista.getId()))
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public Optional<TransportistaProfile> getTransportistaProfile(Long id) {
-        //Revisar porque se modificaron todos los transportistas. ahora se usan los de la api de viajes
-        //.clients/ViajesClient
-        return transportistaRepository.findById(id).map(transportista -> {
+    public Optional<TransportistaProfile> getTransportistaProfile(String id) {
+        TransportistaDTO transportista = viajesClient.getTransportistaById(id);
+        if (transportista == null) {
+            return Optional.empty();
+        }
 
-            List<TarifaCosto> tarifas = tarifaCostoRepository.findByTransportistaIdAndEsVigenteTrue(id);
 
-            Set<TipoVehiculo> tiposVehiculo = tarifas.stream()
-                    .map(TarifaCosto::getTipoVehiculo)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
+        List<TarifaCosto> tarifas = findByTransportistaIdAndEsVigenteTrue(id);
 
-            Set<ZonaViaje> zonasOperacion = tarifas.stream()
-                    .map(TarifaCosto::getZonaViaje)
-                    .filter(Objects::nonNull)
-                    .filter(ZonaViaje::isActivo)
-                    .collect(Collectors.toSet());
+        Set<TipoVehiculo> tiposVehiculo = tarifas.stream()
+                .map(TarifaCosto::getTipoVehiculo)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-            List<Viaje> viajes = viajeRepository.findByTransportistaId(id).stream()
-                    .filter(viaje -> viaje.getTarifaCostoUtilizada() != null && viaje.getTarifaCostoUtilizada().isEsVigente())
-                    .collect(Collectors.toList());
-            List<HistorialServicioDTO> historial = viajes.stream()
-                    .map(HistorialServicioDTO::new)
-                    .collect(Collectors.toList());
+        Set<ZonaViaje> zonasOperacion = tarifas.stream()
+                .map(TarifaCosto::getZonaViaje)
+                .filter(Objects::nonNull)
+                .filter(ZonaViaje::isActivo)
+                .collect(Collectors.toSet());
 
-            return new TransportistaProfile(transportista, tiposVehiculo, zonasOperacion, historial);
-        });
+        TransportistaProfile profile = new TransportistaProfile(transportista, tiposVehiculo, zonasOperacion);
+
+        return Optional.of(profile);
     }
+
 
     @Data
     @NoArgsConstructor
     public static class TransportistaProfile {
-        private Long id;
-        private String nombreEmpresa;
+        private String id;
+        private String nombreComercial;
         private String cuit;
         private String contactoNombre;
         private String contactoEmail;
-        private String contactoTelefono;
+        private TelefonoDTO contactoTelefono;
         private List<TipoVehiculoDTO> vehiculos;
         private List<ZonaViajeDTO> zonasOperacion;
-        private List<HistorialServicioDTO> historialServicios;
 
-        public TransportistaProfile(Transportista transportista, Set<TipoVehiculo> tiposVehiculo, Set<ZonaViaje> zonas, List<HistorialServicioDTO> historial) {
+        public TransportistaProfile(TransportistaDTO transportista, Set<TipoVehiculo> tiposVehiculo, Set<ZonaViaje> zonas) {
             this.id = transportista.getId();
-            this.nombreEmpresa = transportista.getNombreEmpresa();
+            this.nombreComercial = transportista.getNombreComercial();
             this.cuit = transportista.getCuit();
-            this.contactoNombre = transportista.getContactoNombre();
-            this.contactoEmail = transportista.getContactoEmail();
-            this.contactoTelefono = transportista.getContactoTelefono();
-            this.vehiculos = tiposVehiculo.stream().map(TipoVehiculoDTO::new).collect(Collectors.toList());
-            this.zonasOperacion = zonas.stream().map(ZonaViajeDTO::new).collect(Collectors.toList());
-            this.historialServicios = historial;
+            this.contactoNombre = transportista.getContacto().getNombre();
+            this.contactoEmail = transportista.getContacto().getEmail();
+            this.contactoTelefono = transportista.getContacto().getTelefono();
+            this.vehiculos = tiposVehiculo.stream().map(TipoVehiculoDTO::new).collect(Collectors.toList()); //cambiar
+            this.zonasOperacion = zonas.stream().map(ZonaViajeDTO::new).collect(Collectors.toList()); //cambiar
         }
     }
 

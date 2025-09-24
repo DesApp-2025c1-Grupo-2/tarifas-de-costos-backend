@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface TarifaCostoRepository extends JpaRepository<TarifaCosto, Long> {
 
-    List<TarifaCosto> findByTransportistaIdAndEsVigenteTrue(Long transportistaId);
+
+    List<TarifaCosto> findByEsVigenteTrue();
 }

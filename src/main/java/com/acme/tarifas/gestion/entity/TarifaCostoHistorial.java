@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.entity;
 
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,9 +37,9 @@ public class TarifaCostoHistorial {
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_Transportista")
-    private Transportista transportista;
+
+    @Transient
+    private TransportistaDTO transportista;
 
     private Double valorBase;
     private LocalDateTime fechaModificacion;

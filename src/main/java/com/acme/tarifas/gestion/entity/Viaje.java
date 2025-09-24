@@ -26,10 +26,11 @@ public class Viaje {
     @Column(name = "ID_Viaje")
     private Long id;
 
-    @ManyToOne
+
+    /*@ManyToOne
     @JoinColumn(name = "ID_VehiculoEspecificoUtilizado")
     private Vehiculo vehiculoUtilizado;
-
+    */
     private LocalDate fechaViaje;
 
     /*

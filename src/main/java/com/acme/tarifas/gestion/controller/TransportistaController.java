@@ -1,9 +1,7 @@
 package com.acme.tarifas.gestion.controller;
 import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
-import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.service.TransportistaService;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +34,9 @@ public class TransportistaController {
     }
 
 
-    // Revisar de aca para abajo
-    @GetMapping("/{id}/profile") //Corregir
-    public ResponseEntity<TransportistaService.TransportistaProfile> getTransportistaProfile(@PathVariable Long id) {
+
+    @GetMapping("/{id}/profile")
+    public ResponseEntity<TransportistaService.TransportistaProfile> getTransportistaProfile(@PathVariable String id) {
         return transportistaService.getTransportistaProfile(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

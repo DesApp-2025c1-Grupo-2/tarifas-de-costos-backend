@@ -21,6 +21,5 @@ public interface ViajeRepository extends JpaRepository<Viaje, Long> {
     List<Viaje> findByClienteId(@Param("clienteId") Long clienteId);
     */
 
-    @Query("SELECT v FROM Viaje v WHERE v.tarifaCostoUtilizada.transportista.id = :transportistaId")
-    List<Viaje> findByTransportistaId(@Param("transportistaId") Long transportistaId);
+
 }

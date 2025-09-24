@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.entity;
 
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -42,9 +43,11 @@ public class TarifaCosto {
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_Transportista")
-    private Transportista transportista;
+
+
+    @Transient
+    private TransportistaDTO transportista;
+
 
     private Double valorBase;
     private LocalDateTime fechaCreacion;

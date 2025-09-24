@@ -1,8 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 
-import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
 import com.acme.tarifas.gestion.service.ZonaViajeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/zonas")

@@ -162,38 +162,39 @@ public class ReporteService {
 
     private final TarifaCostoHistorialRepository historialRepository;
     private final TarifaAdicionalRepository tarifaAdicionalRepository;
-    private final TransportistaRepository transportistaRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
     private final ViajeRepository viajeRepository;
 
     @Autowired
     public ReporteService(TarifaCostoHistorialRepository historialRepository,
                           TarifaAdicionalRepository tarifaAdicionalRepository,
-                          TransportistaRepository transportistaRepository,
                           TarifaCostoRepository tarifaCostoRepository,
                           ViajeRepository viajeRepository) {
         this.historialRepository = historialRepository;
         this.tarifaAdicionalRepository = tarifaAdicionalRepository;
-        this.transportistaRepository = transportistaRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
         this.viajeRepository = viajeRepository;
     }
 
-    @Transactional(readOnly = true)
-    public List<HistorialServicioDTO> generarHistorialServiciosTransportista(Long transportistaId) {
-        List<Viaje> viajes = viajeRepository.findByTransportistaId(transportistaId);
-        return viajes.stream()
-                .map(HistorialServicioDTO::new)
-                .collect(Collectors.toList());
-    }
 
     public List<FrecuenciaAdicionalDTO> getFrecuenciaUsoAdicionales() {
         return tarifaAdicionalRepository.findFrecuenciaUsoAdicionales();
     }
 
+    /*
+    ARREGLAR: Ya no se puede crear transportistarepository, asi que hay que refactorizar la query:
+
+    @Query("SELECT new com.acme.tarifas.gestion.dto.TransportistaTarifasDTO(t.transportista.nombreEmpresa, COUNT(t)) " +
+            "FROM TarifaCosto t " +
+            "WHERE t.transportista IS NOT NULL " +
+            "GROUP BY t.transportista.nombreEmpresa " +
+            "ORDER BY COUNT(t) DESC")
+    List<TransportistaTarifasDTO> findTransportistasMasUtilizados();
     public List<TransportistaTarifasDTO> getTransportistasMasUtilizados() {
         return transportistaRepository.findTransportistasMasUtilizados();
     }
+     */
+
 
     public ComparativaTransportistaDTO generarComparativaPorServicio(Long zonaId, Long tipoVehiculoId, Long tipoCargaId) {
         List<TarifaCosto> tarifasCoincidentes = tarifaCostoRepository.findAll().stream()
@@ -210,7 +211,7 @@ public class ReporteService {
                 .filter(t -> t.getTransportista() != null)
                 .map(t -> {
                     ComparativaTransportistaDTO.Comparativa c = new ComparativaTransportistaDTO.Comparativa();
-                    c.setTransportista(t.getTransportista().getNombreEmpresa());
+                    c.setTransportista(t.getTransportista().getNombreComercial());
                     c.setCosto(t.getValorTotal());
                     return c;
                 })

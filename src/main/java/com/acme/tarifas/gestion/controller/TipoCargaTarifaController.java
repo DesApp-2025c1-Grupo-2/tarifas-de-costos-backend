@@ -1,8 +1,6 @@
 package com.acme.tarifas.gestion.controller;
 
-import com.acme.tarifas.gestion.entity.Adicional;
 import com.acme.tarifas.gestion.entity.TipoCargaTarifa;
-import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.service.TipoCargaTarifaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tipo-carga-tarifa")

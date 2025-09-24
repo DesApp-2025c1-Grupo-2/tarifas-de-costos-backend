@@ -1,18 +1,12 @@
 package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
-import com.acme.tarifas.gestion.dao.VehiculoRepository;
 import com.acme.tarifas.gestion.dao.ViajeRepository;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.Viaje;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -29,6 +23,7 @@ public class ViajeService {
     @Autowired
     private ClienteRepository clienteRepository;
     */
+    /*
     @Autowired
     private VehiculoRepository vehiculoRepository;
 
