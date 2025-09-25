@@ -35,6 +35,8 @@ public class TarifaCosto {
     @Transient
     private TipoVehiculoDTO tipoVehiculo;
 
+    private String tipoVehiculoId;
+
     @ManyToOne
     @JoinColumn(name = "ID_TipoCargaTarifa")
     private TipoCargaTarifa tipoCargaTarifa;
@@ -48,6 +50,7 @@ public class TarifaCosto {
     @Transient
     private TransportistaDTO transportista;
 
+    private String transportistaId;
 
     private Double valorBase;
     private LocalDateTime fechaCreacion;

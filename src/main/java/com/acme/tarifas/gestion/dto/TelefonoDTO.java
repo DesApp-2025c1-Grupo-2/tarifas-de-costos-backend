@@ -13,6 +13,10 @@ public class TelefonoDTO {
 
     public String numero;
 
-    @JsonProperty("_id")
-    public String id;
+    private String _id;
+
+    @JsonProperty("id")
+    public String getId() {
+        return _id;
+    }
 }

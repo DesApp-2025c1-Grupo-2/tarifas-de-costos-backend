@@ -28,15 +28,13 @@ public class ReporteController {
         return ResponseEntity.ok(datos);
     }
 
-    /*
-    ARREGLAR
+
     @GetMapping("/transportistas-mas-utilizados")
     public ResponseEntity<List<TransportistaTarifasDTO>> getTransportistasMasUtilizados() {
         List<TransportistaTarifasDTO> datos = reporteService.getTransportistasMasUtilizados();
         return ResponseEntity.ok(datos);
     }
 
-     */
 
     @GetMapping("/comparativa-costos")
     public ResponseEntity<ComparativaTransportistaDTO> getComparativaCostos(

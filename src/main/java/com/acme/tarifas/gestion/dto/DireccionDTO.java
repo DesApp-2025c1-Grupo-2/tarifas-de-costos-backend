@@ -16,6 +16,10 @@ public class DireccionDTO {
     private String pais;
     private String tipo;
 
-    @JsonProperty("_id")
-    private String id;
+    private String _id;
+
+    @JsonProperty("id")
+    public String getId() {
+        return _id;
+    }
 }

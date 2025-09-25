@@ -9,6 +9,10 @@ public class ContactoDTO {
     private String nombre;
     private String email;
     private TelefonoDTO telefono;
-    @JsonProperty("_id")
-    private String id;
+    private String _id;
+
+    @JsonProperty("id")
+    public String getId() {
+        return _id;
+    }
 }

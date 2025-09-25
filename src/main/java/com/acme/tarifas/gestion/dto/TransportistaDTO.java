@@ -1,14 +1,18 @@
 package com.acme.tarifas.gestion.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class TransportistaDTO {
 
-    @JsonProperty("_id")
-    private String id;
+    private String _id;
 
+    @JsonProperty("id")
+    public String getId() {
+        return _id;
+    }
     @JsonProperty("razon_social")
     private String razonSocial;
 

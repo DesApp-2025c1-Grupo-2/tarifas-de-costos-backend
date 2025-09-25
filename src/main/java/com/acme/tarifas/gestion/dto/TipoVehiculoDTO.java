@@ -6,8 +6,16 @@ import lombok.Data;
 
 @Data
 public class TipoVehiculoDTO{
-    @JsonProperty("_id")
-    private String id;
+    private String _id;
+
+    @JsonProperty("id")
+    public String getId() {
+        return _id;
+    }
+
+    public void setId(String id){
+        this._id = id;
+    }
 
 
     private String nombre;
