@@ -25,7 +25,7 @@ public class TransportistaService {
 
     private final ViajeRepository viajeRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
-    
+
     private final ViajesClient viajesClient;
 
     @Autowired
