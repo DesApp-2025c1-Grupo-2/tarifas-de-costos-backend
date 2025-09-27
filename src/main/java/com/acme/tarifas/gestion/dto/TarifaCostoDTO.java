@@ -14,8 +14,8 @@ public class TarifaCostoDTO {
     private String tipoVehiculoNombre;
     private String zonaNombre;
     private String tipoCargaNombre;
-    private Long transportistaId;
-    private Long tipoVehiculoId;
+    private String transportistaId; //Ahora es string porque viajes usa mongoid
+    private String tipoVehiculoId;  //Lo mismo
     private Long zonaId;
     private Long tipoCargaId;
     private Double total;
@@ -32,7 +32,7 @@ public class TarifaCostoDTO {
         this.esVigente = tarifaCosto.isEsVigente();
 
         this.transportistaNombre = tarifaCosto.getTransportista() != null
-                ? tarifaCosto.getTransportista().getNombreEmpresa()
+                ? tarifaCosto.getTransportista().getNombreComercial()
                 : null;
         this.tipoVehiculoNombre = tarifaCosto.getTipoVehiculo() != null ? tarifaCosto.getTipoVehiculo().getNombre()
                 : null;
@@ -112,19 +112,19 @@ public class TarifaCostoDTO {
         this.tipoCargaNombre = tipoCargaNombre;
     }
 
-    public Long getTransportistaId() {
+    public String getTransportistaId() {
         return transportistaId;
     }
 
-    public void setTransportistaId(Long transportistaId) {
+    public void setTransportistaId(String transportistaId) {
         this.transportistaId = transportistaId;
     }
 
-    public Long getTipoVehiculoId() {
+    public String getTipoVehiculoId() {
         return tipoVehiculoId;
     }
 
-    public void setTipoVehiculoId(Long tipoVehiculoId) {
+    public void setTipoVehiculoId(String tipoVehiculoId) {
         this.tipoVehiculoId = tipoVehiculoId;
     }
 

@@ -3,7 +3,6 @@ package com.acme.tarifas.gestion.controller;
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
 import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.Transportista;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
 import com.acme.tarifas.gestion.service.ZonaViajeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/zonas")
@@ -82,7 +80,7 @@ public class ZonaViajeController {
         zona.setDescripcion(zonaDto.getDescripcion());
         zona.setRegionMapa(zonaDto.getRegionMapa());
         zona.setActivo(zonaDto.getActivo());
-        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasNombres()) 
+        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasNombres())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -22,26 +22,19 @@ public class ReporteController {
     }
 
 
-    @GetMapping("/historial-servicios-transportista/{transportistaId}")
-    public ResponseEntity<List<HistorialServicioDTO>> getHistorialServiciosTransportista(@PathVariable Long transportistaId) {
-        List<HistorialServicioDTO> historial = reporteService.generarHistorialServiciosTransportista(transportistaId);
-        if (historial.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(historial);
-    }
-
     @GetMapping("/frecuencia-adicionales")
     public ResponseEntity<List<FrecuenciaAdicionalDTO>> getFrecuenciaAdicionales() {
         List<FrecuenciaAdicionalDTO> datos = reporteService.getFrecuenciaUsoAdicionales();
         return ResponseEntity.ok(datos);
     }
 
+
     @GetMapping("/transportistas-mas-utilizados")
     public ResponseEntity<List<TransportistaTarifasDTO>> getTransportistasMasUtilizados() {
         List<TransportistaTarifasDTO> datos = reporteService.getTransportistasMasUtilizados();
         return ResponseEntity.ok(datos);
     }
+
 
     @GetMapping("/comparativa-costos")
     public ResponseEntity<ComparativaTransportistaDTO> getComparativaCostos(

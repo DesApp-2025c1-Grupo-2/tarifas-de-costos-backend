@@ -1,171 +1,123 @@
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
-import com.acme.tarifas.gestion.dao.TransportistaRepository;
 import com.acme.tarifas.gestion.dao.ViajeRepository;
-import com.acme.tarifas.gestion.dto.HistorialServicioDTO;
+import com.acme.tarifas.gestion.dto.TelefonoDTO;
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
+import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.*;
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+//Refaccionar utilizando ViajesClient
+//Eliminar todo lo que sea para creación, modificacion y eliminación. Dejar solo visualizacion/filtrado
 @Service
 public class TransportistaService {
 
-    private final TransportistaRepository transportistaRepository;
     private final ViajeRepository viajeRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
 
+    private final ViajesClient viajesClient;
+
     @Autowired
-    public TransportistaService(TransportistaRepository transportistaRepository,
-            ViajeRepository viajeRepository,
-            TarifaCostoRepository tarifaCostoRepository) {
-        this.transportistaRepository = transportistaRepository;
+    public TransportistaService(ViajeRepository viajeRepository,
+                                TarifaCostoRepository tarifaCostoRepository,
+                                ViajesClient viajesClient) {
+
         this.viajeRepository = viajeRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
+        this.viajesClient = viajesClient;
+    }
+
+    public List<TarifaCosto> findByTransportistaIdAndEsVigenteTrue(String transportistaId) {
+
+        TransportistaDTO transportista = viajesClient.getTransportistaById(transportistaId);
+
+
+        List<TarifaCosto> vigentes = tarifaCostoRepository.findByEsVigenteTrue();
+
+
+        return vigentes.stream()
+                .filter(t -> t.getTransportista() != null &&
+                        t.getTransportista().getId().equals(transportista.getId()))
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public Optional<TransportistaProfile> getTransportistaProfile(Long id) {
-        return transportistaRepository.findById(id).map(transportista -> {
+    public Optional<TransportistaProfile> getTransportistaProfile(String id) {
+        TransportistaDTO transportista = viajesClient.getTransportistaById(id);
+        if (transportista == null) {
+            return Optional.empty();
+        }
 
-            List<TarifaCosto> tarifas = tarifaCostoRepository.findByTransportistaIdAndEsVigenteTrue(id);
 
-            Set<TipoVehiculo> tiposVehiculo = tarifas.stream()
-                    .map(TarifaCosto::getTipoVehiculo)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
+        List<TarifaCosto> tarifas = findByTransportistaIdAndEsVigenteTrue(id);
 
-            Set<ZonaViaje> zonasOperacion = tarifas.stream()
-                    .map(TarifaCosto::getZonaViaje)
-                    .filter(Objects::nonNull)
-                    .filter(ZonaViaje::isActivo)
-                    .collect(Collectors.toSet());
+        Set<TipoVehiculoDTO> tiposVehiculo = tarifas.stream()
+                .map(TarifaCosto::getTipoVehiculo)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-            List<Viaje> viajes = viajeRepository.findByTransportistaId(id).stream()
-                    .filter(viaje -> viaje.getTarifaCostoUtilizada() != null
-                            && viaje.getTarifaCostoUtilizada().isEsVigente())
-                    .collect(Collectors.toList());
-            List<HistorialServicioDTO> historial = viajes.stream()
-                    .map(HistorialServicioDTO::new)
-                    .collect(Collectors.toList());
+        Set<ZonaViaje> zonasOperacion = tarifas.stream()
+                .map(TarifaCosto::getZonaViaje)
+                .filter(Objects::nonNull)
+                .filter(ZonaViaje::isActivo)
+                .collect(Collectors.toSet());
 
-            return new TransportistaProfile(transportista, tiposVehiculo, zonasOperacion, historial);
-        });
+        TransportistaProfile profile = new TransportistaProfile(transportista, tiposVehiculo, zonasOperacion);
+
+        return Optional.of(profile);
     }
+
 
     @Data
     @NoArgsConstructor
     public static class TransportistaProfile {
-        private Long id;
-        private String nombreEmpresa;
+        private String id;
+        private String nombreComercial;
         private String cuit;
         private String contactoNombre;
         private String contactoEmail;
-        private String contactoTelefono;
-        private List<TipoVehiculoDTO> vehiculos;
+        private TelefonoDTO contactoTelefono;
+        private List<TipoVehiculoDTO> tiposVehiculo;
         private List<ZonaViajeDTO> zonasOperacion;
-        private List<HistorialServicioDTO> historialServicios;
 
-        public TransportistaProfile(Transportista transportista, Set<TipoVehiculo> tiposVehiculo, Set<ZonaViaje> zonas,
-                List<HistorialServicioDTO> historial) {
+        public TransportistaProfile(TransportistaDTO transportista, Set<TipoVehiculoDTO> tiposVehiculo, Set<ZonaViaje> zonas) {
             this.id = transportista.getId();
-            this.nombreEmpresa = transportista.getNombreEmpresa();
+            this.nombreComercial = transportista.getNombreComercial();
             this.cuit = transportista.getCuit();
-            this.contactoNombre = transportista.getContactoNombre();
-            this.contactoEmail = transportista.getContactoEmail();
-            this.contactoTelefono = transportista.getContactoTelefono();
-            this.vehiculos = tiposVehiculo.stream().map(TipoVehiculoDTO::new).collect(Collectors.toList());
-            this.zonasOperacion = zonas.stream().map(ZonaViajeDTO::new).collect(Collectors.toList());
-            this.historialServicios = historial;
+            this.contactoNombre = transportista.getContacto().getNombre();
+            this.contactoEmail = transportista.getContacto().getEmail();
+            this.contactoTelefono = transportista.getContacto().getTelefono();
+            this.tiposVehiculo = tiposVehiculo.stream()
+                    .filter(Objects::nonNull)
+                    .map(tv -> {
+                        TipoVehiculoDTO dto = new TipoVehiculoDTO();
+                        dto.setId(tv.getId());
+                        dto.setNombre(tv.getNombre());
+                        dto.setDescripcion(tv.getDescripcion());
+                        dto.setDeletedAt(tv.getDeletedAt());
+                        dto.setLicenciaPermitida(tv.getLicenciaPermitida());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+
+            this.zonasOperacion = zonas.stream()
+                    .filter(Objects::nonNull)
+                    .map(ZonaViajeDTO::new)
+                    .collect(Collectors.toList());
         }
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class TipoVehiculoDTO {
-        private Long id;
-        private String nombre;
 
-        public TipoVehiculoDTO(TipoVehiculo tipoVehiculo) {
-            this.id = tipoVehiculo.getId();
-            this.nombre = tipoVehiculo.getNombre();
-        }
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class ZonaViajeDTO {
-        private Long id;
-        private String nombre;
-
-        public ZonaViajeDTO(ZonaViaje zona) {
-            this.id = zona.getId();
-            this.nombre = zona.getNombre();
-        }
-    }
-
-    @Transactional
-    public Transportista guardarTransportista(Transportista transportista) {
-        if (transportistaRepository.existsByCuitAndActivoTrue(transportista.getCuit())) {
-            throw new IllegalArgumentException("Ya existe un transportista activo con ese CUIT");
-        }
-        return transportistaRepository.save(transportista);
-    }
-
-    public List<Transportista> obtenerTodos() {
-        return transportistaRepository.findAll();
-    }
-
-    public Optional<Transportista> obtenerPorId(Long id) {
-        return transportistaRepository.findById(id);
-    }
-
-    @Transactional
-    public Optional<Transportista> actualizarTransportista(Long id, Transportista nuevosDatos) {
-        return transportistaRepository.findById(id).map(existente -> {
-            transportistaRepository.findByCuitAndActivoTrue(nuevosDatos.getCuit())
-                    .ifPresent(duplicado -> {
-                        if (!Objects.equals(duplicado.getId(), id)) {
-                            throw new IllegalArgumentException("Ya existe otro transportista activo con ese CUIT");
-                        }
-                    });
-
-            existente.setCuit(nuevosDatos.getCuit());
-            existente.setNombreEmpresa(nuevosDatos.getNombreEmpresa());
-            existente.setContactoNombre(nuevosDatos.getContactoNombre());
-            existente.setContactoEmail(nuevosDatos.getContactoEmail());
-            existente.setContactoTelefono(nuevosDatos.getContactoTelefono());
-            existente.setActivo(nuevosDatos.isActivo());
-
-            return transportistaRepository.save(existente);
-        });
-    }
-
-    @Transactional
-    public void eliminarTransportista(Long id) throws Exception {
-        Transportista transportista = transportistaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Transportista no encontrado"));
-        transportistaRepository.delete(transportista);
-    }
-
-    public Transportista baja(Long id) throws Exception {
-        Transportista transportista = transportistaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Transportista no encontrado"));
-
-        if (transportista.isActivo()) {
-            transportista.setActivo(false);
-            return transportistaRepository.save(transportista);
-        } else {
-            throw new Exception("El transportista ya está inactivo");
-        }
-    }
 }

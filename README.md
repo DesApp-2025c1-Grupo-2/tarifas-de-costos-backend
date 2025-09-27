@@ -12,6 +12,15 @@ Asegúrate de tener instalado lo siguiente antes de comenzar:
 -   **Spring Boot**: 3.4.4 (gestionado por Maven a través del `pom.xml`)
 -   **Base de datos**: SQLite
 
+# Variables de Entorno Necesarias
+
+- `DB_USER` : Usuario de la base de datos
+- `DB_PASS` : Contraseña de la base de datos
+- `DB_URL`  : URL de conexión a la base de datos
+- `DB_DRIVER` : Driver de la base de datos (Puede ser el de pgsql o mysql)
+- `PORT`    : Puerto donde corre la aplicación
+- `VIAJES_URL` : URL de la API de viajes
+
 ## 🛠 Instalación y Configuración
 
 Sigue estos pasos para configurar el entorno y el proyecto:
@@ -79,4 +88,4 @@ Puedes verificar que la configuración sea correcta de las siguientes maneras:
 
 ## 🗃 Base de Datos
 
--   **Sistema**: MySQL
+-   **Funciona en MySQL o PostgreSQL. Se define en la variable de entorno `DB_DRIVER`**

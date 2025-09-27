@@ -1,4 +1,4 @@
-    /*package com.acme.tarifas.gestion.config;
+package com.acme.tarifas.gestion.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -27,4 +27,4 @@ public class WebConfig implements WebMvcConfigurer {
             }
         }
     }
-}   */
+}

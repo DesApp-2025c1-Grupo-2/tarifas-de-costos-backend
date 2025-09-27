@@ -1,13 +1,10 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.entity.Adicional;
-import com.acme.tarifas.gestion.entity.Transportista;
-import com.acme.tarifas.gestion.entity.ZonaViaje;
 import com.acme.tarifas.gestion.service.AdicionalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 

@@ -138,6 +138,7 @@ public class ReporteService {
 }*/
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.*;
 import com.acme.tarifas.gestion.dto.*;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
@@ -162,38 +163,46 @@ public class ReporteService {
 
     private final TarifaCostoHistorialRepository historialRepository;
     private final TarifaAdicionalRepository tarifaAdicionalRepository;
-    private final TransportistaRepository transportistaRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
-    private final ViajeRepository viajeRepository;
+    private final ViajesClient viajesClient;
 
     @Autowired
     public ReporteService(TarifaCostoHistorialRepository historialRepository,
                           TarifaAdicionalRepository tarifaAdicionalRepository,
-                          TransportistaRepository transportistaRepository,
                           TarifaCostoRepository tarifaCostoRepository,
-                          ViajeRepository viajeRepository) {
+                          ViajesClient viajesClient) {
         this.historialRepository = historialRepository;
         this.tarifaAdicionalRepository = tarifaAdicionalRepository;
-        this.transportistaRepository = transportistaRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
-        this.viajeRepository = viajeRepository;
+        this.viajesClient = viajesClient;
     }
 
-    @Transactional(readOnly = true)
-    public List<HistorialServicioDTO> generarHistorialServiciosTransportista(Long transportistaId) {
-        List<Viaje> viajes = viajeRepository.findByTransportistaId(transportistaId);
-        return viajes.stream()
-                .map(HistorialServicioDTO::new)
-                .collect(Collectors.toList());
-    }
 
     public List<FrecuenciaAdicionalDTO> getFrecuenciaUsoAdicionales() {
         return tarifaAdicionalRepository.findFrecuenciaUsoAdicionales();
     }
 
+
     public List<TransportistaTarifasDTO> getTransportistasMasUtilizados() {
-        return transportistaRepository.findTransportistasMasUtilizados();
+        List<Object[]> rawResults = tarifaCostoRepository.countByTransportista();
+
+        return rawResults.stream()
+                .map(obj -> {
+                    String transportistaId = (String) obj[0];
+                    Long cantidad = (Long) obj[1];
+
+
+                    TransportistaDTO dto = viajesClient.getTransportistaById(transportistaId);
+
+
+                    return new TransportistaTarifasDTO(
+                            dto.getNombreComercial(),
+                            cantidad
+                    );
+                })
+                .toList();
     }
+
 
     public ComparativaTransportistaDTO generarComparativaPorServicio(Long zonaId, Long tipoVehiculoId, Long tipoCargaId) {
         List<TarifaCosto> tarifasCoincidentes = tarifaCostoRepository.findAll().stream()
@@ -210,7 +219,7 @@ public class ReporteService {
                 .filter(t -> t.getTransportista() != null)
                 .map(t -> {
                     ComparativaTransportistaDTO.Comparativa c = new ComparativaTransportistaDTO.Comparativa();
-                    c.setTransportista(t.getTransportista().getNombreEmpresa());
+                    c.setTransportista(t.getTransportista().getNombreComercial());
                     c.setCosto(t.getValorTotal());
                     return c;
                 })

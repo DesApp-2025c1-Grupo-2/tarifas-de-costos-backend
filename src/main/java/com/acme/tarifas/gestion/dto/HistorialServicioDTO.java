@@ -12,6 +12,7 @@ public class HistorialServicioDTO {
     private Double valorTotalTarifa;
     private String nombreCarga;
 
+    //Viaje debe venir de la API de viajes
     public HistorialServicioDTO(Viaje viaje) {
         this.id = viaje.getId();
 
