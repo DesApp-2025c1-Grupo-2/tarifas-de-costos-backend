@@ -1,10 +1,13 @@
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.AdicionalRepository;
 import com.acme.tarifas.gestion.dao.TarifaAdicionalRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.TarifaHistorialRepository;
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.acme.tarifas.gestion.entity.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,9 @@ public class TarifaCostoService {
 
     @Autowired
     private TarifaHistorialRepository historialRepository;
+
+    @Autowired
+    private ViajesClient viajesClient;
 
     private void procesarYAsociarAdicionales(TarifaCosto tarifa) {
         if (tarifa.getAdicionales() != null) {
@@ -112,7 +118,7 @@ public class TarifaCostoService {
 
         if (tipoVehiculo != null) {
             stream = stream
-                    .filter(t -> t.getTipoVehiculo() != null && t.getTipoVehiculo().getId().equals(tipoVehiculo));
+                    .filter(t -> t.getTipoVehiculoId() != null && t.getTipoVehiculoId().equals(tipoVehiculo));
         }
         if (zona != null) {
             stream = stream.filter(t -> t.getZonaViaje() != null && t.getZonaViaje().getId().equals(zona));
@@ -123,10 +129,27 @@ public class TarifaCostoService {
         }
         if (transportista != null) {
             stream = stream
-                    .filter(t -> t.getTransportista() != null && t.getTransportista().getId().equals(transportista));
+                    .filter(t -> t.getTransportistaId() != null && t.getTransportistaId().equals(transportista));
         }
 
-        return stream.map(TarifaCostoDTO::new).collect(Collectors.toList());
+        return stream.map(tarifaCosto -> {
+            TarifaCostoDTO dto = new TarifaCostoDTO(tarifaCosto);
+
+            if (tarifaCosto.getTransportistaId() != null) {
+                TransportistaDTO transportistaDTO = viajesClient.getTransportistaById(tarifaCosto.getTransportistaId());
+                if (transportistaDTO != null) {
+                    dto.setTransportistaNombre(transportistaDTO.getNombreComercial());
+                }
+            }
+
+            if (tarifaCosto.getTipoVehiculoId() != null) {
+                TipoVehiculoDTO tipoVehiculoDTO = viajesClient.getTiposVehiculoById(tarifaCosto.getTipoVehiculoId());
+                if (tipoVehiculoDTO != null) {
+                    dto.setTipoVehiculoNombre(tipoVehiculoDTO.getNombre());
+                }
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     public Optional<TarifaCostoDTO> obtenerTarifaPorId(Long id) {

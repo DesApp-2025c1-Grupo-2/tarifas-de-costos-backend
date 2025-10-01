@@ -9,13 +9,13 @@ public class TarifaCostoDTO {
     private Long id;
     private String nombre;
     private Double valorBase;
-    private boolean esVigente; // Corregido a primitivo boolean
+    private boolean esVigente;
     private String transportistaNombre;
     private String tipoVehiculoNombre;
     private String zonaNombre;
     private String tipoCargaNombre;
-    private String transportistaId; //Ahora es string porque viajes usa mongoid
-    private String tipoVehiculoId;  //Lo mismo
+    private String transportistaId;
+    private String tipoVehiculoId;
     private Long zonaId;
     private Long tipoCargaId;
     private Double total;
@@ -31,22 +31,16 @@ public class TarifaCostoDTO {
 
         this.esVigente = tarifaCosto.isEsVigente();
 
-        this.transportistaNombre = tarifaCosto.getTransportista() != null
-                ? tarifaCosto.getTransportista().getNombreComercial()
-                : null;
-        this.tipoVehiculoNombre = tarifaCosto.getTipoVehiculo() != null ? tarifaCosto.getTipoVehiculo().getNombre()
-                : null;
         this.zonaNombre = tarifaCosto.getZonaViaje() != null ? tarifaCosto.getZonaViaje().getNombre() : null;
         this.tipoCargaNombre = tarifaCosto.getTipoCargaTarifa() != null ? tarifaCosto.getTipoCargaTarifa().getNombre()
                 : null;
-        this.transportistaId = tarifaCosto.getTransportista() != null ? tarifaCosto.getTransportista().getId() : null;
-        this.tipoVehiculoId = tarifaCosto.getTipoVehiculo() != null ? tarifaCosto.getTipoVehiculo().getId() : null;
+        this.transportistaId = tarifaCosto.getTransportistaId();
+        this.tipoVehiculoId = tarifaCosto.getTipoVehiculoId();
         this.zonaId = tarifaCosto.getZonaViaje() != null ? tarifaCosto.getZonaViaje().getId() : null;
         this.tipoCargaId = tarifaCosto.getTipoCargaTarifa() != null ? tarifaCosto.getTipoCargaTarifa().getId() : null;
         this.total = tarifaCosto.getValorTotal();
         this.adicionales = tarifaCosto.getAdicionales();
     }
-
 
     public Long getId() {
         return id;
