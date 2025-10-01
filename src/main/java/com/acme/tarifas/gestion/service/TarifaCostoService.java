@@ -99,11 +99,8 @@ public class TarifaCostoService {
         });
     }
 
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // Este método está optimizado para evitar múltiples llamadas a la API externa.
-    public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, String transportistaId) {
-        // 1. Obtener datos externos UNA SOLA VEZ y guardarlos en mapas para acceso
-        // rápido.
+    public List<TarifaCostoDTO> filtrarTarifas(String tipoVehiculoId, Long zonaId, Long tipoCargaId,
+            String transportistaId) {
         Map<String, String> transportistaNombres;
         Map<String, String> tipoVehiculoNombres;
         try {
@@ -114,24 +111,26 @@ public class TarifaCostoService {
             tipoVehiculoNombres = viajesClient.getTiposVehiculo().stream()
                     .collect(Collectors.toMap(TipoVehiculoDTO::getId, TipoVehiculoDTO::getNombre, (v1, v2) -> v1));
         } catch (Exception e) {
-            // Si la API externa falla, es mejor devolver una lista vacía para no bloquear
-            // la aplicación.
             return Collections.emptyList();
         }
 
-        // 2. Obtener todas las tarifas de la base de datos local.
-        List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
+        List<TarifaCosto> tarifasFiltradas = tarifaRepository.findAll().stream()
+                .filter(t -> tipoVehiculoId == null || tipoVehiculoId.isEmpty()
+                        || (t.getTipoVehiculoId() != null && t.getTipoVehiculoId().equals(tipoVehiculoId)))
+                .filter(t -> zonaId == null || (t.getZonaViaje() != null && t.getZonaViaje().getId().equals(zonaId)))
+                .filter(t -> tipoCargaId == null
+                        || (t.getTipoCargaTarifa() != null && t.getTipoCargaTarifa().getId().equals(tipoCargaId)))
+                .filter(t -> transportistaId == null || transportistaId.isEmpty()
+                        || (t.getTransportistaId() != null && t.getTransportistaId().equals(transportistaId)))
+                .collect(Collectors.toList());
 
-        // 3. Mapear a DTO enriqueciendo con los datos de los mapas (esto es muy
-        // rápido).
-        return todasLasTarifas.stream().map(tarifaCosto -> {
+        return tarifasFiltradas.stream().map(tarifaCosto -> {
             TarifaCostoDTO dto = new TarifaCostoDTO(tarifaCosto);
             dto.setTransportistaNombre(transportistaNombres.get(tarifaCosto.getTransportistaId()));
             dto.setTipoVehiculoNombre(tipoVehiculoNombres.get(tarifaCosto.getTipoVehiculoId()));
             return dto;
         }).collect(Collectors.toList());
     }
-    // --- FIN DE LA MODIFICACIÓN ---
 
     private void crearRegistroHistorial(TarifaCosto tarifa, String comentario) {
         TarifaCostoHistorial historial = new TarifaCostoHistorial();

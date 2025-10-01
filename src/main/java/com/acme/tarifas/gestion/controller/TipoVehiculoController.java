@@ -24,12 +24,8 @@ public class TipoVehiculoController {
         this.viajesClient = viajesClient;
     }
 
-    // --- INICIO DE LA MODIFICACIÓN ---
     @GetMapping
     public List<TipoVehiculoViewDTO> obtenerTodosTipos() {
-        // Se vuelve a consultar la lista de vehículos para obtener todos los datos
-        // (peso, volumen),
-        // pero se mantiene el filtro para devolver solo tipos de vehículo únicos.
         return viajesClient.getVehiculos().stream()
                 .filter(Objects::nonNull)
                 .filter(v -> v.getTipo() != null && v.getTipo().getId() != null)
@@ -38,13 +34,10 @@ public class TipoVehiculoController {
                 .collect(Collectors.toList());
     }
 
-    // Función de utilidad para filtrar elementos duplicados por una propiedad (el
-    // ID)
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
-    // --- FIN DE LA MODIFICACIÓN ---
 
     @GetMapping("/form")
     public List<TipoVehiculoFormDTO> obtenerParaFormulario() {

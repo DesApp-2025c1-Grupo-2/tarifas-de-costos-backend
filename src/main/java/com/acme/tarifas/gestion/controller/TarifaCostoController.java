@@ -36,22 +36,18 @@ public class TarifaCostoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // --- INICIO DE LA MODIFICACIÓN ---
     @GetMapping
     public List<TarifaCostoDTO> obtenerTodasTarifas(
-            @RequestParam(required = false) Long tipoVehiculo,
+            @RequestParam(required = false) String tipoVehiculo, // Cambiado a String
             @RequestParam(required = false) Long zona,
             @RequestParam(required = false) Long tipoCarga,
-            @RequestParam(required = false) String transportista) { // El ID del transportista es String
-
-        // Se llama al método optimizado del servicio
+            @RequestParam(required = false) String transportista) {
         return tarifaService.filtrarTarifas(
                 tipoVehiculo,
                 zona,
                 tipoCarga,
                 transportista);
     }
-    // --- FIN DE LA MODIFICACIÓN ---
 
     @GetMapping("/{id}")
     public ResponseEntity<TarifaCostoDTO> getTarifaPorId(@PathVariable Long id) {
@@ -61,8 +57,7 @@ public class TarifaCostoController {
     }
 
     @PostMapping("/{id}/adicionales")
-    public ResponseEntity<TarifaAdicional> agregarAdicional(
-            @PathVariable Long id,
+    public ResponseEntity<TarifaAdicional> agregarAdicional(@PathVariable Long id,
             @RequestBody TarifaAdicional adicional) {
         return tarifaService.agregarAdicional(id, adicional)
                 .map(ResponseEntity::ok)
@@ -70,9 +65,7 @@ public class TarifaCostoController {
     }
 
     @PutMapping("/{id}/valor-base")
-    public ResponseEntity<TarifaCosto> actualizarValorBase(
-            @PathVariable Long id,
-            @RequestParam Double nuevoValor) {
+    public ResponseEntity<TarifaCosto> actualizarValorBase(@PathVariable Long id, @RequestParam Double nuevoValor) {
         return tarifaService.actualizarValorBase(id, nuevoValor)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
