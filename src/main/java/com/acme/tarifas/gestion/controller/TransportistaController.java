@@ -18,28 +18,30 @@ public class TransportistaController {
     @Autowired
     private TransportistaService transportistaService;
 
-    @Autowired
-    private ViajesClient viajesClient;
+    private final ViajesClient viajesClient;
 
-    public TransportistaController(ViajesClient viajesClient) {
+    @Autowired
+    public TransportistaController(ViajesClient viajesClient, TransportistaService transportistaService) {
         this.viajesClient = viajesClient;
+        this.transportistaService = transportistaService;
     }
 
     @GetMapping("/form")
     public List<TransportistaFormDTO> obtenerParaFormulario() {
-        List<TransportistaDTO> dtoList = viajesClient.getTransportistas();
-        return dtoList.stream()
+        return viajesClient.getTransportistas().stream()
                 .map(TransportistaFormDTO::new)
                 .collect(Collectors.toList());
     }
 
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // Se ajusta este método para asegurar la eficiencia.
     @GetMapping
     public List<TransportistaViewDTO> getTransportistas() {
-        List<TransportistaDTO> dtoList = viajesClient.getTransportistas();
-        return dtoList.stream()
+        return viajesClient.getTransportistas().stream()
                 .map(TransportistaViewDTO::new)
                 .collect(Collectors.toList());
     }
+    // --- FIN DE LA MODIFICACIÓN ---
 
     @GetMapping("/{id}")
     public TransportistaDTO getTransportistaPorId(@PathVariable String id) {

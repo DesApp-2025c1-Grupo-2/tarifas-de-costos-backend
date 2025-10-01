@@ -24,29 +24,18 @@ public class TipoVehiculoController {
         this.viajesClient = viajesClient;
     }
 
-    @GetMapping("/form")
-    public List<TipoVehiculoFormDTO> obtenerParaFormulario() {
-        return viajesClient.getTiposVehiculo().stream()
-                .map(TipoVehiculoFormDTO::new)
-                .collect(Collectors.toList());
-    }
-
+    // --- INICIO DE LA MODIFICACIÓN ---
     @GetMapping
     public List<TipoVehiculoViewDTO> obtenerTodosTipos() {
-        // --- INICIO DE LA MODIFICACIÓN ---
-        // Se procesa la lista de vehículos para devolver solo tipos de vehículo únicos.
-        List<TipoVehiculoViewDTO> tiposNoUnicos = viajesClient.getVehiculos().stream()
-                .filter(Objects::nonNull) // 1. Filtra vehículos nulos de la API
-                .filter(v -> v.getTipo() != null && v.getTipo().getId() != null) // 2. Asegura que el vehículo tenga un
-                                                                                 // tipo con ID
+        // Se vuelve a consultar la lista de vehículos para obtener todos los datos
+        // (peso, volumen),
+        // pero se mantiene el filtro para devolver solo tipos de vehículo únicos.
+        return viajesClient.getVehiculos().stream()
+                .filter(Objects::nonNull)
+                .filter(v -> v.getTipo() != null && v.getTipo().getId() != null)
                 .map(TipoVehiculoViewDTO::new)
-                .collect(Collectors.toList());
-
-        // 3. Filtra la lista para que solo contenga elementos con un ID único
-        return tiposNoUnicos.stream()
                 .filter(distinctByKey(TipoVehiculoViewDTO::getId))
                 .collect(Collectors.toList());
-        // --- FIN DE LA MODIFICACIÓN ---
     }
 
     // Función de utilidad para filtrar elementos duplicados por una propiedad (el
@@ -54,6 +43,14 @@ public class TipoVehiculoController {
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
+    // --- FIN DE LA MODIFICACIÓN ---
+
+    @GetMapping("/form")
+    public List<TipoVehiculoFormDTO> obtenerParaFormulario() {
+        return viajesClient.getTiposVehiculo().stream()
+                .map(TipoVehiculoFormDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")

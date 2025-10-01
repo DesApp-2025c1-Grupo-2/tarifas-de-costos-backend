@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tarifas")
@@ -37,19 +36,22 @@ public class TarifaCostoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // --- INICIO DE LA MODIFICACIÓN ---
     @GetMapping
     public List<TarifaCostoDTO> obtenerTodasTarifas(
             @RequestParam(required = false) Long tipoVehiculo,
             @RequestParam(required = false) Long zona,
             @RequestParam(required = false) Long tipoCarga,
-            @RequestParam(required = false) Long transportista) {
+            @RequestParam(required = false) String transportista) { // El ID del transportista es String
 
+        // Se llama al método optimizado del servicio
         return tarifaService.filtrarTarifas(
                 tipoVehiculo,
                 zona,
                 tipoCarga,
-                transportista != null ? transportista.toString() : null);
+                transportista);
     }
+    // --- FIN DE LA MODIFICACIÓN ---
 
     @GetMapping("/{id}")
     public ResponseEntity<TarifaCostoDTO> getTarifaPorId(@PathVariable Long id) {

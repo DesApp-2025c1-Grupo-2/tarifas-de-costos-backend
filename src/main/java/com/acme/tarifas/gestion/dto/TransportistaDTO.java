@@ -6,20 +6,10 @@ import lombok.Data;
 @Data
 public class TransportistaDTO {
 
-    private String _id;
-
-    @JsonProperty("id")
-    public String getId() {
-        return _id;
-    }
-
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // Se añade el método 'setId' para que Jackson pueda deserializar el ID
-    @JsonProperty("id")
-    public void setId(String id) {
-        this._id = id;
-    }
-    // --- FIN DE LA MODIFICACIÓN ---
+    // --- MODIFICACIÓN CLAVE ---
+    // Se mapea la propiedad "_id" del JSON al campo "id" de Java.
+    @JsonProperty("_id")
+    private String id;
 
     @JsonProperty("razon_social")
     private String razonSocial;
@@ -28,8 +18,6 @@ public class TransportistaDTO {
     private String nombreComercial;
 
     private String cuit;
-
     private DireccionDTO direccion;
-
     private ContactoDTO contacto;
 }
