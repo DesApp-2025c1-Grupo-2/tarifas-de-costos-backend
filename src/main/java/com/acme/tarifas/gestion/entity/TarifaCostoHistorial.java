@@ -1,7 +1,5 @@
 package com.acme.tarifas.gestion.entity;
 
-import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
-import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,8 +24,12 @@ public class TarifaCostoHistorial {
     private String codigoTarifa;
     private String nombreTarifa;
 
-    @Transient
-    private TipoVehiculoDTO tipoVehiculo;
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // Se reemplazan los objetos transitorios por los campos de ID que se guardarán
+    // en la BD.
+    private String tipoVehiculoId;
+    private String transportistaId;
+    // --- FIN DE LA MODIFICACIÓN ---
 
     @ManyToOne
     @JoinColumn(name = "ID_TipoCargaTarifa")
@@ -36,10 +38,6 @@ public class TarifaCostoHistorial {
     @ManyToOne
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
-
-
-    @Transient
-    private TransportistaDTO transportista;
 
     private Double valorBase;
     private LocalDateTime fechaModificacion;

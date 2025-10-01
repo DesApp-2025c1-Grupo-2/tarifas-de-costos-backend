@@ -49,7 +49,6 @@ public class TarifaCostoService {
                             .orElseThrow(() -> new EntityNotFoundException(
                                     "No se encontró el Adicional con ID: " + adicionalEnviado.getId()));
                     tarifaAdicional.setAdicional(adicionalGestionado);
-                } else {
                 }
                 tarifaAdicional.setTarifaCosto(tarifa);
             }
@@ -59,12 +58,17 @@ public class TarifaCostoService {
     @Transactional
     public TarifaCosto crearTarifa(TarifaCosto tarifa) {
         Double valorBase = tarifa.getValorBase();
-        if (valorBase == null) {
-            throw new IllegalArgumentException("El valor base es obligatorio.");
+        if (valorBase == null || valorBase <= 0) {
+            throw new IllegalArgumentException("El valor base es obligatorio y debe ser mayor que cero.");
         }
-        if (valorBase <= 0) {
-            throw new IllegalArgumentException("El valor base debe ser mayor que cero.");
+
+        if (tarifa.getTransportista() != null && tarifa.getTransportista().getId() != null) {
+            tarifa.setTransportistaId(tarifa.getTransportista().getId());
         }
+        if (tarifa.getTipoVehiculo() != null && tarifa.getTipoVehiculo().getId() != null) {
+            tarifa.setTipoVehiculoId(tarifa.getTipoVehiculo().getId());
+        }
+
         tarifa.setFechaCreacion(LocalDateTime.now());
         tarifa.setFechaUltimaModificacion(LocalDateTime.now());
         procesarYAsociarAdicionales(tarifa);
@@ -78,10 +82,15 @@ public class TarifaCostoService {
 
             crearRegistroHistorial(tarifaExistente, "Actualización general de la tarifa.");
 
+            if (datosNuevos.getTransportista() != null && datosNuevos.getTransportista().getId() != null) {
+                tarifaExistente.setTransportistaId(datosNuevos.getTransportista().getId());
+            }
+            if (datosNuevos.getTipoVehiculo() != null && datosNuevos.getTipoVehiculo().getId() != null) {
+                tarifaExistente.setTipoVehiculoId(datosNuevos.getTipoVehiculo().getId());
+            }
+
             tarifaExistente.setNombreTarifa(datosNuevos.getNombreTarifa());
             tarifaExistente.setValorBase(datosNuevos.getValorBase());
-            tarifaExistente.setTransportista(datosNuevos.getTransportista());
-            tarifaExistente.setTipoVehiculo(datosNuevos.getTipoVehiculo());
             tarifaExistente.setZonaViaje(datosNuevos.getZonaViaje());
             tarifaExistente.setTipoCargaTarifa(datosNuevos.getTipoCargaTarifa());
             tarifaExistente.setFechaUltimaModificacion(LocalDateTime.now());
@@ -96,29 +105,20 @@ public class TarifaCostoService {
                 }
             }
 
-            tarifaExistente.getAdicionales().removeIf(existente -> !nuevosAdicionales.contains(existente));
-
-            for (TarifaAdicional nuevo : nuevosAdicionales) {
-                if (tarifaExistente.getAdicionales().contains(nuevo)) {
-                    int index = tarifaExistente.getAdicionales().indexOf(nuevo);
-                    TarifaAdicional existente = tarifaExistente.getAdicionales().get(index);
-                    existente.setCostoEspecifico(nuevo.getCostoEspecifico());
-                } else {
-                    tarifaExistente.getAdicionales().add(nuevo);
-                }
-            }
+            tarifaExistente.getAdicionales().clear();
+            tarifaExistente.getAdicionales().addAll(nuevosAdicionales);
 
             return tarifaRepository.save(tarifaExistente);
         });
     }
 
-    public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
+    public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, String transportistaId) {
         List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
         Stream<TarifaCosto> stream = todasLasTarifas.stream();
 
         if (tipoVehiculo != null) {
-            stream = stream
-                    .filter(t -> t.getTipoVehiculoId() != null && t.getTipoVehiculoId().equals(tipoVehiculo));
+            stream = stream.filter(
+                    t -> t.getTipoVehiculoId() != null && t.getTipoVehiculoId().equals(String.valueOf(tipoVehiculo)));
         }
         if (zona != null) {
             stream = stream.filter(t -> t.getZonaViaje() != null && t.getZonaViaje().getId().equals(zona));
@@ -127,25 +127,35 @@ public class TarifaCostoService {
             stream = stream
                     .filter(t -> t.getTipoCargaTarifa() != null && t.getTipoCargaTarifa().getId().equals(tipoCarga));
         }
-        if (transportista != null) {
+        if (transportistaId != null && !transportistaId.isEmpty()) {
             stream = stream
-                    .filter(t -> t.getTransportistaId() != null && t.getTransportistaId().equals(transportista));
+                    .filter(t -> t.getTransportistaId() != null && t.getTransportistaId().equals(transportistaId));
         }
 
         return stream.map(tarifaCosto -> {
             TarifaCostoDTO dto = new TarifaCostoDTO(tarifaCosto);
 
             if (tarifaCosto.getTransportistaId() != null) {
-                TransportistaDTO transportistaDTO = viajesClient.getTransportistaById(tarifaCosto.getTransportistaId());
-                if (transportistaDTO != null) {
-                    dto.setTransportistaNombre(transportistaDTO.getNombreComercial());
+                try {
+                    TransportistaDTO transportistaDTO = viajesClient
+                            .getTransportistaById(tarifaCosto.getTransportistaId());
+                    if (transportistaDTO != null) {
+                        dto.setTransportistaNombre(transportistaDTO.getNombreComercial());
+                    }
+                } catch (Exception e) {
+                    dto.setTransportistaNombre("No encontrado");
                 }
             }
 
             if (tarifaCosto.getTipoVehiculoId() != null) {
-                TipoVehiculoDTO tipoVehiculoDTO = viajesClient.getTiposVehiculoById(tarifaCosto.getTipoVehiculoId());
-                if (tipoVehiculoDTO != null) {
-                    dto.setTipoVehiculoNombre(tipoVehiculoDTO.getNombre());
+                try {
+                    TipoVehiculoDTO tipoVehiculoDTO = viajesClient
+                            .getTiposVehiculoById(tarifaCosto.getTipoVehiculoId());
+                    if (tipoVehiculoDTO != null) {
+                        dto.setTipoVehiculoNombre(tipoVehiculoDTO.getNombre());
+                    }
+                } catch (Exception e) {
+                    dto.setTipoVehiculoNombre("No encontrado");
                 }
             }
             return dto;
@@ -182,7 +192,6 @@ public class TarifaCostoService {
     @Transactional
     public Optional<TarifaCosto> actualizarValorBase(Long id, Double nuevoValor) {
         return tarifaRepository.findById(id).map(tarifa -> {
-
             crearRegistroHistorial(tarifa, "Actualización del valor base.");
             tarifa.setValorBase(nuevoValor);
             tarifa.setFechaUltimaModificacion(LocalDateTime.now());
@@ -196,10 +205,16 @@ public class TarifaCostoService {
         historial.setTarifaOriginal(tarifa);
         historial.setCodigoTarifa(tarifa.getCodigoTarifa());
         historial.setNombreTarifa(tarifa.getNombreTarifa());
-        historial.setTipoVehiculo(tarifa.getTipoVehiculo());
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // Se utilizan los nuevos campos 'set...Id' que creamos en la entidad de
+        // historial.
+        historial.setTipoVehiculoId(tarifa.getTipoVehiculoId());
+        historial.setTransportistaId(tarifa.getTransportistaId());
+        // --- FIN DE LA MODIFICACIÓN ---
+
         historial.setTipoCargaTarifa(tarifa.getTipoCargaTarifa());
         historial.setZonaViaje(tarifa.getZonaViaje());
-        historial.setTransportista(tarifa.getTransportista());
         historial.setValorBase(tarifa.getValorBase());
         historial.setFechaModificacion(LocalDateTime.now());
         historial.setComentarioCambio(comentario);

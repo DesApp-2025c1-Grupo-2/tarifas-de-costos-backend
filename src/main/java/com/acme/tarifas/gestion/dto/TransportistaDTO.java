@@ -1,6 +1,5 @@
 package com.acme.tarifas.gestion.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -13,6 +12,15 @@ public class TransportistaDTO {
     public String getId() {
         return _id;
     }
+
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // Se añade el método 'setId' para que Jackson pueda deserializar el ID
+    @JsonProperty("id")
+    public void setId(String id) {
+        this._id = id;
+    }
+    // --- FIN DE LA MODIFICACIÓN ---
+
     @JsonProperty("razon_social")
     private String razonSocial;
 

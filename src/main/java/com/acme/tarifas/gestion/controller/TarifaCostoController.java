@@ -44,7 +44,11 @@ public class TarifaCostoController {
             @RequestParam(required = false) Long tipoCarga,
             @RequestParam(required = false) Long transportista) {
 
-        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga, transportista);
+        return tarifaService.filtrarTarifas(
+                tipoVehiculo,
+                zona,
+                tipoCarga,
+                transportista != null ? transportista.toString() : null);
     }
 
     @GetMapping("/{id}")
