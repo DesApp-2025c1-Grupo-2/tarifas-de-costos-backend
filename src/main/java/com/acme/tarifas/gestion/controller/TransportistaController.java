@@ -1,4 +1,5 @@
 package com.acme.tarifas.gestion.controller;
+
 import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.acme.tarifas.gestion.dto.TransportistaViewDTO;
@@ -25,19 +26,19 @@ public class TransportistaController {
     }
 
     @GetMapping("/form")
-    public List<TransportistaFormDTO> obtenerParaFormulario(){
+    public List<TransportistaFormDTO> obtenerParaFormulario() {
         List<TransportistaDTO> dtoList = viajesClient.getTransportistas();
         return dtoList.stream()
-                         .map(TransportistaFormDTO::new)
-                         .collect(Collectors.toList());
+                .map(TransportistaFormDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping
-    public List<TransportistaViewDTO> getTransportistas(){
+    public List<TransportistaViewDTO> getTransportistas() {
         List<TransportistaDTO> dtoList = viajesClient.getTransportistas();
         return dtoList.stream()
-                         .map(TransportistaViewDTO::new)
-                         .collect(Collectors.toList());
+                .map(TransportistaViewDTO::new)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")

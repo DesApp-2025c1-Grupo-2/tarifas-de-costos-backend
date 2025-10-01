@@ -14,4 +14,4 @@ public class TipoVehiculoFormDTO {
         this.id = dto.getId();
         this.nombre = dto.getNombre();
     }
-} 
+}

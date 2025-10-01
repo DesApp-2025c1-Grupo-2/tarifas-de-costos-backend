@@ -15,9 +15,11 @@ public class TipoVehiculoViewDTO {
     private boolean activo = true;
 
     public TipoVehiculoViewDTO(VehiculoDTO dto) {
-        this.id = dto.getTipo().getId();
-        this.nombre = dto.getTipo().getNombre();
-        this.descripcion = dto.getTipo().getDescripcion();
+        if (dto.getTipo() != null) {
+            this.id = dto.getTipo().getId();
+            this.nombre = dto.getTipo().getNombre();
+            this.descripcion = dto.getTipo().getDescripcion();
+        }
         this.capacidadPesoKG = dto.getPesoCarga();
         this.capacidadVolumenM3 = dto.getVolumenCarga();
     }

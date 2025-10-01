@@ -14,4 +14,4 @@ public class TransportistaFormDTO {
         this.id = dto.getId();
         this.nombre = dto.getNombreComercial();
     }
-} 
+}
