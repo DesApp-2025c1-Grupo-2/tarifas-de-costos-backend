@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class TipoVehiculoDTO{
-    private String _id;
+
 
     @JsonProperty("id")
     @JsonAlias("_id")
