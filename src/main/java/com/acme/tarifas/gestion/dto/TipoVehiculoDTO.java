@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -9,13 +10,8 @@ public class TipoVehiculoDTO{
     private String _id;
 
     @JsonProperty("id")
-    public String getId() {
-        return _id;
-    }
-
-    public void setId(String id){
-        this._id = id;
-    }
+    @JsonAlias("_id")
+    private String id;
 
 
     private String nombre;

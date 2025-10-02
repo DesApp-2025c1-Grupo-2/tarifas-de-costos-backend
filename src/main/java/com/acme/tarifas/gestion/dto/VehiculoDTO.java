@@ -1,12 +1,15 @@
 package com.acme.tarifas.gestion.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class VehiculoDTO {
-    @JsonProperty("_id")
+
+    @JsonProperty("id")
+    @JsonAlias("_id")
     private String id;
 
     private String patente;
