@@ -1,5 +1,7 @@
 package com.acme.tarifas.gestion.dto;
 
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
+import com.acme.tarifas.gestion.dto.VehiculoDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,16 +11,10 @@ public class TipoVehiculoViewDTO {
     private String id;
     private String nombre;
     private String descripcion;
-    // Estos campos se mantienen por compatibilidad, aunque no siempre vendrán
-    // llenos.
-    private Integer capacidadPesoKG;
-    private Integer capacidadVolumenM3;
+    private Double capacidadPesoKG;
+    private Double capacidadVolumenM3;
     private boolean activo = true;
 
-    /**
-     * Constructor para cuando se recibe un TipoVehiculoDTO directamente.
-     * Esto es más eficiente y se usa en la tabla de "Vehículos".
-     */
     public TipoVehiculoViewDTO(TipoVehiculoDTO dto) {
         if (dto != null) {
             this.id = dto.getId();
@@ -27,19 +23,15 @@ public class TipoVehiculoViewDTO {
         }
     }
 
-    /**
-     * Constructor para cuando se recibe un VehiculoDTO completo.
-     * Se mantiene por si alguna otra parte del código lo necesita.
-     */
-    public TipoVehiculoViewDTO(VehiculoDTO dto) {
-        if (dto != null) {
-            if (dto.getTipo() != null) {
-                this.id = dto.getTipo().getId();
-                this.nombre = dto.getTipo().getNombre();
-                this.descripcion = dto.getTipo().getDescripcion();
-            }
-            this.capacidadPesoKG = dto.getPesoCarga();
-            this.capacidadVolumenM3 = dto.getVolumenCarga();
+    public TipoVehiculoViewDTO(VehiculoDTO vehiculo, TipoVehiculoDTO tipo) {
+        if (tipo != null) {
+            this.id = tipo.getId();
+            this.nombre = tipo.getNombre();
+            this.descripcion = tipo.getDescripcion();
+        }
+        if (vehiculo != null) {
+            this.capacidadPesoKG = vehiculo.getPesoCarga();
+            this.capacidadVolumenM3 = vehiculo.getVolumenCarga();
         }
     }
 }

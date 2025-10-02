@@ -17,12 +17,13 @@ public class VehiculoDTO {
     private Integer anio;
 
     @JsonProperty("volumen_carga")
-    private Integer volumenCarga;
+    private Double volumenCarga;
 
     @JsonProperty("peso_carga")
-    private Integer pesoCarga;
+    private Double pesoCarga;
 
     private TipoVehiculoDTO tipo;
+
     private String deletedAt;
 
     @JsonProperty("empresa")

@@ -24,12 +24,8 @@ public class TarifaCostoHistorial {
     private String codigoTarifa;
     private String nombreTarifa;
 
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // Se reemplazan los objetos transitorios por los campos de ID que se guardarán
-    // en la BD.
     private String tipoVehiculoId;
     private String transportistaId;
-    // --- FIN DE LA MODIFICACIÓN ---
 
     @ManyToOne
     @JoinColumn(name = "ID_TipoCargaTarifa")

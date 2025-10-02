@@ -29,7 +29,7 @@ public class TipoVehiculoController {
         return viajesClient.getVehiculos().stream()
                 .filter(Objects::nonNull)
                 .filter(v -> v.getTipo() != null && v.getTipo().getId() != null)
-                .map(TipoVehiculoViewDTO::new)
+                .map(vehiculo -> new TipoVehiculoViewDTO(vehiculo, vehiculo.getTipo()))
                 .filter(distinctByKey(TipoVehiculoViewDTO::getId))
                 .collect(Collectors.toList());
     }

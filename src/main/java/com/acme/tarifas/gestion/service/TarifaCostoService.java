@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -105,10 +106,12 @@ public class TarifaCostoService {
         Map<String, String> tipoVehiculoNombres;
         try {
             transportistaNombres = viajesClient.getTransportistas().stream()
+                    .filter(t -> t != null && t.getId() != null && !t.getId().isEmpty())
                     .collect(Collectors.toMap(TransportistaDTO::getId, TransportistaDTO::getNombreComercial,
                             (v1, v2) -> v1));
 
             tipoVehiculoNombres = viajesClient.getTiposVehiculo().stream()
+                    .filter(tv -> tv != null && tv.getId() != null && !tv.getId().isEmpty())
                     .collect(Collectors.toMap(TipoVehiculoDTO::getId, TipoVehiculoDTO::getNombre, (v1, v2) -> v1));
         } catch (Exception e) {
             return Collections.emptyList();
