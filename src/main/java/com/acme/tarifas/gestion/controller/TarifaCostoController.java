@@ -23,7 +23,7 @@ public class TarifaCostoController {
     @PostMapping
     public ResponseEntity<?> crearTarifa(@RequestBody TarifaCosto tarifa) {
         try {
-            TarifaCosto nueva = tarifaService.crearTarifa(tarifa);
+            TarifaCostoDTO nueva = tarifaService.crearTarifa(tarifa);
             return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", ex.getMessage()));
