@@ -75,7 +75,7 @@ public class TarifaCostoService {
         return new TarifaCostoDTO(tarifaRepository.save(tarifaGuardada));
     }
 
-
+    // --- INICIO DE LA MODIFICACIÓN FINAL ---
     @Transactional
     public Optional<TarifaCostoDTO> actualizarTarifa(Long id, TarifaCostoPayloadDTO payload) {
         return tarifaRepository.findById(id).map(tarifaExistente -> {
@@ -99,20 +99,28 @@ public class TarifaCostoService {
             tarifaExistente.setFechaUltimaModificacion(LocalDateTime.now());
             tarifaExistente.setVersion(tarifaExistente.getVersion() != null ? tarifaExistente.getVersion() + 1 : 1);
 
-
+            // Lógica Definitiva y Simplificada para Adicionales:
+            // 1. Limpiamos la colección en memoria. Gracias a `orphanRemoval=true` en la
+            // entidad TarifaCosto,
+            // esto le dice a Hibernate que, al guardar, debe borrar de la base de datos
+            // todos los
+            // registros de la tabla `Tarifas_Adicionales` que ya no estén en esta lista.
             tarifaExistente.getAdicionales().clear();
 
+            // 2. Procesamos y añadimos las nuevas relaciones de adicionales.
             if (payload.getAdicionales() != null && !payload.getAdicionales().isEmpty()) {
                 List<TarifaAdicional> nuevosAdicionales = procesarYAsociarAdicionales(tarifaExistente,
                         payload.getAdicionales());
                 tarifaExistente.getAdicionales().addAll(nuevosAdicionales);
             }
 
+            // 3. Guardamos la tarifa. Hibernate ahora sabe que debe borrar los viejos y
+            // añadir los nuevos en el orden correcto.
             TarifaCosto tarifaActualizada = tarifaRepository.save(tarifaExistente);
             return new TarifaCostoDTO(tarifaActualizada);
         });
     }
-
+    // --- FIN DE LA MODIFICACIÓN FINAL ---
 
     private List<TarifaAdicional> procesarYAsociarAdicionales(TarifaCosto tarifa,
             List<TarifaAdicional> adicionalesPayload) {
@@ -121,10 +129,12 @@ public class TarifaCostoService {
                     Adicional adicionalOriginal = taPayload.getAdicional();
                     Adicional adicionalGestionado;
 
+                    // Si el ID es nulo o negativo, es un adicional nuevo.
                     if (adicionalOriginal.getId() == null || adicionalOriginal.getId() <= 0) {
-                        adicionalOriginal.setId(null);
+                        adicionalOriginal.setId(null); // Aseguramos que sea nulo para que la BD genere un ID nuevo.
                         adicionalGestionado = adicionalRepository.save(adicionalOriginal);
                     } else {
+                        // Si el ID es positivo, lo buscamos en la BD.
                         adicionalGestionado = adicionalRepository.findById(adicionalOriginal.getId())
                                 .orElseThrow(() -> new EntityNotFoundException(
                                         "Adicional existente no encontrado con ID: " + adicionalOriginal.getId()));
@@ -164,12 +174,13 @@ public class TarifaCostoService {
     private Map<String, String> getTransportistaNamesMap() {
         try {
             List<TransportistaDTO> transportistas = viajesClient.getTransportistas();
+            logger.info("Transportistas recibidos de la API externa: {}", transportistas);
             return transportistas.stream()
                     .filter(t -> t != null && t.getId() != null && !t.getNombreParaMostrar().isEmpty())
                     .collect(Collectors.toMap(TransportistaDTO::getId, TransportistaDTO::getNombreParaMostrar,
                             (prev, next) -> prev));
         } catch (Exception e) {
-            logger.error("ERROR al obtener transportistas de la API externa:", e);
+            logger.error("ERROR FATAL al obtener o procesar transportistas de la API externa:", e);
             return Collections.emptyMap();
         }
     }
@@ -177,12 +188,13 @@ public class TarifaCostoService {
     private Map<String, String> getTipoVehiculoNamesMap() {
         try {
             List<TipoVehiculoDTO> tiposVehiculo = viajesClient.getTiposVehiculo();
+            logger.info("Tipos de Vehículo recibidos de la API externa: {}", tiposVehiculo);
             return tiposVehiculo.stream()
                     .filter(tv -> tv != null && tv.getId() != null && tv.getNombre() != null)
                     .collect(
                             Collectors.toMap(TipoVehiculoDTO::getId, TipoVehiculoDTO::getNombre, (prev, next) -> prev));
         } catch (Exception e) {
-            logger.error("ERROR al obtener tipos de vehículo de la API externa:", e);
+            logger.error("ERROR FATAL al obtener o procesar tipos de vehículo de la API externa:", e);
             return Collections.emptyMap();
         }
     }
