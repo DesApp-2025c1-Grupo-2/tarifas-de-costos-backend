@@ -27,8 +27,8 @@ public class TipoVehiculoController {
     @GetMapping
     public List<TipoVehiculoViewDTO> obtenerTodosTipos() {
         return viajesClient.getVehiculos().stream()
-                .filter(Objects::nonNull)
-                .filter(v -> v.getTipo() != null && v.getTipo().getId() != null)
+                .filter(v -> v != null && v.getDeletedAt() == null && v.getTipo() != null
+                        && v.getTipo().getId() != null)
                 .map(vehiculo -> new TipoVehiculoViewDTO(vehiculo, vehiculo.getTipo()))
                 .filter(distinctByKey(TipoVehiculoViewDTO::getId))
                 .collect(Collectors.toList());

@@ -15,7 +15,27 @@ public class TransportistaDTO {
     @JsonProperty("nombre_comercial")
     private String nombreComercial;
 
+    @JsonProperty("cuit")
     private String cuit;
-    private DireccionDTO direccion;
+
+    @JsonProperty("contacto")
     private ContactoDTO contacto;
+
+    /**
+     * Método clave: Devuelve el nombre que está dentro del objeto 'contacto'.
+     * Este es el nombre que queremos mostrar (ej: "Laura Acosta").
+     * Si el contacto no existe o no tiene nombre, devuelve el nombre comercial como
+     * alternativa.
+     * 
+     * @return El nombre del contacto o el nombre comercial de la empresa.
+     */
+    public String getNombreParaMostrar() {
+        if (this.contacto != null && this.contacto.getNombre() != null && !this.contacto.getNombre().isEmpty()) {
+            return this.contacto.getNombre();
+        }
+        if (this.nombreComercial != null && !this.nombreComercial.isEmpty()) {
+            return this.nombreComercial;
+        }
+        return ""; 
+    }
 }
