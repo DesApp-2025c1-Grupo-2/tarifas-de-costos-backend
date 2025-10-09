@@ -32,8 +32,10 @@ public class CargaDeCombustibleService {
     public Optional<CargaDeCombustible> actualizar(Long id, CargaDeCombustible nuevosDatos) {
         return cargaDeCombustibleRepository.findById(id).map(existente -> {
             existente.setVehiculoId(nuevosDatos.getVehiculoId());
-            existente.setCostoTotal(nuevosDatos.getCostoTotal());
             existente.setFecha(nuevosDatos.getFecha());
+            existente.setCantidadTanques(nuevosDatos.getCantidadTanques());
+            existente.setPrecioPorLitro(nuevosDatos.getPrecioPorLitro());
+            existente.setCostoTotal(nuevosDatos.getCostoTotal());
             existente.setEsVigente(nuevosDatos.isEsVigente());
             return cargaDeCombustibleRepository.save(existente);
         });
