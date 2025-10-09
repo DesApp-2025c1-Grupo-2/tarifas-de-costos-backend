@@ -1,5 +1,6 @@
 package com.acme.tarifas.gestion.clients;
 
+
 import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
 import com.acme.tarifas.gestion.dto.VehiculoDTO;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
@@ -11,9 +12,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
+
 @Service
 public class ViajesClient {
-    // Sirve para consumir todo lo de la API de viajes.
+    //Sirve para consumir todo lo de la API de viajes.
     private final WebClient webClient;
 
     public ViajesClient(@Value("${VIAJES_URL}") String urlViajes, WebClient.Builder builder) {
@@ -24,6 +26,7 @@ public class ViajesClient {
         return webClient;
     }
 
+
     public List<TransportistaDTO> getTransportistas() {
         return webClient.get()
                 .uri("/empresa")
@@ -33,6 +36,7 @@ public class ViajesClient {
                 .block();
     }
 
+
     public TransportistaDTO getTransportistaById(String id) {
         return webClient.get()
                 .uri("/empresa/{id}", id)
@@ -41,16 +45,18 @@ public class ViajesClient {
                 .block();
     }
 
-    public List<VehiculoDTO> getVehiculos() { // Vehiculos
+
+    public List<VehiculoDTO> getVehiculos(){ //Vehiculos
         return webClient.get()
                 .uri("/vehiculo")
                 .retrieve()
                 .bodyToFlux(VehiculoDTO.class)
                 .collectList()
                 .block();
-    }
+         }
 
-    public VehiculoDTO getVehiculoById(String id) {
+
+    public VehiculoDTO getVehiculoById(String id){
         return webClient.get()
                 .uri("/vehiculo/{id}", id)
                 .retrieve()
@@ -58,7 +64,8 @@ public class ViajesClient {
                 .block();
     }
 
-    public List<TipoVehiculoDTO> getTiposVehiculo() { // TIPOS de vehiculo
+
+    public List<TipoVehiculoDTO> getTiposVehiculo(){ //TIPOS de vehiculo
         return webClient.get()
                 .uri("/tipo-vehiculo")
                 .retrieve()
@@ -67,7 +74,7 @@ public class ViajesClient {
                 .block();
     }
 
-    public TipoVehiculoDTO getTiposVehiculoById(String id) {
+    public TipoVehiculoDTO getTiposVehiculoById(String id){
         return webClient.get()
                 .uri("/tipo-vehiculo/{id}", id)
                 .retrieve()
@@ -76,3 +83,5 @@ public class ViajesClient {
     }
 
 }
+
+

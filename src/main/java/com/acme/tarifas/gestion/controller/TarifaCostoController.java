@@ -1,11 +1,9 @@
 package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.dto.TarifaCostoDTO;
-import com.acme.tarifas.gestion.dto.TarifaCostoPayloadDTO;
 import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.service.TarifaCostoService;
-import jakarta.persistence.EntityNotFoundException; // Asegúrate de tener esta importación
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tarifas")
@@ -21,34 +20,30 @@ public class TarifaCostoController {
     @Autowired
     private TarifaCostoService tarifaService;
 
-    // --- CORREGIDO ---
-    // Ahora el bloque 'try-catch' está correcto y maneja las excepciones adecuadas.
     @PostMapping
-    public ResponseEntity<?> crearTarifa(@RequestBody TarifaCostoPayloadDTO payload) {
+    public ResponseEntity<?> crearTarifa(@RequestBody TarifaCosto tarifa) {
         try {
-            TarifaCostoDTO nuevaTarifaDTO = tarifaService.crearTarifa(payload);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaTarifaDTO);
-        } catch (IllegalArgumentException | EntityNotFoundException ex) {
+            TarifaCostoDTO nueva = tarifaService.crearTarifa(tarifa);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nueva);
+        } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(Map.of("mensaje", ex.getMessage()));
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TarifaCostoDTO> actualizarTarifa(@PathVariable Long id,
-            @RequestBody TarifaCostoPayloadDTO payload) {
-        return tarifaService.actualizarTarifa(id, payload)
+    public ResponseEntity<TarifaCosto> actualizarTarifa(@PathVariable Long id, @RequestBody TarifaCosto tarifa) {
+        return tarifaService.actualizarTarifa(id, tarifa)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // --- El resto de los métodos no cambian ---
-
     @GetMapping
     public List<TarifaCostoDTO> obtenerTodasTarifas(
-            @RequestParam(required = false) String tipoVehiculo,
+            @RequestParam(required = false) Long tipoVehiculo,
             @RequestParam(required = false) Long zona,
             @RequestParam(required = false) Long tipoCarga,
-            @RequestParam(required = false) String transportista) {
+            @RequestParam(required = false) Long transportista) {
+
         return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga, transportista);
     }
 
@@ -60,7 +55,8 @@ public class TarifaCostoController {
     }
 
     @PostMapping("/{id}/adicionales")
-    public ResponseEntity<TarifaAdicional> agregarAdicional(@PathVariable Long id,
+    public ResponseEntity<TarifaAdicional> agregarAdicional(
+            @PathVariable Long id,
             @RequestBody TarifaAdicional adicional) {
         return tarifaService.agregarAdicional(id, adicional)
                 .map(ResponseEntity::ok)
@@ -68,7 +64,9 @@ public class TarifaCostoController {
     }
 
     @PutMapping("/{id}/valor-base")
-    public ResponseEntity<TarifaCosto> actualizarValorBase(@PathVariable Long id, @RequestParam Double nuevoValor) {
+    public ResponseEntity<TarifaCosto> actualizarValorBase(
+            @PathVariable Long id,
+            @RequestParam Double nuevoValor) {
         return tarifaService.actualizarValorBase(id, nuevoValor)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

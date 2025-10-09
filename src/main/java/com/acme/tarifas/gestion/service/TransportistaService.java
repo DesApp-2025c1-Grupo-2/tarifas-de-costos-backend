@@ -52,8 +52,6 @@ public class TransportistaService {
                 .toList();
     }
 
-    
-
     @Transactional(readOnly = true)
     public Optional<TransportistaProfile> getTransportistaProfile(String id) {
         TransportistaDTO transportista = viajesClient.getTransportistaById(id);
@@ -123,4 +121,3 @@ public class TransportistaService {
 
 
 }
-

@@ -3,15 +3,9 @@ package com.acme.tarifas.gestion.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
+//Se usa para transportistaDTO y CamionDTO
 @Data
-@NoArgsConstructor
 public class TelefonoDTO {
-
-    @JsonProperty("_id")
-    private String id;
-
     @JsonProperty("codigo_pais")
     public String codigoPais;
 
@@ -19,4 +13,10 @@ public class TelefonoDTO {
     public String codigoArea;
 
     public String numero;
+
+
+    @JsonProperty("id")
+    @JsonAlias("_id")
+    private String id;
+
 }
