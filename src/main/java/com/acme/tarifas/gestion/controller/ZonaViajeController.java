@@ -86,11 +86,10 @@ public class ZonaViajeController {
     }
 
     @PutMapping("/{id}/baja")
-    public ResponseEntity<?> baja(@PathVariable Long id) {
+    public ResponseEntity<ZonaViaje> baja(@PathVariable Long id) {
         try {
-            zonaService.baja(id);
-            return ResponseEntity.noContent().build();
-
+            ZonaViaje zona = zonaService.baja(id);
+            return ResponseEntity.ok(zona);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
