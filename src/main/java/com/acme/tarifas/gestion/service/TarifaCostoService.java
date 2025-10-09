@@ -33,6 +33,9 @@ public class TarifaCostoService {
     @Autowired
     private AdicionalRepository adicionalRepository;
     @Autowired
+    private final ViajesClient viajesClient;
+
+    @Autowired
     private TarifaAdicionalRepository tarifaAdicionalRepository;
     @Autowired
     private TarifaHistorialRepository historialRepository;
