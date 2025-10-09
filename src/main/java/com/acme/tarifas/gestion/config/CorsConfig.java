@@ -13,7 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
                         "http://localhost:5173",
                         "http://127.0.0.1:5173",
                         "http://localhost:8080",
-                        "https://68d73033f00e1875e53568ce--tarifas-de-costo.netlify.app")
+                        "https://tarifas-de-costo.netlify.app/tarifas")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true);
     }
