@@ -1,15 +1,12 @@
 package com.acme.tarifas.gestion.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class VehiculoDTO {
 
-    @JsonProperty("id")
-    @JsonAlias("_id")
+    @JsonProperty("_id")
     private String id;
 
     private String patente;
@@ -20,10 +17,10 @@ public class VehiculoDTO {
     private Integer anio;
 
     @JsonProperty("volumen_carga")
-    private Integer volumenCarga;
+    private Double volumenCarga;
 
     @JsonProperty("peso_carga")
-    private Integer pesoCarga;
+    private Double pesoCarga;
 
     private TipoVehiculoDTO tipo;
 
@@ -31,5 +28,4 @@ public class VehiculoDTO {
 
     @JsonProperty("empresa")
     private TransportistaDTO transportista;
-
 }

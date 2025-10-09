@@ -6,7 +6,7 @@ import java.util.List;
 public class TarifaCostoDTO {
 
     private Long id;
-    private String nombre;
+    private String nombreTarifa;
     private Double valorBase;
     private boolean esVigente;
     private String transportistaNombre;
@@ -24,24 +24,36 @@ public class TarifaCostoDTO {
         // Constructor vacío. Se setea todo desde el service.
     }
 
-    // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public TarifaCostoDTO(TarifaCosto tarifaCosto) {
+        this.id = tarifaCosto.getId();
+        this.nombreTarifa = tarifaCosto.getNombreTarifa();
+        this.valorBase = tarifaCosto.getValorBase();
+        this.esVigente = tarifaCosto.isEsVigente();
+        this.zonaNombre = tarifaCosto.getZonaViaje() != null ? tarifaCosto.getZonaViaje().getNombre() : null;
+        this.tipoCargaNombre = tarifaCosto.getTipoCargaTarifa() != null ? tarifaCosto.getTipoCargaTarifa().getNombre()
+                : null;
+        this.transportistaId = tarifaCosto.getTransportistaId();
+        this.tipoVehiculoId = tarifaCosto.getTipoVehiculoId();
+        this.zonaId = tarifaCosto.getZonaViaje() != null ? tarifaCosto.getZonaViaje().getId() : null;
+        this.tipoCargaId = tarifaCosto.getTipoCargaTarifa() != null ? tarifaCosto.getTipoCargaTarifa().getId() : null;
+        this.total = tarifaCosto.getValorTotal();
+        this.adicionales = tarifaCosto.getAdicionales();
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public Double getValorBase() { return valorBase; }
-    public void setValorBase(Double valorBase) { this.valorBase = valorBase; }
+    public Long getId() {
+        return id;
+    }
 
     public boolean isEsVigente() { return esVigente; }
     public void setEsVigente(boolean esVigente) { this.esVigente = esVigente; }
 
-    public String getTransportistaNombre() { return transportistaNombre; }
-    public void setTransportistaNombre(String transportistaNombre) { this.transportistaNombre = transportistaNombre; }
+    public String getNombreTarifa() {
+        return nombreTarifa;
+    }
 
-    public String getTipoVehiculoNombre() { return tipoVehiculoNombre; }
-    public void setTipoVehiculoNombre(String tipoVehiculoNombre) { this.tipoVehiculoNombre = tipoVehiculoNombre; }
+    public void setNombreTarifa(String nombreTarifa) {
+        this.nombreTarifa = nombreTarifa;
+    }
 
     public String getZonaNombre() { return zonaNombre; }
     public void setZonaNombre(String zonaNombre) { this.zonaNombre = zonaNombre; }
