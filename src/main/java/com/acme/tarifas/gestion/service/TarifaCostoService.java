@@ -48,6 +48,18 @@ public class TarifaCostoService {
         if (payload.getValorBase() == null || payload.getValorBase() <= 0) {
             throw new IllegalArgumentException("El valor base es obligatorio y debe ser mayor que cero.");
         }
+
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Se añaden validaciones para asegurar que los IDs no sean nulos antes de
+        // usarlos.
+        if (payload.getZonaId() == null) {
+            throw new IllegalArgumentException("El ID de la zona no puede ser nulo.");
+        }
+        if (payload.getTipoCargaId() == null) {
+            throw new IllegalArgumentException("El ID del tipo de carga no puede ser nulo.");
+        }
+        // --- FIN DE LA CORRECCIÓN ---
+
         TarifaCosto tarifa = new TarifaCosto();
         tarifa.setNombreTarifa(payload.getNombreTarifa());
         tarifa.setValorBase(payload.getValorBase());
