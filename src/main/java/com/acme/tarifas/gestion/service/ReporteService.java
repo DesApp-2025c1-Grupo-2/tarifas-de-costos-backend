@@ -8,6 +8,7 @@ import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dto.ComparativaTransportistaDTO;
 import com.acme.tarifas.gestion.dto.FrecuenciaAdicionalDTO;
 import com.acme.tarifas.gestion.dto.ReporteVehiculoCombustibleDTO;
+import org.springframework.transaction.annotation.Transactional;
 import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
 import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.acme.tarifas.gestion.dto.TransportistaTarifasDTO;
@@ -52,11 +53,10 @@ public class ReporteService {
         this.cargaDeCombustibleRepository = cargaDeCombustibleRepository;
     }
 
-
+    @Transactional(readOnly = true) 
     public List<FrecuenciaAdicionalDTO> getFrecuenciaUsoAdicionales() {
-        return tarifaAdicionalRepository.findFrecuenciaUsoAdicionales();
-    }
-
+    return tarifaAdicionalRepository.findFrecuenciaUsoAdicionales();
+    }   
 
     public List<TransportistaTarifasDTO> getTransportistasMasUtilizados() {
         List<Object[]> rawResults = tarifaCostoRepository.countByTransportista();
