@@ -86,7 +86,7 @@ public class ViajesClient {
         try {
             return webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/viajes/count") 
+                            .path("/viajes/count-by-vehiculo") 
                             .queryParam("vehiculoId", vehiculoId)
                             .queryParam("fechaInicio", fechaInicio)
                             .queryParam("fechaFin", fechaFin)
@@ -95,12 +95,13 @@ public class ViajesClient {
                     .bodyToMono(Long.class) 
                     .block();
         } catch (Exception e) {
-            System.err.println("Error al obtener cantidad de viajes del vehículo: " + vehiculoId + ". Error: " + e.getMessage());
+            System.err.println("Error al obtener cantidad de viajes del vehículo " + vehiculoId + " en rango de fechas. Error: " + e.getMessage());
             
             return 0L;
         }
     }
 }
+
 
 
 

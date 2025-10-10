@@ -65,4 +65,19 @@ public class ReporteController {
 
         return ResponseEntity.ok(reporte);
     }
+    
+    @GetMapping("/uso-combustible")
+    public ResponseEntity<ReporteVehiculoCombustibleDTO> getReporteUsoCombustible(
+            @RequestParam String vehiculoId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+
+        ReporteVehiculoCombustibleDTO reporte = reporteService.generarReporteUsoCombustible(vehiculoId, fechaInicio, fechaFin);
+
+        if (reporte.getCantidadViajes() == 0 && reporte.getCantidadCargasCombustible() == 0) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(reporte);
+    }
 }

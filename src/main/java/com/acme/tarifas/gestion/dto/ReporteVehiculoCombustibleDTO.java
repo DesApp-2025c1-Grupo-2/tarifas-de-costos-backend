@@ -15,6 +15,6 @@ public class ReporteVehiculoCombustibleDTO {
     private String fechaInicio;
     private String fechaFin;
 
-    // Métricas de eficiencia
+   
     private Double viajesPorCarga;
 }

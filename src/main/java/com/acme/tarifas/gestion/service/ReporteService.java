@@ -1,18 +1,28 @@
 package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.clients.ViajesClient;
-import com.acme.tarifas.gestion.dao.*;
-import com.acme.tarifas.gestion.dto.*;
+import com.acme.tarifas.gestion.dao.CargaDeCombustibleRepository;
+import com.acme.tarifas.gestion.dao.TarifaAdicionalRepository;
+import com.acme.tarifas.gestion.dao.TarifaCostoHistorialRepository;
+import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
+import com.acme.tarifas.gestion.dto.ComparativaTransportistaDTO;
+import com.acme.tarifas.gestion.dto.FrecuenciaAdicionalDTO;
+import com.acme.tarifas.gestion.dto.ReporteVehiculoCombustibleDTO;
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
+import com.acme.tarifas.gestion.dto.TransportistaDTO;
+import com.acme.tarifas.gestion.dto.TransportistaTarifasDTO;
+import com.acme.tarifas.gestion.dto.VariacionTarifaDTO;
+import com.acme.tarifas.gestion.dto.VehiculoDTO;
+import com.acme.tarifas.gestion.entity.CargaDeCombustible;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
-import com.acme.tarifas.gestion.entity.Viaje;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -27,16 +37,19 @@ public class ReporteService {
     private final TarifaAdicionalRepository tarifaAdicionalRepository;
     private final TarifaCostoRepository tarifaCostoRepository;
     private final ViajesClient viajesClient;
+    private final CargaDeCombustibleRepository cargaDeCombustibleRepository;
 
     @Autowired
     public ReporteService(TarifaCostoHistorialRepository historialRepository,
                           TarifaAdicionalRepository tarifaAdicionalRepository,
                           TarifaCostoRepository tarifaCostoRepository,
-                          ViajesClient viajesClient) {
+                          ViajesClient viajesClient,
+                          CargaDeCombustibleRepository cargaDeCombustibleRepository) {
         this.historialRepository = historialRepository;
         this.tarifaAdicionalRepository = tarifaAdicionalRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
         this.viajesClient = viajesClient;
+        this.cargaDeCombustibleRepository = cargaDeCombustibleRepository;
     }
 
 
@@ -135,6 +148,49 @@ public class ReporteService {
             reporte.add(variacionDTO);
         }
         return reporte;
+    }
+    
+    // [NUEVO MÉTODO DE REPORTE]
+    public ReporteVehiculoCombustibleDTO generarReporteUsoCombustible(String vehiculoId, LocalDate fechaInicio, LocalDate fechaFin) {
+        
+        // 1. Obtener datos de Viajes (API Externa)
+        Long cantidadViajes = viajesClient.getCantidadViajesVehiculo(
+            vehiculoId, 
+            fechaInicio.toString(), 
+            fechaFin.toString()
+        );
+
+        // 2. Obtener datos de Combustible (DB Local)
+        LocalDateTime inicio = fechaInicio.atStartOfDay();
+        LocalDateTime fin = fechaFin.atStartOfDay().withHour(23).withMinute(59).withSecond(59);
+
+        List<CargaDeCombustible> cargas = cargaDeCombustibleRepository
+            .findByVehiculoIdAndFechaBetweenAndEsVigenteTrue(vehiculoId, inicio, fin);
+
+        Long cantidadCargas = (long) cargas.size();
+        Double costoTotal = cargas.stream()
+            .mapToDouble(CargaDeCombustible::getCostoTotal)
+            .sum();
+
+        // 3. Obtener nombre del vehículo para el reporte (API Externa)
+        VehiculoDTO vehiculoDTO = viajesClient.getVehiculoById(vehiculoId);
+        String patente = (vehiculoDTO != null) ? vehiculoDTO.getPatente() : "Vehículo No Encontrado";
+
+        // 4. Calcular métricas de eficiencia
+        Double viajesPorCarga = (cantidadCargas > 0) 
+            ? (double) cantidadViajes / cantidadCargas 
+            : 0.0;
+
+        // 5. Construir y devolver el DTO
+        return new ReporteVehiculoCombustibleDTO(
+            patente,
+            cantidadViajes,
+            cantidadCargas,
+            round(costoTotal, 2),
+            fechaInicio.toString(),
+            fechaFin.toString(),
+            round(viajesPorCarga, 2)
+        );
     }
 
     private double round(double value, int places) {
