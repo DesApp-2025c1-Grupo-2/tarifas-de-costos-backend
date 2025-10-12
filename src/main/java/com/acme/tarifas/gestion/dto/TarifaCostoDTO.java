@@ -6,7 +6,7 @@ import java.util.List;
 public class TarifaCostoDTO {
 
     private Long id;
-    private String nombre;
+    private String nombreTarifa;
     private Double valorBase;
     private boolean esVigente;
     private String transportistaNombre;
@@ -28,8 +28,8 @@ public class TarifaCostoDTO {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getNombreTarifa() { return nombreTarifa; }
+    public void setNombreTarifa(String nombreTarifa) { this.nombreTarifa = nombreTarifa; }
 
     public Double getValorBase() { return valorBase; }
     public void setValorBase(Double valorBase) { this.valorBase = valorBase; }

@@ -75,6 +75,10 @@ public class TarifaCostoService {
         if (tarifa.getTipoVehiculoId() == null || tarifa.getTipoVehiculoId().isEmpty()) {
             throw new IllegalArgumentException("El ID de TipoVehiculo es obligatorio.");
         }
+        if (tarifa.getTipoCargaTarifa() == null || tarifa.getTipoCargaTarifa().getId() == null) {
+            throw new IllegalArgumentException("El Tipo de Carga es obligatorio.");
+        }
+
 
 
         tarifa.setFechaCreacion(LocalDateTime.now());
@@ -91,7 +95,7 @@ public class TarifaCostoService {
 
         TarifaCostoDTO dto = new TarifaCostoDTO();
         dto.setId(savedTarifa.getId());
-        dto.setNombre(savedTarifa.getNombreTarifa());
+        dto.setNombreTarifa(savedTarifa.getNombreTarifa());
         dto.setValorBase(savedTarifa.getValorBase());
         dto.setEsVigente(savedTarifa.isEsVigente());
         dto.setTransportistaId(savedTarifa.getTransportistaId());
@@ -100,8 +104,10 @@ public class TarifaCostoService {
         dto.setTipoVehiculoNombre(tipoVehiculo != null ? tipoVehiculo.getNombre() : null);
         dto.setZonaId(savedTarifa.getZonaViaje() != null ? savedTarifa.getZonaViaje().getId() : null);
         dto.setZonaNombre(savedTarifa.getZonaViaje() != null ? savedTarifa.getZonaViaje().getNombre() : null);
+
         dto.setTipoCargaId(savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getId() : null);
         dto.setTipoCargaNombre(savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getNombre() : null);
+
         dto.setTotal(savedTarifa.getValorTotal());
         dto.setAdicionales(savedTarifa.getAdicionales());
 
@@ -171,7 +177,7 @@ public class TarifaCostoService {
 
             TarifaCostoDTO dto = new TarifaCostoDTO();
             dto.setId(tarifa.getId());
-            dto.setNombre(tarifa.getNombreTarifa());
+            dto.setNombreTarifa(tarifa.getNombreTarifa());
             dto.setValorBase(tarifa.getValorBase());
             dto.setEsVigente(tarifa.isEsVigente());
             dto.setTransportistaId(tarifa.getTransportistaId());
@@ -196,7 +202,7 @@ public class TarifaCostoService {
 
             TarifaCostoDTO dto = new TarifaCostoDTO();
             dto.setId(tarifa.getId());
-            dto.setNombre(tarifa.getNombreTarifa());
+            dto.setNombreTarifa(tarifa.getNombreTarifa());
             dto.setValorBase(tarifa.getValorBase());
             dto.setEsVigente(tarifa.isEsVigente());
             dto.setTransportistaId(tarifa.getTransportistaId());
