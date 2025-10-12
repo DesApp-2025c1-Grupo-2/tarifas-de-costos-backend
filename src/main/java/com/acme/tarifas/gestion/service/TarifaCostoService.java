@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -154,7 +155,9 @@ public class TarifaCostoService {
         });
     }
 
+
     public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
+
         List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
         Stream<TarifaCosto> stream = todasLasTarifas.stream();
 
@@ -171,9 +174,31 @@ public class TarifaCostoService {
             stream = stream.filter(t -> t.getTransportistaId() != null && t.getTransportistaId().equals(transportista.toString()));
         }
 
-        return stream.map(tarifa -> {
-            TransportistaDTO transportistaDTO = viajesClient.getTransportistaById(tarifa.getTransportistaId());
-            TipoVehiculoDTO tipoVehiculoDTO = viajesClient.getTiposVehiculoById(tarifa.getTipoVehiculoId());
+        List<TarifaCosto> tarifasFiltradas = stream.collect(Collectors.toList());
+
+        List<String> transportistaIds = tarifasFiltradas.stream()
+                .map(TarifaCosto::getTransportistaId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> tipoVehiculoIds = tarifasFiltradas.stream()
+                .map(TarifaCosto::getTipoVehiculoId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 3. Obtener todos los datos externos en lote (¡solo 2 llamadas a la API!)
+        Map<String, TransportistaDTO> transportistasMap = viajesClient.getTransportistas().stream()
+                .filter(t -> transportistaIds.contains(t.getId()))
+                .collect(Collectors.toMap(TransportistaDTO::getId, t -> t));
+
+        Map<String, TipoVehiculoDTO> tiposVehiculoMap = viajesClient.getTiposVehiculo().stream()
+                .filter(tv -> tipoVehiculoIds.contains(tv.getId()))
+                .collect(Collectors.toMap(TipoVehiculoDTO::getId, tv -> tv));
+
+
+        return tarifasFiltradas.stream().map(tarifa -> {
+            TransportistaDTO transportistaDTO = transportistasMap.get(tarifa.getTransportistaId());
+            TipoVehiculoDTO tipoVehiculoDTO = tiposVehiculoMap.get(tarifa.getTipoVehiculoId());
 
             TarifaCostoDTO dto = new TarifaCostoDTO();
             dto.setId(tarifa.getId());
@@ -182,8 +207,8 @@ public class TarifaCostoService {
             dto.setEsVigente(tarifa.isEsVigente());
             dto.setTransportistaId(tarifa.getTransportistaId());
             dto.setTipoVehiculoId(tarifa.getTipoVehiculoId());
-            dto.setTransportistaNombre(transportistaDTO != null ? transportistaDTO.getNombreComercial() : null);
-            dto.setTipoVehiculoNombre(tipoVehiculoDTO != null ? tipoVehiculoDTO.getNombre() : null);
+            dto.setTransportistaNombre(transportistaDTO != null ? transportistaDTO.getNombreComercial() : "N/A");
+            dto.setTipoVehiculoNombre(tipoVehiculoDTO != null ? tipoVehiculoDTO.getNombre() : "N/A");
             dto.setZonaId(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getId() : null);
             dto.setZonaNombre(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getNombre() : null);
             dto.setTipoCargaId(tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getId() : null);
