@@ -24,6 +24,7 @@ public class AdicionalService {
         return adicionalRepository.save(adicional);
     }
 
+    @Transactional(readOnly = true)
     public List<Adicional> obtenerTodos() {
 
         return adicionalRepository.findAll();

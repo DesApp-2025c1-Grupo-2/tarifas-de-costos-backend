@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,6 +76,10 @@ public class TarifaCostoService {
         if (tarifa.getTipoVehiculoId() == null || tarifa.getTipoVehiculoId().isEmpty()) {
             throw new IllegalArgumentException("El ID de TipoVehiculo es obligatorio.");
         }
+        if (tarifa.getTipoCargaTarifa() == null || tarifa.getTipoCargaTarifa().getId() == null) {
+            throw new IllegalArgumentException("El Tipo de Carga es obligatorio.");
+        }
+
 
 
         tarifa.setFechaCreacion(LocalDateTime.now());
@@ -91,7 +96,7 @@ public class TarifaCostoService {
 
         TarifaCostoDTO dto = new TarifaCostoDTO();
         dto.setId(savedTarifa.getId());
-        dto.setNombre(savedTarifa.getNombreTarifa());
+        dto.setNombreTarifa(savedTarifa.getNombreTarifa());
         dto.setValorBase(savedTarifa.getValorBase());
         dto.setEsVigente(savedTarifa.isEsVigente());
         dto.setTransportistaId(savedTarifa.getTransportistaId());
@@ -100,8 +105,10 @@ public class TarifaCostoService {
         dto.setTipoVehiculoNombre(tipoVehiculo != null ? tipoVehiculo.getNombre() : null);
         dto.setZonaId(savedTarifa.getZonaViaje() != null ? savedTarifa.getZonaViaje().getId() : null);
         dto.setZonaNombre(savedTarifa.getZonaViaje() != null ? savedTarifa.getZonaViaje().getNombre() : null);
+
         dto.setTipoCargaId(savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getId() : null);
         dto.setTipoCargaNombre(savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getNombre() : null);
+
         dto.setTotal(savedTarifa.getValorTotal());
         dto.setAdicionales(savedTarifa.getAdicionales());
 
@@ -148,7 +155,9 @@ public class TarifaCostoService {
         });
     }
 
+
     public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
+
         List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
         Stream<TarifaCosto> stream = todasLasTarifas.stream();
 
@@ -165,19 +174,41 @@ public class TarifaCostoService {
             stream = stream.filter(t -> t.getTransportistaId() != null && t.getTransportistaId().equals(transportista.toString()));
         }
 
-        return stream.map(tarifa -> {
-            TransportistaDTO transportistaDTO = viajesClient.getTransportistaById(tarifa.getTransportistaId());
-            TipoVehiculoDTO tipoVehiculoDTO = viajesClient.getTiposVehiculoById(tarifa.getTipoVehiculoId());
+        List<TarifaCosto> tarifasFiltradas = stream.collect(Collectors.toList());
+
+        List<String> transportistaIds = tarifasFiltradas.stream()
+                .map(TarifaCosto::getTransportistaId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> tipoVehiculoIds = tarifasFiltradas.stream()
+                .map(TarifaCosto::getTipoVehiculoId)
+                .distinct()
+                .collect(Collectors.toList());
+
+
+        Map<String, TransportistaDTO> transportistasMap = viajesClient.getTransportistas().stream()
+                .filter(t -> transportistaIds.contains(t.getId()))
+                .collect(Collectors.toMap(TransportistaDTO::getId, t -> t));
+
+        Map<String, TipoVehiculoDTO> tiposVehiculoMap = viajesClient.getTiposVehiculo().stream()
+                .filter(tv -> tipoVehiculoIds.contains(tv.getId()))
+                .collect(Collectors.toMap(TipoVehiculoDTO::getId, tv -> tv));
+
+
+        return tarifasFiltradas.stream().map(tarifa -> {
+            TransportistaDTO transportistaDTO = transportistasMap.get(tarifa.getTransportistaId());
+            TipoVehiculoDTO tipoVehiculoDTO = tiposVehiculoMap.get(tarifa.getTipoVehiculoId());
 
             TarifaCostoDTO dto = new TarifaCostoDTO();
             dto.setId(tarifa.getId());
-            dto.setNombre(tarifa.getNombreTarifa());
+            dto.setNombreTarifa(tarifa.getNombreTarifa());
             dto.setValorBase(tarifa.getValorBase());
             dto.setEsVigente(tarifa.isEsVigente());
             dto.setTransportistaId(tarifa.getTransportistaId());
             dto.setTipoVehiculoId(tarifa.getTipoVehiculoId());
-            dto.setTransportistaNombre(transportistaDTO != null ? transportistaDTO.getNombreComercial() : null);
-            dto.setTipoVehiculoNombre(tipoVehiculoDTO != null ? tipoVehiculoDTO.getNombre() : null);
+            dto.setTransportistaNombre(transportistaDTO != null ? transportistaDTO.getNombreComercial() : "N/A");
+            dto.setTipoVehiculoNombre(tipoVehiculoDTO != null ? tipoVehiculoDTO.getNombre() : "N/A");
             dto.setZonaId(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getId() : null);
             dto.setZonaNombre(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getNombre() : null);
             dto.setTipoCargaId(tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getId() : null);
@@ -196,7 +227,7 @@ public class TarifaCostoService {
 
             TarifaCostoDTO dto = new TarifaCostoDTO();
             dto.setId(tarifa.getId());
-            dto.setNombre(tarifa.getNombreTarifa());
+            dto.setNombreTarifa(tarifa.getNombreTarifa());
             dto.setValorBase(tarifa.getValorBase());
             dto.setEsVigente(tarifa.isEsVigente());
             dto.setTransportistaId(tarifa.getTransportistaId());

@@ -27,6 +27,7 @@ public class ZonaViajeService {
     @Autowired
     private ProvinciaRepository provinciaRepository;
 
+    @Transactional(readOnly = true)    
     public List<ZonaViaje> getZonas() {
         return zonaRepository.findAll();
     }
