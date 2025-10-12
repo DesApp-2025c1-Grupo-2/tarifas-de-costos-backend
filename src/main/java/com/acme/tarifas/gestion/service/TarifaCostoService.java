@@ -186,7 +186,7 @@ public class TarifaCostoService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // 3. Obtener todos los datos externos en lote (¡solo 2 llamadas a la API!)
+
         Map<String, TransportistaDTO> transportistasMap = viajesClient.getTransportistas().stream()
                 .filter(t -> transportistaIds.contains(t.getId()))
                 .collect(Collectors.toMap(TransportistaDTO::getId, t -> t));
