@@ -35,8 +35,9 @@ public class TarifaCosto {
     @Transient
     private TipoVehiculoDTO tipoVehiculo;
 
-    @Column(name = "ID_TipoVehiculo", nullable = false)
+    @Column(name = "ID_TipoVehiculo", nullable = false, length = 255)
     private String tipoVehiculoId;
+
 
     @ManyToOne
     @JoinColumn(name = "ID_TipoCargaTarifa")
@@ -46,9 +47,8 @@ public class TarifaCosto {
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
 
-    @Column(name = "ID_Transportista", nullable = false)
+    @Column(name = "ID_Transportista", nullable = false, length = 255) 
     private String transportistaId;
-
 
     @Transient
     private TransportistaDTO transportista;
