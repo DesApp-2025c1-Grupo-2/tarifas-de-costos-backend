@@ -16,7 +16,6 @@ public class CargaDeCombustible {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_CargaCombustible")
     private Long id;
 
     @Column(name = "ID_Vehiculo", nullable = false)

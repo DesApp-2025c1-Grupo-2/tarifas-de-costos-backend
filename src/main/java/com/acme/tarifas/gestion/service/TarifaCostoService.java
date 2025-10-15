@@ -47,7 +47,6 @@ public class TarifaCostoService {
         this.viajesClient = viajesClient;
     }
 
-
     private void procesarYAsociarAdicionales(TarifaCosto tarifa) {
         if (tarifa.getAdicionales() != null) {
             for (TarifaAdicional tarifaAdicional : tarifa.getAdicionales()) {
@@ -81,19 +80,14 @@ public class TarifaCostoService {
             throw new IllegalArgumentException("El Tipo de Carga es obligatorio.");
         }
 
-
-
         tarifa.setFechaCreacion(LocalDateTime.now());
         tarifa.setFechaUltimaModificacion(LocalDateTime.now());
         procesarYAsociarAdicionales(tarifa);
 
-
         TarifaCosto savedTarifa = tarifaRepository.save(tarifa);
-
 
         TransportistaDTO transportista = viajesClient.getTransportistaById(savedTarifa.getTransportistaId());
         TipoVehiculoDTO tipoVehiculo = viajesClient.getTiposVehiculoById(savedTarifa.getTipoVehiculoId());
-
 
         TarifaCostoDTO dto = new TarifaCostoDTO();
         dto.setId(savedTarifa.getId());
@@ -108,7 +102,8 @@ public class TarifaCostoService {
         dto.setZonaNombre(savedTarifa.getZonaViaje() != null ? savedTarifa.getZonaViaje().getNombre() : null);
 
         dto.setTipoCargaId(savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getId() : null);
-        dto.setTipoCargaNombre(savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getNombre() : null);
+        dto.setTipoCargaNombre(
+                savedTarifa.getTipoCargaTarifa() != null ? savedTarifa.getTipoCargaTarifa().getNombre() : null);
 
         dto.setTotal(savedTarifa.getValorTotal());
         dto.setAdicionales(savedTarifa.getAdicionales());
@@ -126,7 +121,7 @@ public class TarifaCostoService {
             tarifaExistente.setValorBase(datosNuevos.getValorBase());
             tarifaExistente.setTransportistaId(datosNuevos.getTransportistaId());
             tarifaExistente.setTipoVehiculoId(datosNuevos.getTipoVehiculoId());
-            
+
             tarifaExistente.setZonaViaje(datosNuevos.getZonaViaje());
             tarifaExistente.setTipoCargaTarifa(datosNuevos.getTipoCargaTarifa());
             tarifaExistente.setFechaUltimaModificacion(LocalDateTime.now());
@@ -157,46 +152,33 @@ public class TarifaCostoService {
         });
     }
 
-
     public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
-
         List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
         Stream<TarifaCosto> stream = todasLasTarifas.stream();
 
         if (tipoVehiculo != null) {
-            stream = stream.filter(t -> t.getTipoVehiculoId() != null && t.getTipoVehiculoId().equals(tipoVehiculo.toString()));
+            stream = stream.filter(
+                    t -> t.getTipoVehiculoId() != null && t.getTipoVehiculoId().equals(String.valueOf(tipoVehiculo)));
         }
         if (zona != null) {
             stream = stream.filter(t -> t.getZonaViaje() != null && t.getZonaViaje().getId().equals(zona));
         }
         if (tipoCarga != null) {
-            stream = stream.filter(t -> t.getTipoCargaTarifa() != null && t.getTipoCargaTarifa().getId().equals(tipoCarga));
+            stream = stream
+                    .filter(t -> t.getTipoCargaTarifa() != null && t.getTipoCargaTarifa().getId().equals(tipoCarga));
         }
         if (transportista != null) {
-            stream = stream.filter(t -> t.getTransportistaId() != null && t.getTransportistaId().equals(transportista.toString()));
+            stream = stream.filter(t -> t.getTransportistaId() != null
+                    && t.getTransportistaId().equals(String.valueOf(transportista)));
         }
 
         List<TarifaCosto> tarifasFiltradas = stream.collect(Collectors.toList());
 
-        List<String> transportistaIds = tarifasFiltradas.stream()
-                .map(TarifaCosto::getTransportistaId)
-                .distinct()
-                .collect(Collectors.toList());
-
-        List<String> tipoVehiculoIds = tarifasFiltradas.stream()
-                .map(TarifaCosto::getTipoVehiculoId)
-                .distinct()
-                .collect(Collectors.toList());
-
-
         Map<String, TransportistaDTO> transportistasMap = viajesClient.getTransportistas().stream()
-                .filter(t -> transportistaIds.contains(t.getId()))
-                .collect(Collectors.toMap(TransportistaDTO::getId, t -> t));
+                .collect(Collectors.toMap(TransportistaDTO::getId, t -> t, (existing, replacement) -> existing));
 
         Map<String, TipoVehiculoDTO> tiposVehiculoMap = viajesClient.getTiposVehiculo().stream()
-                .filter(tv -> tipoVehiculoIds.contains(tv.getId()))
-                .collect(Collectors.toMap(TipoVehiculoDTO::getId, tv -> tv));
-
+                .collect(Collectors.toMap(TipoVehiculoDTO::getId, tv -> tv, (existing, replacement) -> existing));
 
         return tarifasFiltradas.stream().map(tarifa -> {
             TransportistaDTO transportistaDTO = transportistasMap.get(tarifa.getTransportistaId());
@@ -214,7 +196,8 @@ public class TarifaCostoService {
             dto.setZonaId(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getId() : null);
             dto.setZonaNombre(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getNombre() : null);
             dto.setTipoCargaId(tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getId() : null);
-            dto.setTipoCargaNombre(tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getNombre() : null);
+            dto.setTipoCargaNombre(
+                    tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getNombre() : null);
             dto.setTotal(tarifa.getValorTotal());
             dto.setAdicionales(tarifa.getAdicionales());
 
@@ -239,14 +222,14 @@ public class TarifaCostoService {
             dto.setZonaId(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getId() : null);
             dto.setZonaNombre(tarifa.getZonaViaje() != null ? tarifa.getZonaViaje().getNombre() : null);
             dto.setTipoCargaId(tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getId() : null);
-            dto.setTipoCargaNombre(tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getNombre() : null);
+            dto.setTipoCargaNombre(
+                    tarifa.getTipoCargaTarifa() != null ? tarifa.getTipoCargaTarifa().getNombre() : null);
             dto.setTotal(tarifa.getValorTotal());
             dto.setAdicionales(tarifa.getAdicionales());
 
             return dto;
         });
     }
-
 
     @Transactional
     public Optional<TarifaAdicional> agregarAdicional(Long tarifaId, TarifaAdicional nuevoAdicional) {
@@ -288,15 +271,11 @@ public class TarifaCostoService {
         historial.setTarifaOriginal(tarifa);
         historial.setCodigoTarifa(tarifa.getCodigoTarifa());
         historial.setNombreTarifa(tarifa.getNombreTarifa());
-        
+
         // Se setean los IDs persistentes para el historial
         historial.setTipoVehiculoId(tarifa.getTipoVehiculoId());
         historial.setTransportistaId(tarifa.getTransportistaId());
-        
-        // Se mantienen los DTOs transitorios (aunque no necesarios para persistencia)
-        historial.setTipoVehiculo(tarifa.getTipoVehiculo()); 
-        historial.setTransportista(tarifa.getTransportista());
-        
+
         historial.setTipoCargaTarifa(tarifa.getTipoCargaTarifa());
         historial.setZonaViaje(tarifa.getZonaViaje());
         historial.setValorBase(tarifa.getValorBase());

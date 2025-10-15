@@ -1,7 +1,5 @@
 package com.acme.tarifas.gestion.entity;
 
-import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
-import com.acme.tarifas.gestion.dto.TransportistaDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -23,7 +21,6 @@ public class TarifaCosto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_TarifaCosto")
     private Long id;
 
     @Column(unique = true)
@@ -32,12 +29,7 @@ public class TarifaCosto {
     @NotBlank(message = "El nombre es obligatorio.")
     private String nombreTarifa;
 
-    @Transient
-    private TipoVehiculoDTO tipoVehiculo;
-
-    @Column(name = "ID_TipoVehiculo", nullable = false, length = 255)
     private String tipoVehiculoId;
-
 
     @ManyToOne
     @JoinColumn(name = "ID_TipoCargaTarifa")
@@ -47,17 +39,11 @@ public class TarifaCosto {
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
 
-    @Column(name = "ID_Transportista", nullable = false, length = 255) 
     private String transportistaId;
-
-    @Transient
-    private TransportistaDTO transportista;
-
 
     private Double valorBase;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaUltimaModificacion;
-
 
     @NotNull
     @Column(name = "esVigente", nullable = false)

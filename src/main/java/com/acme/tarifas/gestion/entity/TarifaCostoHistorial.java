@@ -28,9 +28,7 @@ public class TarifaCostoHistorial {
 
     @Transient
     private TipoVehiculoDTO tipoVehiculo;
-    
-    // CORRECCIÓN: Campo persistente para TipoVehiculo ID (Ahora opcional)
-    @Column(name = "ID_TipoVehiculo", length = 255) 
+
     private String tipoVehiculoId;
 
     @ManyToOne
@@ -41,12 +39,9 @@ public class TarifaCostoHistorial {
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
 
-
     @Transient
     private TransportistaDTO transportista;
 
-    // CORRECCIÓN: Campo persistente para Transportista ID (Ahora opcional)
-    @Column(name = "ID_Transportista", length = 255)
     private String transportistaId;
 
     private Double valorBase;

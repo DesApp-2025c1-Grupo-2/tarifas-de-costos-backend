@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 //Refaccionar utilizando ViajesClient
 //Eliminar todo lo que sea para creación, modificacion y eliminación. Dejar solo visualizacion/filtrado
 @Service
@@ -30,8 +31,8 @@ public class TransportistaService {
 
     @Autowired
     public TransportistaService(ViajeRepository viajeRepository,
-                                TarifaCostoRepository tarifaCostoRepository,
-                                ViajesClient viajesClient) {
+            TarifaCostoRepository tarifaCostoRepository,
+            ViajesClient viajesClient) {
 
         this.viajeRepository = viajeRepository;
         this.tarifaCostoRepository = tarifaCostoRepository;
@@ -39,16 +40,11 @@ public class TransportistaService {
     }
 
     public List<TarifaCosto> findByTransportistaIdAndEsVigenteTrue(String transportistaId) {
-
-        TransportistaDTO transportista = viajesClient.getTransportistaById(transportistaId);
-
-
         List<TarifaCosto> vigentes = tarifaCostoRepository.findByEsVigenteTrue();
 
-
         return vigentes.stream()
-                .filter(t -> t.getTransportista() != null &&
-                        t.getTransportista().getId().equals(transportista.getId()))
+                .filter(t -> t.getTransportistaId() != null &&
+                        t.getTransportistaId().equals(transportistaId))
                 .toList();
     }
 
@@ -59,12 +55,16 @@ public class TransportistaService {
             return Optional.empty();
         }
 
-
         List<TarifaCosto> tarifas = findByTransportistaIdAndEsVigenteTrue(id);
 
-        Set<TipoVehiculoDTO> tiposVehiculo = tarifas.stream()
-                .map(TarifaCosto::getTipoVehiculo)
+        Set<String> tipoVehiculoIds = tarifas.stream()
+                .map(TarifaCosto::getTipoVehiculoId)
                 .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<TipoVehiculoDTO> allTipos = viajesClient.getTiposVehiculo();
+        Set<TipoVehiculoDTO> tiposVehiculo = allTipos.stream()
+                .filter(tipo -> tipoVehiculoIds.contains(tipo.getId()))
                 .collect(Collectors.toSet());
 
         Set<ZonaViaje> zonasOperacion = tarifas.stream()
@@ -78,7 +78,6 @@ public class TransportistaService {
         return Optional.of(profile);
     }
 
-
     @Data
     @NoArgsConstructor
     public static class TransportistaProfile {
@@ -91,7 +90,8 @@ public class TransportistaService {
         private List<TipoVehiculoDTO> tiposVehiculo;
         private List<ZonaViajeDTO> zonasOperacion;
 
-        public TransportistaProfile(TransportistaDTO transportista, Set<TipoVehiculoDTO> tiposVehiculo, Set<ZonaViaje> zonas) {
+        public TransportistaProfile(TransportistaDTO transportista, Set<TipoVehiculoDTO> tiposVehiculo,
+                Set<ZonaViaje> zonas) {
             this.id = transportista.getId();
             this.nombreComercial = transportista.getNombreComercial();
             this.cuit = transportista.getCuit();
@@ -111,13 +111,11 @@ public class TransportistaService {
                     })
                     .collect(Collectors.toList());
 
-
             this.zonasOperacion = zonas.stream()
                     .filter(Objects::nonNull)
                     .map(ZonaViajeDTO::new)
                     .collect(Collectors.toList());
         }
     }
-
 
 }
