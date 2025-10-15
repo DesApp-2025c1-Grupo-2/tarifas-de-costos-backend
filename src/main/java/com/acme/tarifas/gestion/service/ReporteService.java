@@ -181,4 +181,65 @@ public class ReporteService {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+    public ReporteVehiculoCombustibleDTO generarReporteUsoCombustible(
+        String vehiculoId,
+        LocalDate fechaInicio,
+        LocalDate fechaFin) {
+
+    VehiculoDTO vehiculo = null;
+    try {
+        // 1. Obtener datos del vehículo (protegido contra 4xx/5xx)
+        vehiculo = viajesClient.getVehiculoById(vehiculoId);
+    } catch (Exception e) {
+        System.err.println("Error al obtener datos del vehículo " + vehiculoId + ": " + e.getMessage());
+        // Se permite que continúe con vehiculo = null
+    }
+
+    String patente;
+    if (vehiculo != null) {
+        // CORRECCIÓN: Se asegura que cada campo individual no sea nulo.
+        String p = Optional.ofNullable(vehiculo.getPatente()).orElse("N/A");
+        String m = Optional.ofNullable(vehiculo.getMarca()).orElse("N/A");
+        String mod = Optional.ofNullable(vehiculo.getModelo()).orElse("N/A");
+        patente = p + " - " + m + " " + mod;
+    } else {
+        patente = "Vehículo no encontrado (ID: " + vehiculoId + ")";
+    }
+
+    // 2. Obtener las cargas de combustible vigentes en el rango de fechas
+    List<CargaDeCombustible> cargas = cargaDeCombustibleRepository.findAll().stream()
+            .filter(c -> c.isEsVigente() && c.getVehiculoId().equals(vehiculoId))
+            .filter(c -> !c.getFecha().toLocalDate().isBefore(fechaInicio) && !c.getFecha().toLocalDate().isAfter(fechaFin))
+            .collect(Collectors.toList());
+
+
+    // 3. Calcular totales de combustible
+    long cantidadCargas = cargas.size();
+    
+    // NOTA: La entidad CargaDeCombustible NO incluye el costo por litro.
+    // El costo total se establece a 0.0 como marcador de posición (placeholder) para que el reporte funcione, hasta que se complete esta lógica.
+    double costoTotalCombustible = 0.0;
+    
+    // 4. Obtener la cantidad de viajes (Usa la implementación corregida en ViajesClient)
+    long cantidadViajes = viajesClient.getCantidadViajesVehiculo(
+        vehiculoId, 
+        fechaInicio.toString(), 
+        fechaFin.toString()
+    );
+
+    // 5. Crear el DTO de Reporte
+    double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajes / cantidadCargas : 0.0;
+    
+    ReporteVehiculoCombustibleDTO dto = new ReporteVehiculoCombustibleDTO(
+        patente,
+        cantidadViajes,
+        cantidadCargas,
+        costoTotalCombustible,
+        fechaInicio.toString(),
+        fechaFin.toString(),
+        viajesPorCarga
+    );
+
+    return dto;
+}
 }
