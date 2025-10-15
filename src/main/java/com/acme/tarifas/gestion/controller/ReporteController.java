@@ -22,7 +22,6 @@ public class ReporteController {
         this.reporteService = reporteService;
     }
 
-
     @GetMapping("/frecuencia-adicionales")
     public ResponseEntity<List<FrecuenciaAdicionalDTO>> getFrecuenciaAdicionales(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
@@ -36,13 +35,11 @@ public class ReporteController {
         return ResponseEntity.ok(datos);
     }
 
-
     @GetMapping("/transportistas-mas-utilizados")
     public ResponseEntity<List<TransportistaTarifasDTO>> getTransportistasMasUtilizados() {
         List<TransportistaTarifasDTO> datos = reporteService.getTransportistasMasUtilizados();
         return ResponseEntity.ok(datos);
     }
-
 
     @GetMapping("/comparativa-costos")
     public ResponseEntity<ComparativaTransportistaDTO> getComparativaCostos(
@@ -73,19 +70,5 @@ public class ReporteController {
 
         return ResponseEntity.ok(reporte);
     }
-    
-    @GetMapping("/uso-combustible")
-    public ResponseEntity<ReporteVehiculoCombustibleDTO> getReporteUsoCombustible(
-            @RequestParam String vehiculoId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
 
-        ReporteVehiculoCombustibleDTO reporte = reporteService.generarReporteUsoCombustible(vehiculoId, fechaInicio, fechaFin);
-
-        if (reporte.getCantidadViajes() == 0 && reporte.getCantidadCargasCombustible() == 0) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(reporte);
-    }
 }
