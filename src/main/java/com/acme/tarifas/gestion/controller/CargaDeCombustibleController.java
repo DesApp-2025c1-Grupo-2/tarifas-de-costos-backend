@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -18,7 +20,19 @@ public class CargaDeCombustibleController {
 
     @GetMapping
     public List<CargaDeCombustible> obtenerTodasLasCargas() {
-        return cargaService.obtenerTodasLasCargas();
+        // --- PRUEBA DE DEPURACIÓN ---
+        // Si ves este objeto en la respuesta de la API, ¡el deploy funcionó!
+        CargaDeCombustible testData = new CargaDeCombustible();
+        testData.setId(999L);
+        testData.setVehiculoId("TEST-VEHICULO");
+        testData.setFecha(LocalDateTime.now());
+        testData.setLitrosCargados(123.45);
+        testData.setKilometrosRecorridos(987.65);
+        testData.setEsVigente(true);
+        return Collections.singletonList(testData);
+        // --- FIN DE LA PRUEBA ---
+
+        // return cargaService.obtenerTodasLasCargas(); // <- Línea original comentada
     }
 
     @PostMapping
@@ -28,7 +42,8 @@ public class CargaDeCombustibleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CargaDeCombustible> actualizarCarga(@PathVariable Long id, @RequestBody CargaDeCombustible carga) {
+    public ResponseEntity<CargaDeCombustible> actualizarCarga(@PathVariable Long id,
+            @RequestBody CargaDeCombustible carga) {
         return cargaService.actualizarCarga(id, carga)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

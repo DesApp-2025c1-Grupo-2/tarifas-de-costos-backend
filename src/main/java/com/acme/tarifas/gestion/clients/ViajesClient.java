@@ -82,11 +82,11 @@ public class ViajesClient {
                 .block();
     }
 
-    public Long getCantidadViajesVehiculo(String vehiculoId, String fechaInicio, String fechaFin) {
+     public Long getCantidadViajesVehiculo(String vehiculoId, String fechaInicio, String fechaFin) {
         try {
             return webClient.get()
                     .uri(uriBuilder -> uriBuilder
-                            .path("/viajes/count-by-vehiculo") 
+                            .path("/viaje/buscar") 
                             .queryParam("vehiculoId", vehiculoId)
                             .queryParam("fechaInicio", fechaInicio)
                             .queryParam("fechaFin", fechaFin)

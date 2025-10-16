@@ -16,17 +16,19 @@ public class CargaDeCombustible {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_CargaCombustible")
     private Long id;
 
-    @Column(name = "ID_Vehiculo", nullable = false)
-    private String vehiculoId; // ID externo del vehículo
+    @Column(name = "vehiculo_id", nullable = false)
+    private String vehiculoId;
 
     private LocalDateTime fecha;
-    private Integer cantidadTanques;
-    private Double precioPorLitro;
-    private Double costoTotal;
 
-    @Column(name = "EsVigente", nullable = false)
+    @Column(name = "litros_cargados")
+    private Double litrosCargados;
+
+    @Column(name = "kilometros_recorridos")
+    private Double kilometrosRecorridos;
+
+    @Column(name = "es_vigente", nullable = false)
     private boolean esVigente = true;
 }

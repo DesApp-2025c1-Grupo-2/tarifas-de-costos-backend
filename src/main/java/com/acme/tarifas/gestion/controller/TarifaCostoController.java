@@ -39,10 +39,10 @@ public class TarifaCostoController {
 
     @GetMapping
     public List<TarifaCostoDTO> obtenerTodasTarifas(
-            @RequestParam(required = false) Long tipoVehiculo,
+            @RequestParam(required = false) String tipoVehiculo,
             @RequestParam(required = false) Long zona,
             @RequestParam(required = false) Long tipoCarga,
-            @RequestParam(required = false) Long transportista) {
+            @RequestParam(required = false) String transportista) {
 
         return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga, transportista);
     }
