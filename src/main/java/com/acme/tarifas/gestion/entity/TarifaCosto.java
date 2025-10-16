@@ -21,6 +21,7 @@ public class TarifaCosto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_TarifaCosto")
     private Long id;
 
     @Column(unique = true)
@@ -29,6 +30,7 @@ public class TarifaCosto {
     @NotBlank(message = "El nombre es obligatorio.")
     private String nombreTarifa;
 
+    @Column(name = "ID_TipoVehiculo")
     private String tipoVehiculoId;
 
     @ManyToOne
@@ -39,6 +41,7 @@ public class TarifaCosto {
     @JoinColumn(name = "ID_ZonaViaje")
     private ZonaViaje zonaViaje;
 
+    @Column(name = "ID_Transportista")
     private String transportistaId;
 
     private Double valorBase;
