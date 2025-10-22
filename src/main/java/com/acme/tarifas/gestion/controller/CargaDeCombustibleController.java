@@ -18,21 +18,10 @@ public class CargaDeCombustibleController {
     @Autowired
     private CargaDeCombustibleService cargaService;
 
-    @GetMapping
+   @GetMapping
     public List<CargaDeCombustible> obtenerTodasLasCargas() {
-        // --- PRUEBA DE DEPURACIÓN ---
-        // Si ves este objeto en la respuesta de la API, ¡el deploy funcionó!
-        CargaDeCombustible testData = new CargaDeCombustible();
-        testData.setId(999L);
-        testData.setVehiculoId("TEST-VEHICULO");
-        testData.setFecha(LocalDateTime.now());
-        testData.setLitrosCargados(123.45);
-        testData.setKilometrosRecorridos(987.65);
-        testData.setEsVigente(true);
-        return Collections.singletonList(testData);
-        // --- FIN DE LA PRUEBA ---
-
-        // return cargaService.obtenerTodasLasCargas(); // <- Línea original comentada
+    // Elimina el bloque de prueba si existe
+    return cargaService.obtenerTodasLasCargas(); // Asegúrate que esta sea la línea activa
     }
 
     @PostMapping

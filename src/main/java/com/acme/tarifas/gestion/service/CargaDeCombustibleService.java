@@ -29,14 +29,15 @@ public class CargaDeCombustibleService {
     }
 
     public Optional<CargaDeCombustible> actualizarCarga(Long id, CargaDeCombustible datosNuevos) {
-        return cargaRepository.findById(id).map(existente -> {
-            existente.setVehiculoId(datosNuevos.getVehiculoId());
-            existente.setFecha(datosNuevos.getFecha());
-            existente.setLitrosCargados(datosNuevos.getLitrosCargados());
-            existente.setKilometrosRecorridos(datosNuevos.getKilometrosRecorridos());
-            return cargaRepository.save(existente);
-        });
-    }
+    return cargaRepository.findById(id).map(existente -> {
+        existente.setVehiculoId(datosNuevos.getVehiculoId());
+        existente.setFecha(datosNuevos.getFecha());
+        existente.setLitrosCargados(datosNuevos.getLitrosCargados());
+        existente.setNumeroTicket(datosNuevos.getNumeroTicket()); 
+        existente.setPrecioTotal(datosNuevos.getPrecioTotal());   
+        return cargaRepository.save(existente);
+    });
+}
 
     @Transactional
     public void darBaja(Long id) {
