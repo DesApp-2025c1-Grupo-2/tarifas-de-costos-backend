@@ -152,7 +152,7 @@ public class TarifaCostoService {
         });
     }
 
-    public List<TarifaCostoDTO> filtrarTarifas(Long tipoVehiculo, Long zona, Long tipoCarga, Long transportista) {
+    public List<TarifaCostoDTO> filtrarTarifas(String tipoVehiculo, Long zona, Long tipoCarga, String transportista) {
         List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
         Stream<TarifaCosto> stream = todasLasTarifas.stream();
 
