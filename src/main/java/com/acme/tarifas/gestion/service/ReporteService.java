@@ -11,8 +11,8 @@ import com.acme.tarifas.gestion.entity.CargaDeCombustible;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
 import com.acme.tarifas.gestion.entity.ZonaViaje; // Necesario para ComparativaTransportistaDTO
-import com.fasterxml.jackson.databind.JsonNode; // Necesario para procesar la respuesta
-import com.fasterxml.jackson.databind.node.ArrayNode; // Necesario para procesar la respuesta
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +33,10 @@ public class ReporteService {
     private final TarifaCostoRepository tarifaCostoRepository;
     private final ViajesClient viajesClient;
     private final CargaDeCombustibleRepository cargaDeCombustibleRepository;
+
+    // Estado esperado para filtrar los viajes finalizados (ignora mayúsculas/minúsculas)
+    private static final String ESTADO_VIAJE_FINALIZADO = "fin de viaje";
+
 
     @Autowired
     public ReporteService(TarifaCostoHistorialRepository historialRepository,
@@ -193,6 +197,7 @@ public class ReporteService {
         return reporte;
     }
 
+
     private double round(double value, int places) {
         if (places < 0)
             throw new IllegalArgumentException();
@@ -201,7 +206,8 @@ public class ReporteService {
         return bd.doubleValue();
     }
 
-    // *** MÉTODO ACTUALIZADO ***
+
+    // *** MÉTODO ACTUALIZADO CON FILTRO DE ESTADO ***
     public ReporteVehiculoCombustibleDTO generarReporteUsoCombustible(
             String vehiculoId,
             LocalDate fechaInicio,
@@ -234,57 +240,60 @@ public class ReporteService {
                 .mapToDouble(CargaDeCombustible::getPrecioTotal)
                 .sum();
 
-        // --- OBTENER VIAJES Y KILÓMETROS DESDE LA RESPUESTA COMPLETA ---
-        long cantidadViajes = 0L;
-        double kilometrosTotales = 0.0;
+        // --- OBTENER VIAJES Y KILÓMETROS Y FILTRAR POR ESTADO ---
+        long cantidadViajesFinalizados = 0L; // Cambiado nombre de variable
+        double kilometrosTotalesFinalizados = 0.0; // Cambiado nombre de variable
 
         try {
-            JsonNode viajesResponse = viajesClient.getViajesFiltradosResponse( // Llama al método renombrado
+            JsonNode viajesResponse = viajesClient.getViajesFiltradosResponse(
                  vehiculoId,
                  fechaInicio.toString(),
                  fechaFin.toString()
             );
 
             if (viajesResponse != null) {
-                // Extraer total de viajes
-                if (viajesResponse.hasNonNull("total") && viajesResponse.get("total").isNumber()) { // Verificación más robusta
-                    cantidadViajes = viajesResponse.get("total").asLong(0L);
-                } else {
-                     System.err.println("Advertencia: El campo 'total' no está presente o no es un número en la respuesta de ViajesClient.");
-                }
-
-                // Sumar kilómetros de la lista "data"
-                if (viajesResponse.hasNonNull("data") && viajesResponse.get("data").isArray()) { // Verificación más robusta
+                // Ya no leemos el 'total' directamente, lo contaremos después de filtrar
+                // Sumar kilómetros de la lista "data", filtrando por estado
+                if (viajesResponse.hasNonNull("data") && viajesResponse.get("data").isArray()) {
                     ArrayNode dataArray = (ArrayNode) viajesResponse.get("data");
                     for (JsonNode viajeNode : dataArray) {
-                        if (viajeNode.hasNonNull("kilometros") && viajeNode.get("kilometros").isNumber()) { // Verificación más robusta
-                            kilometrosTotales += viajeNode.get("kilometros").asDouble(0.0);
+                        // ---- FILTRO POR ESTADO ----
+                        if (viajeNode.hasNonNull("estado") &&
+                            ESTADO_VIAJE_FINALIZADO.equalsIgnoreCase(viajeNode.get("estado").asText()))
+                        {
+                            cantidadViajesFinalizados++; // Incrementar contador solo si está finalizado
+
+                            // Sumar kilómetros solo si está finalizado
+                            if (viajeNode.hasNonNull("kilometros") && viajeNode.get("kilometros").isNumber()) {
+                                kilometrosTotalesFinalizados += viajeNode.get("kilometros").asDouble(0.0);
+                            }
                         }
+                        // -------------------------
                     }
                 } else {
-                     System.err.println("Advertencia: La respuesta de ViajesClient no contiene un array 'data' válido para sumar kilómetros.");
+                     System.err.println("Advertencia: La respuesta de ViajesClient no contiene un array 'data' válido para procesar viajes.");
                 }
             } else {
                  System.err.println("Advertencia: La respuesta de ViajesClient fue nula.");
             }
         } catch (Exception e) {
              System.err.println("Error procesando respuesta de ViajesClient para vehículo " + vehiculoId + ": " + e.getMessage());
-             // Mantener cantidadViajes y kilometrosTotales en 0
+             // Mantener contadores en 0
         }
-        // --- FIN OBTENER VIAJES Y KILÓMETROS ---
+        // --- FIN OBTENER Y FILTRAR VIAJES ---
 
 
-        double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajes / cantidadCargas : 0.0;
+        double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajesFinalizados / cantidadCargas : 0.0; // Usar el contador filtrado
 
         ReporteVehiculoCombustibleDTO dto = new ReporteVehiculoCombustibleDTO(
             patente,
-            cantidadViajes,
+            cantidadViajesFinalizados, // Usar el contador filtrado
             cantidadCargas,
-            round(costoTotalCombustible, 2), // Redondear costo
+            round(costoTotalCombustible, 2),
             fechaInicio.toString(),
             fechaFin.toString(),
             round(viajesPorCarga, 2),
-            round(kilometrosTotales, 2) // Añadir kilómetros redondeados al DTO
+            round(kilometrosTotalesFinalizados, 2) // Usar la suma filtrada
         );
 
         return dto;
