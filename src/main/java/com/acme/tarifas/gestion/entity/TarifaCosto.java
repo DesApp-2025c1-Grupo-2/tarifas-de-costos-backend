@@ -21,6 +21,7 @@ public class TarifaCosto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_TarifaCosto")
     private Long id;
 
     @Column(unique = true)
