@@ -16,5 +16,6 @@ public class ReporteVehiculoCombustibleDTO {
     private String fechaInicio;
     private String fechaFin;
     private Double viajesPorCarga;
-    private Double totalKilometros; 
+    private Double totalKilometros;
+    private Double litrosTotales; 
 }

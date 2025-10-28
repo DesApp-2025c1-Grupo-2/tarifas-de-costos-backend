@@ -166,8 +166,7 @@ public class ReporteService {
             // El valor inicial es el del primer registro DENTRO DEL RANGO
             Double valorInicialRango = registroInicial.getValorBase();
 
-            // Si el valor inicial o final no existe (puede pasar si la tarifa se creó antes/después del rango
-            // o si el valor base es nulo), se omite esta tarifa para evitar errores de cálculo.
+     
              if (valorInicialRango == null || valorFinalActual == null) {
                 continue;
             }
@@ -175,9 +174,9 @@ public class ReporteService {
 
             VariacionTarifaDTO variacionDTO = new VariacionTarifaDTO(entry.getKey(), tarifaActual.getNombreTarifa());
             variacionDTO.setValorInicial(valorInicialRango);
-            variacionDTO.setFechaInicial(registroInicial.getFechaModificacion()); // Fecha del primer cambio en el rango
+            variacionDTO.setFechaInicial(registroInicial.getFechaModificacion());
             variacionDTO.setValorFinal(valorFinalActual);
-             // Usamos la fecha del último registro ENCONTRADO en el rango como fecha final de referencia del aumento
+           
             variacionDTO.setFechaFinal(registros.get(registros.size() - 1).getFechaModificacion());
 
 
@@ -192,7 +191,7 @@ public class ReporteService {
             }
             reporte.add(variacionDTO);
         }
-        // Ordenar reporte final por ID de tarifa o nombre para consistencia
+   
         reporte.sort(Comparator.comparing(VariacionTarifaDTO::getTarifaId));
         return reporte;
     }
@@ -207,7 +206,7 @@ public class ReporteService {
     }
 
 
-    // *** MÉTODO ACTUALIZADO CON FILTRO DE ESTADO ***
+   
     public ReporteVehiculoCombustibleDTO generarReporteUsoCombustible(
             String vehiculoId,
             LocalDate fechaInicio,
@@ -229,20 +228,28 @@ public class ReporteService {
 
 
         List<CargaDeCombustible> cargas = cargaDeCombustibleRepository.findAll().stream()
-                .filter(c -> c.isEsVigente() && Objects.equals(c.getVehiculoId(), vehiculoId)) // Comparación más segura
+                .filter(c -> c.isEsVigente() && Objects.equals(c.getVehiculoId(), vehiculoId)) 
                 .filter(c -> c.getFecha() != null && !c.getFecha().toLocalDate().isBefore(fechaInicio) && !c.getFecha().toLocalDate().isAfter(fechaFin))
                 .collect(Collectors.toList());
 
         long cantidadCargas = cargas.size();
 
         double costoTotalCombustible = cargas.stream()
-                .filter(c -> c.getPrecioTotal() != null) // Evitar NullPointerException
+                .filter(c -> c.getPrecioTotal() != null)
                 .mapToDouble(CargaDeCombustible::getPrecioTotal)
                 .sum();
 
-        // --- OBTENER VIAJES Y KILÓMETROS Y FILTRAR POR ESTADO ---
-        long cantidadViajesFinalizados = 0L; // Cambiado nombre de variable
-        double kilometrosTotalesFinalizados = 0.0; // Cambiado nombre de variable
+  
+        double litrosTotales = cargas.stream()
+                .filter(c -> c.getLitrosCargados() != null) 
+                .mapToDouble(CargaDeCombustible::getLitrosCargados)
+                .sum();
+ 
+
+
+        
+        long cantidadViajesFinalizados = 0L; 
+        double kilometrosTotalesFinalizados = 0.0;
 
         try {
             JsonNode viajesResponse = viajesClient.getViajesFiltradosResponse(
@@ -252,23 +259,22 @@ public class ReporteService {
             );
 
             if (viajesResponse != null) {
-                // Ya no leemos el 'total' directamente, lo contaremos después de filtrar
-                // Sumar kilómetros de la lista "data", filtrando por estado
+     
                 if (viajesResponse.hasNonNull("data") && viajesResponse.get("data").isArray()) {
                     ArrayNode dataArray = (ArrayNode) viajesResponse.get("data");
                     for (JsonNode viajeNode : dataArray) {
-                        // ---- FILTRO POR ESTADO ----
+                    
                         if (viajeNode.hasNonNull("estado") &&
                             ESTADO_VIAJE_FINALIZADO.equalsIgnoreCase(viajeNode.get("estado").asText()))
                         {
-                            cantidadViajesFinalizados++; // Incrementar contador solo si está finalizado
+                            cantidadViajesFinalizados++; 
 
-                            // Sumar kilómetros solo si está finalizado
+                          
                             if (viajeNode.hasNonNull("kilometros") && viajeNode.get("kilometros").isNumber()) {
                                 kilometrosTotalesFinalizados += viajeNode.get("kilometros").asDouble(0.0);
                             }
                         }
-                        // -------------------------
+                      
                     }
                 } else {
                      System.err.println("Advertencia: La respuesta de ViajesClient no contiene un array 'data' válido para procesar viajes.");
@@ -278,22 +284,23 @@ public class ReporteService {
             }
         } catch (Exception e) {
              System.err.println("Error procesando respuesta de ViajesClient para vehículo " + vehiculoId + ": " + e.getMessage());
-             // Mantener contadores en 0
+           
         }
-        // --- FIN OBTENER Y FILTRAR VIAJES ---
+       
 
 
-        double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajesFinalizados / cantidadCargas : 0.0; // Usar el contador filtrado
+        double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajesFinalizados / cantidadCargas : 0.0; 
 
         ReporteVehiculoCombustibleDTO dto = new ReporteVehiculoCombustibleDTO(
             patente,
-            cantidadViajesFinalizados, // Usar el contador filtrado
+            cantidadViajesFinalizados, 
             cantidadCargas,
             round(costoTotalCombustible, 2),
             fechaInicio.toString(),
             fechaFin.toString(),
             round(viajesPorCarga, 2),
-            round(kilometrosTotalesFinalizados, 2) // Usar la suma filtrada
+            round(kilometrosTotalesFinalizados, 2), 
+            round(litrosTotales, 2) // 
         );
 
         return dto;
