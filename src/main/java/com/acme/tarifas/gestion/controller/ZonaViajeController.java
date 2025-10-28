@@ -1,108 +1,9 @@
-/*package com.acme.tarifas.gestion.controller;
-
-import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
-import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
-import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.ZonaViaje;
-import com.acme.tarifas.gestion.service.ZonaViajeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import io.swagger.v3.oas.annotations.Parameter;
-
-import java.util.List;
-import java.util.Map;
-
-@RestController
-@RequestMapping("/api/zonas")
-public class ZonaViajeController {
-
-    @Autowired
-    private ZonaViajeService zonaService;
-
-    @GetMapping
-    public List<ZonaViaje> obtenerTodasLasZonas() {
-        return zonaService.getZonas();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ZonaViaje> obtenerZonaPorId(@PathVariable Long id) {
-        return zonaService.getZonaById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping(params = "nombre")
-    public ResponseEntity<ZonaViaje> obtenerZonaPorNombre(
-            @Parameter(description = "Nombre de la zona") @RequestParam String nombre) {
-        return zonaService.getZonaByNombre(nombre)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<ZonaViaje> crearZona(@RequestBody ZonaViajeDTO zonaDto) {
-        ZonaViaje zona = new ZonaViaje();
-        zona.setNombre(zonaDto.getNombre());
-        zona.setDescripcion(zonaDto.getDescripcion());
-        zona.setRegionMapa(zonaDto.getRegionMapa());
-        zona.setActivo(zonaDto.getActivo());
-        ZonaViaje nuevaZona = zonaService.guardarZona(zona, zonaDto.getProvinciasNombres());
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaZona);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarZona(@PathVariable Long id) {
-        try {
-            zonaService.eliminarZona(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/comparativa-costos")
-    public Map<String, Object> compararCostosPorZona() {
-        return zonaService.obtenerComparativaCostos();
-    }
-
-    @GetMapping("/{id}/tarifas")
-    public List<TarifaCosto> obtenerTarifasPorZona(@PathVariable Long id) {
-        return zonaService.obtenerTarifasZona(id);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ZonaViaje> actualizarZona(@PathVariable Long id, @RequestBody ZonaViajeDTO zonaDto) {
-        ZonaViaje zona = new ZonaViaje();
-        zona.setNombre(zonaDto.getNombre());
-        zona.setDescripcion(zonaDto.getDescripcion());
-        zona.setRegionMapa(zonaDto.getRegionMapa());
-        zona.setActivo(zonaDto.getActivo());
-        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasNombres())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/{id}/baja")
-    public ResponseEntity<ZonaViaje> baja(@PathVariable Long id) {
-        try {
-            ZonaViaje zona = zonaService.baja(id);
-            return ResponseEntity.ok(zona);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
-        }
-    }
-}*/
-
 package com.acme.tarifas.gestion.controller;
 
-import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
-import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
-import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.ZonaViaje;
+import com.acme.tarifas.gestion.dto.ZonaViajeDTO; // Importa y USA el DTO
+import com.acme.tarifas.gestion.entity.TarifaCosto; // Mantén si obtenerTarifasPorZona devuelve entidad
 import com.acme.tarifas.gestion.service.ZonaViajeService;
+import jakarta.persistence.EntityNotFoundException; // Para capturar excepciones específicas
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -114,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional; // Para manejar el Optional devuelto por el servicio
 
 @RestController
 @RequestMapping("/api/zonas")
@@ -123,47 +25,64 @@ public class ZonaViajeController {
     private ZonaViajeService zonaService;
 
     @GetMapping
-    public List<ZonaViaje> obtenerTodasLasZonas() {
-        return zonaService.getZonas();
+    public List<ZonaViajeDTO> obtenerTodasLasZonas() {
+        // Llama al método del servicio que devuelve DTOs
+        return zonaService.getZonasDTO();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ZonaViaje> obtenerZonaPorId(@PathVariable Long id) {
-        return zonaService.getZonaById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ZonaViajeDTO> obtenerZonaPorId(@PathVariable Long id) {
+        try {
+            // Llama al método del servicio que devuelve DTO
+            ZonaViajeDTO dto = zonaService.getZonaDTOById(id);
+            return ResponseEntity.ok(dto);
+        } catch (EntityNotFoundException e) {
+            // Si el servicio lanza EntityNotFoundException, devolvemos 404
+            return ResponseEntity.notFound().build();
+        }
+        // Considera capturar otras excepciones si es necesario
     }
 
     @GetMapping(params = "nombre")
-    public ResponseEntity<ZonaViaje> obtenerZonaPorNombre(
+    public ResponseEntity<ZonaViajeDTO> obtenerZonaPorNombre(
             @Parameter(description = "Nombre de la zona") @RequestParam String nombre) {
-        return zonaService.getZonaByNombre(nombre)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        // Llama al método del servicio que devuelve Optional<DTO>
+        Optional<ZonaViajeDTO> dtoOpt = zonaService.getZonaDTOByNombre(nombre);
+        return dtoOpt.map(ResponseEntity::ok) // Si el Optional contiene un DTO, devuelve 200 OK con el DTO
+                .orElseGet(() -> ResponseEntity.notFound().build()); // Si el Optional está vacío, devuelve 404 Not
+                                                                     // Found
     }
 
     @PostMapping
-    public ResponseEntity<ZonaViaje> crearZona(@RequestBody ZonaViajeDTO zonaDto) {
-        ZonaViaje zona = new ZonaViaje();
-        zona.setNombre(zonaDto.getNombre());
-        zona.setDescripcion(zonaDto.getDescripcion());
-        zona.setRegionMapa(zonaDto.getRegionMapa());
-        zona.setActivo(zonaDto.getActivo());
-        ZonaViaje nuevaZona = zonaService.guardarZona(zona, zonaDto.getProvinciasNombres());
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaZona);
+    public ResponseEntity<?> crearZona(@RequestBody ZonaViajeDTO zonaDto) {
+        try {
+            // Llama al método del servicio que recibe y devuelve DTO
+            ZonaViajeDTO nuevaZonaDTO = zonaService.guardarZonaYDevolverDTO(zonaDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaZonaDTO);
+        } catch (IllegalArgumentException e) {
+            // Captura errores de validación (ej. nombre duplicado)
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            // Captura otros errores inesperados
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al crear la zona"));
+        }
     }
 
+    // Este endpoint elimina físicamente. Si prefieres baja lógica, usa el endpoint
+    // /baja
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarZona(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarZona(@PathVariable Long id) {
         try {
             zonaService.eliminarZona(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().build(); // O ResponseEntity.noContent().build();
         } catch (Exception e) {
+            // Si la zona no existe para eliminar
             return ResponseEntity.notFound().build();
         }
     }
 
-    // [ENDPOINT MODIFICADO]
+    // Endpoint de Comparativa (ya devolvía Map, no necesita cambio de tipo)
     @GetMapping("/comparativa-costos")
     public Map<String, Object> compararCostosPorZona(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
@@ -171,29 +90,56 @@ public class ZonaViajeController {
         return zonaService.obtenerComparativaCostos(fechaInicio, fechaFin);
     }
 
+    // Este endpoint podría necesitar devolver TarifaCostoDTO si TarifaCosto tiene
+    // relaciones lazy
     @GetMapping("/{id}/tarifas")
-    public List<TarifaCosto> obtenerTarifasPorZona(@PathVariable Long id) {
-        return zonaService.obtenerTarifasZona(id);
+    public ResponseEntity<List<TarifaCosto>> obtenerTarifasPorZona(@PathVariable Long id) {
+        try {
+            // Verificar si la zona existe primero (opcional pero bueno)
+            zonaService.getZonaDTOById(id); // Lanza EntityNotFound si no existe
+            List<TarifaCosto> tarifas = zonaService.obtenerTarifasZona(id);
+            // ¡CUIDADO! Si TarifaCosto tiene relaciones LAZY, esto puede fallar aquí al
+            // serializar.
+            // Sería mejor que obtenerTarifasZona devuelva List<TarifaCostoDTO>.
+            if (tarifas.isEmpty()) {
+                return ResponseEntity.noContent().build(); // 204 si no hay tarifas para esa zona
+            }
+            return ResponseEntity.ok(tarifas);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build(); // 404 si la zona no existe
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ZonaViaje> actualizarZona(@PathVariable Long id, @RequestBody ZonaViajeDTO zonaDto) {
-        ZonaViaje zona = new ZonaViaje();
-        zona.setNombre(zonaDto.getNombre());
-        zona.setDescripcion(zonaDto.getDescripcion());
-        zona.setRegionMapa(zonaDto.getRegionMapa());
-        zona.setActivo(zonaDto.getActivo());
-        return zonaService.actualizarZona(id, zona, zonaDto.getProvinciasNombres())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> actualizarZona(@PathVariable Long id, @RequestBody ZonaViajeDTO zonaDto) {
+        try {
+            // Llama al método del servicio que devuelve Optional<DTO>
+            Optional<ZonaViajeDTO> dtoActualizadoOpt = zonaService.actualizarZonaYDevolverDTO(id, zonaDto);
+            return dtoActualizadoOpt
+                    .map(ResponseEntity::ok) // Si se actualizó, devuelve 200 OK con el DTO
+                    .orElseGet(() -> ResponseEntity.notFound().build()); // Si no se encontró la zona, devuelve 404
+        } catch (IllegalArgumentException e) {
+            // Captura errores de validación (ej. nombre duplicado)
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            // Captura otros errores inesperados
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al actualizar la zona"));
+        }
     }
 
     @PutMapping("/{id}/baja")
-    public ResponseEntity<ZonaViaje> baja(@PathVariable Long id) {
+    public ResponseEntity<?> baja(@PathVariable Long id) { // Cambiado el retorno a ResponseEntity<?> para manejar
+                                                           // errores
         try {
-            ZonaViaje zona = zonaService.baja(id);
-            return ResponseEntity.ok(zona);
+            // Llama al método del servicio que devuelve DTO
+            ZonaViajeDTO zonaDto = zonaService.bajaYDevolverDTO(id);
+            return ResponseEntity.ok(zonaDto); // Devuelve 200 OK con el DTO de la zona dada de baja
         } catch (Exception e) {
+            // Captura la excepción si la zona no existe o ya está inactiva
+            // Usa ResponseStatusException o devuelve ResponseEntity directamente
+            // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error",
+            // e.getMessage()));
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
