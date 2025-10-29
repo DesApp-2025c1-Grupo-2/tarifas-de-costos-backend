@@ -1,6 +1,7 @@
 > ## IMPORTANTE
 >
 > * Los puertos 7070, 8080 y 5432 deben estar libres
+> * Las imágenes tanto del front como del back están en Dockerhub, por lo que no es necesario clonar el repositorio (al menos que sea para desarrollo)
 
 ---
 
