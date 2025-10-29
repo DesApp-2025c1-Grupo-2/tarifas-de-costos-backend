@@ -94,7 +94,7 @@ public class ReporteService {
                 .toList();
     }
 
-
+    
     public ComparativaTransportistaDTO generarComparativaPorServicio(Long zonaId, String tipoVehiculoId, Long tipoCargaId) { // Changed tipoVehiculoId to String
         List<TarifaCosto> tarifasCoincidentes = tarifaCostoRepository.findAll().stream()
                 .filter(TarifaCosto::isEsVigente)
@@ -120,6 +120,8 @@ public class ReporteService {
                     // Use getNombreComercial which exists in TransportistaDTO
                     c.setTransportista(transportista.getNombreComercial() != null ? transportista.getNombreComercial() : "Nombre no disponible");
                     c.setCosto(t.getValorTotal());
+                    c.setTarifaId(t.getId());
+                    c.setNombreTarifa(t.getNombreTarifa() != null ? t.getNombreTarifa() : "Tarifa sin nombre");
                     return c;
                 })
                 .sorted(Comparator.comparing(ComparativaTransportistaDTO.Comparativa::getCosto))
