@@ -1,17 +1,16 @@
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.ProvinciaRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
+import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
 import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.Provincia;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.Hibernate;
-// Quitar los imports de Logger si ya no se usan
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ZonaViajeService {
-
-    // Quitar el logger si ya no se usa
-    // private static final Logger log =
-    // LoggerFactory.getLogger(ZonaViajeService.class);
 
     @Autowired
     private TarifaCostoService tarifaCostoService;
@@ -40,9 +35,12 @@ public class ZonaViajeService {
     @Autowired
     private ProvinciaRepository provinciaRepository;
 
+    @Autowired
+    private ViajesClient viajesClient;
+
     @Transactional(readOnly = true)
     public List<ZonaViajeDTO> getZonasDTO() {
-        List<ZonaViaje> zonas = zonaRepository.findAll(); // Asume @EntityGraph en repo
+        List<ZonaViaje> zonas = zonaRepository.findAll();
         return zonas.stream()
                 .filter(ZonaViaje::getActivo)
                 .map(this::mapToDTO)
@@ -145,29 +143,53 @@ public class ZonaViajeService {
                 .collect(Collectors.toList());
     }
 
+    // --- LÓGICA DEL REPORTE MODIFICADA ---
     @Transactional(readOnly = true)
-    public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio, LocalDate fechaFin) {
+    public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio, LocalDate fechaFin, Long zonaId) { // <--
+                                                                                                                  // AÑADIDO
+                                                                                                                  // zonaId
         Map<String, Object> resultado = new HashMap<>();
-        List<ZonaViaje> zonas = getZonasActivas();
+
         List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas(fechaInicio, fechaFin);
 
-        zonas.forEach(zona -> {
-            List<TarifaCosto> tarifasDeLaZona = todasLasTarifas.stream()
-                    .filter(tarifa -> tarifa.getZonaViaje() != null
-                            && tarifa.getZonaViaje().getId().equals(zona.getId()))
-                    .collect(Collectors.toList());
+        Map<String, String> tempVehiculosMap;
+        try {
+            tempVehiculosMap = viajesClient.getTiposVehiculo().stream()
+                    .filter(v -> v.getId() != null && v.getNombre() != null)
+                    .collect(Collectors.toMap(TipoVehiculoDTO::getId, TipoVehiculoDTO::getNombre, (n1, n2) -> n1));
+        } catch (Exception e) {
+            System.err.println("Error al obtener tipos de vehículo: " + e.getMessage());
+            tempVehiculosMap = Collections.emptyMap();
+        }
 
-            if (tarifasDeLaZona.isEmpty()) {
-                resultado.put(zona.getNombre(), "No hay tarifas");
+        final Map<String, String> vehiculosMap = tempVehiculosMap;
+
+        // --- APLICAR FILTRO DE ZONA AQUÍ ---
+        Map<String, List<TarifaCosto>> tarifasPorVehiculoId = todasLasTarifas.stream()
+                .filter(tarifa -> tarifa.getTipoVehiculoId() != null)
+                // Filtra por zonaId SI es que se proveyó uno
+                .filter(tarifa -> zonaId == null
+                        || (tarifa.getZonaViaje() != null && tarifa.getZonaViaje().getId().equals(zonaId)))
+                .collect(Collectors.groupingBy(TarifaCosto::getTipoVehiculoId));
+        // --- FIN DEL FILTRO ---
+
+        tarifasPorVehiculoId.forEach((tipoVehiculoId, tarifasDelVehiculo) -> {
+            String nombreVehiculo = vehiculosMap.getOrDefault(tipoVehiculoId,
+                    "Desconocido (ID: " + tipoVehiculoId + ")");
+
+            if (tarifasDelVehiculo.isEmpty()) {
+                // No lo agregamos si está vacío post-filtro
             } else {
-                DoubleSummaryStatistics stats = tarifasDeLaZona.stream()
+                DoubleSummaryStatistics stats = tarifasDelVehiculo.stream()
                         .mapToDouble(TarifaCosto::getValorTotal)
                         .summaryStatistics();
-                resultado.put(zona.getNombre(), stats);
+                resultado.put(nombreVehiculo, stats);
             }
         });
+
         return resultado;
     }
+    // --- FIN DE LA LÓGICA MODIFICADA ---
 
     private ZonaViajeDTO mapToDTO(ZonaViaje zona) {
         ZonaViajeDTO dto = new ZonaViajeDTO();
@@ -183,10 +205,6 @@ public class ZonaViajeService {
             dto.setProvinciasNombres(nombresProvincias);
         } else {
             dto.setProvinciasNombres(Collections.emptySet());
-            // Considera loggear una advertencia si prefieres, pero quitamos los logs de
-            // depuración
-            // log.warn("Mapeando DTO para Zona ID {}: ¡Provincias no inicializadas!",
-            // zona.getId());
         }
         return dto;
     }
@@ -197,7 +215,6 @@ public class ZonaViajeService {
         }
         return provinciasNombres.stream()
                 .map(nombre -> provinciaRepository.findByNombre(nombre)
-                        // Lanza la excepción si no se encuentra
                         .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
                 .collect(Collectors.toSet());
     }
