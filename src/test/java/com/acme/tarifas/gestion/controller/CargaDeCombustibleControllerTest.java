@@ -59,7 +59,7 @@ class CargaDeCombustibleControllerTest {
     @Test
     @DisplayName("GET / - Debe devolver todas las cargas vigentes")
     void cuandoObtenerTodasLasCargas_debeDevolverLista() throws Exception {
-        when(cargaService.obtenerTodasLasCargas()).thenReturn(List.of(carga1, carga2));
+        when(cargaService.obtenerTodasLasCargas(null)).thenReturn(List.of(carga1, carga2));
 
         mockMvc.perform(get("/api/cargasDeCombustible"))
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class CargaDeCombustibleControllerTest {
     @Test
     @DisplayName("GET / - Debe devolver lista vacía si no hay cargas")
     void cuandoObtenerTodasLasCargas_yNoHayCargas_debeDevolverListaVacia() throws Exception {
-        when(cargaService.obtenerTodasLasCargas()).thenReturn(Collections.emptyList());
+        when(cargaService.obtenerTodasLasCargas(null)).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/cargasDeCombustible"))
                 .andExpect(status().isOk())
@@ -83,8 +83,8 @@ class CargaDeCombustibleControllerTest {
         when(cargaService.guardarCarga(any(CargaDeCombustible.class))).thenReturn(carga1);
 
         mockMvc.perform(post("/api/cargasDeCombustible")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carga1)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(carga1)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)));
     }
@@ -92,12 +92,14 @@ class CargaDeCombustibleControllerTest {
     @Test
     @DisplayName("PUT /{id} - Debe actualizar si ID y datos son válidos")
     void cuandoActualizarCarga_conIdValido_debeDevolverOk() throws Exception {
-        CargaDeCombustible cargaActualizada = new CargaDeCombustible(1L, "NUEVO-ID", fechaTest, 60.0, "TICKET-999", 6000.0, true);
-        when(cargaService.actualizarCarga(eq(1L), any(CargaDeCombustible.class))).thenReturn(Optional.of(cargaActualizada));
+        CargaDeCombustible cargaActualizada = new CargaDeCombustible(1L, "NUEVO-ID", fechaTest, 60.0, "TICKET-999",
+                6000.0, true);
+        when(cargaService.actualizarCarga(eq(1L), any(CargaDeCombustible.class)))
+                .thenReturn(Optional.of(cargaActualizada));
 
         mockMvc.perform(put("/api/cargasDeCombustible/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cargaActualizada)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cargaActualizada)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.vehiculoId", is("NUEVO-ID")))
                 .andExpect(jsonPath("$.litrosCargados", is(60.0)));
@@ -109,8 +111,8 @@ class CargaDeCombustibleControllerTest {
         when(cargaService.actualizarCarga(eq(99L), any(CargaDeCombustible.class))).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/api/cargasDeCombustible/99")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carga1)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(carga1)))
                 .andExpect(status().isNotFound());
     }
 
@@ -128,11 +130,12 @@ class CargaDeCombustibleControllerTest {
     @Test
     @DisplayName("POST / - Debe devolver 400 si los litros son negativos")
     void cuandoCrearCarga_conLitrosInvalidos_debeDevolverBadRequest() throws Exception {
-        CargaDeCombustible cargaInvalida = new CargaDeCombustible(null, "AA123BB", fechaTest, -10.0, "TICKET-001", 5000.0, true);
+        CargaDeCombustible cargaInvalida = new CargaDeCombustible(null, "AA123BB", fechaTest, -10.0, "TICKET-001",
+                5000.0, true);
 
         mockMvc.perform(post("/api/cargasDeCombustible")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cargaInvalida)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cargaInvalida)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> {
                     assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
@@ -147,8 +150,8 @@ class CargaDeCombustibleControllerTest {
         CargaDeCombustible cargaInvalida = new CargaDeCombustible(null, "AA123BB", fechaTest, 50.0, "", 5000.0, true);
 
         mockMvc.perform(post("/api/cargasDeCombustible")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cargaInvalida)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cargaInvalida)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> {
                     assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
@@ -160,11 +163,12 @@ class CargaDeCombustibleControllerTest {
     @Test
     @DisplayName("PUT /{id} - Debe devolver 400 si datos son inválidos")
     void cuandoActualizarCarga_conDatosInvalidos_debeDevolverBadRequest() throws Exception {
-        CargaDeCombustible cargaInvalida = new CargaDeCombustible(1L, "AA123BB", fechaTest, -50.0, "TICKET-001", -5000.0, true);
+        CargaDeCombustible cargaInvalida = new CargaDeCombustible(1L, "AA123BB", fechaTest, -50.0, "TICKET-001",
+                -5000.0, true);
 
         mockMvc.perform(put("/api/cargasDeCombustible/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(cargaInvalida)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cargaInvalida)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> {
                     assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
