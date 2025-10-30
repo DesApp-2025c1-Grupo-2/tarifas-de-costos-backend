@@ -1,19 +1,32 @@
-/*package com.acme.tarifas.gestion.service;
+package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.dao.ProvinciaRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
+import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.Provincia;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
+import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.Hibernate;
+// Quitar los imports de Logger si ya no se usan
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ZonaViajeService {
+
+    // Quitar el logger si ya no se usa
+    // private static final Logger log =
+    // LoggerFactory.getLogger(ZonaViajeService.class);
 
     @Autowired
     private TarifaCostoService tarifaCostoService;
@@ -27,175 +40,115 @@ public class ZonaViajeService {
     @Autowired
     private ProvinciaRepository provinciaRepository;
 
-    @Transactional(readOnly = true)    
-    public List<ZonaViaje> getZonas() {
-        return zonaRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<ZonaViajeDTO> getZonasDTO() {
+        List<ZonaViaje> zonas = zonaRepository.findAll(); // Asume @EntityGraph en repo
+        return zonas.stream()
+                .filter(ZonaViaje::getActivo)
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<ZonaViaje> getZonaById(Long id) {
-        return zonaRepository.findById(id);
+    @Transactional(readOnly = true)
+    public ZonaViajeDTO getZonaDTOById(Long id) {
+        ZonaViaje zona = zonaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Zona no encontrada con ID: " + id));
+
+        if (!Hibernate.isInitialized(zona.getProvincias())) {
+            Hibernate.initialize(zona.getProvincias());
+        }
+        return mapToDTO(zona);
     }
 
-    public Optional<ZonaViaje> getZonaByNombre(String nombre) {
-        return zonaRepository.findByNombreAndActivoTrue(nombre);
+    @Transactional(readOnly = true)
+    public Optional<ZonaViajeDTO> getZonaDTOByNombre(String nombre) {
+        Optional<ZonaViaje> zonaOpt = zonaRepository.findByNombreAndActivoTrue(nombre);
+        if (zonaOpt.isPresent()) {
+            ZonaViaje zona = zonaOpt.get();
+            if (!Hibernate.isInitialized(zona.getProvincias())) {
+                Hibernate.initialize(zona.getProvincias());
+            }
+            return Optional.of(mapToDTO(zona));
+        }
+        return Optional.empty();
     }
 
     @Transactional
-    public void eliminarZona(Long id) throws Exception {
-        ZonaViaje zonaViaje = zonaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Zona no encontrada"));
-        zonaRepository.deleteById(id);
-    }
-
-    public ZonaViaje guardarZona(ZonaViaje zona, Set<String> provinciasNombres) {
-        if (zonaRepository.existsByNombreAndActivoTrue(zona.getNombre())) {
+    public ZonaViajeDTO guardarZonaYDevolverDTO(ZonaViajeDTO zonaDto) {
+        if (zonaRepository.existsByNombreAndActivoTrue(zonaDto.getNombre())) {
             throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
         }
-        Set<Provincia> provincias = provinciasNombres.stream()
-                .map(nombre -> provinciaRepository.findByNombre(nombre)
-                        .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
-                .collect(Collectors.toSet());
+
+        ZonaViaje zona = new ZonaViaje();
+        zona.setNombre(zonaDto.getNombre());
+        zona.setDescripcion(zonaDto.getDescripcion());
+        zona.setActivo(zonaDto.getActivo() != null ? zonaDto.getActivo() : true);
+
+        Set<Provincia> provincias = mapProvinciasFromNombres(zonaDto.getProvinciasNombres());
         zona.setProvincias(provincias);
-        return zonaRepository.save(zona);
+
+        ZonaViaje zonaGuardada = zonaRepository.save(zona);
+        return mapToDTO(zonaGuardada);
     }
 
-    public Map<String, Object> obtenerComparativaCostos() {
-        Map<String, Object> resultado = new HashMap<>();
-        List<ZonaViaje> zonas = getZonasActivas();
+    @Transactional
+    public Optional<ZonaViajeDTO> actualizarZonaYDevolverDTO(Long zonaId, ZonaViajeDTO zonaDto) {
+        Optional<ZonaViaje> zonaOpt = zonaRepository.findById(zonaId);
+        if (zonaOpt.isEmpty()) {
+            return Optional.empty();
+        }
 
-        List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas();
+        ZonaViaje existente = zonaOpt.get();
 
-        zonas.forEach(zona -> {
-            List<TarifaCosto> tarifasDeLaZona = todasLasTarifas.stream()
-                    .filter(tarifa -> tarifa.getZonaViaje() != null
-                            && tarifa.getZonaViaje().getId().equals(zona.getId()))
-                    .collect(Collectors.toList());
-            if (tarifasDeLaZona.isEmpty()) {
-                resultado.put(zona.getNombre(), "No hay tarifas");
-            } else {
-                DoubleSummaryStatistics stats = tarifasDeLaZona.stream()
-                        .mapToDouble(TarifaCosto::getValorTotal)
-                        .summaryStatistics();
-                resultado.put(zona.getNombre(), stats);
+        zonaRepository.findByNombreAndActivoTrue(zonaDto.getNombre()).ifPresent(duplicado -> {
+            if (!Objects.equals(duplicado.getId(), zonaId)) {
+                throw new IllegalArgumentException("Ya existe otra zona activa con ese nombre");
             }
         });
 
-        return resultado;
+        existente.setNombre(zonaDto.getNombre());
+        existente.setDescripcion(zonaDto.getDescripcion());
+        existente.setActivo(zonaDto.getActivo() != null ? zonaDto.getActivo() : existente.getActivo());
+
+        Set<Provincia> provincias = mapProvinciasFromNombres(zonaDto.getProvinciasNombres());
+        existente.getProvincias().clear();
+        existente.getProvincias().addAll(provincias);
+
+        ZonaViaje zonaActualizada = zonaRepository.save(existente);
+        return Optional.of(mapToDTO(zonaActualizada));
     }
 
     @Transactional
-    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos, Set<String> provinciasNombres) {
-        return zonaRepository.findById(zonaId).map(existente -> {
-            zonaRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
-                if (!Objects.equals(duplicado.getId(), zonaId)) {
-                    throw new IllegalArgumentException("Ya existe otra zona activa con ese nombre");
-                }
-            });
-
-            existente.setNombre(nuevosDatos.getNombre());
-            existente.setDescripcion(nuevosDatos.getDescripcion());
-            existente.setRegionMapa(nuevosDatos.getRegionMapa());
-            existente.setActivo(nuevosDatos.isActivo());
-            Set<Provincia> provincias = provinciasNombres.stream()
-                    .map(nombre -> provinciaRepository.findByNombre(nombre)
-                            .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
-                    .collect(Collectors.toSet());
-            existente.setProvincias(provincias);
-            return zonaRepository.save(existente);
-        });
+    public ZonaViajeDTO bajaYDevolverDTO(Long id) throws Exception {
+        ZonaViaje zona = zonaRepository.findById(id)
+                .orElseThrow(() -> new Exception("Zona no encontrada con ID: " + id));
+        if (!zona.getActivo()) {
+            throw new Exception("La zona ya está inactiva");
+        }
+        zona.setActivo(false);
+        ZonaViaje zonaActualizada = zonaRepository.save(zona);
+        Hibernate.initialize(zonaActualizada.getProvincias());
+        return mapToDTO(zonaActualizada);
     }
 
+    @Transactional(readOnly = true)
     public List<TarifaCosto> obtenerTarifasZona(Long zonaId) {
         return tarifaRepository.findAll().stream()
                 .filter(tarifa -> tarifa.getZonaViaje() != null && tarifa.getZonaViaje().getId().equals(zonaId))
                 .collect(Collectors.toList());
     }
 
-    public ZonaViaje baja(Long id) throws Exception {
-        ZonaViaje zona = zonaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Zona no encontrada"));
-        if (zona.isActivo()) {
-            zona.setActivo(false);
-            return zonaRepository.save(zona);
-        } else {
-            throw new Exception("La zona ya está inactiva");
-        }
-    }
-
+    @Transactional(readOnly = true)
     public List<ZonaViaje> getZonasActivas() {
         return zonaRepository.findAll().stream()
-                .filter(ZonaViaje::isActivo)
+                .filter(ZonaViaje::getActivo)
                 .collect(Collectors.toList());
     }
-}*/
-package com.acme.tarifas.gestion.service;
 
-import com.acme.tarifas.gestion.dao.ProvinciaRepository;
-import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
-import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
-import com.acme.tarifas.gestion.entity.Provincia;
-import com.acme.tarifas.gestion.entity.TarifaCosto;
-import com.acme.tarifas.gestion.entity.ZonaViaje;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.time.LocalDate; // Importación necesaria
-
-@Service
-public class ZonaViajeService {
-
-    @Autowired
-    private TarifaCostoService tarifaCostoService;
-
-    @Autowired
-    private ZonaViajeRepository zonaRepository;
-
-    @Autowired
-    private TarifaCostoRepository tarifaRepository;
-
-    @Autowired
-    private ProvinciaRepository provinciaRepository;
-
-    @Transactional(readOnly = true)    
-    public List<ZonaViaje> getZonas() {
-        return zonaRepository.findAll();
-    }
-
-    public Optional<ZonaViaje> getZonaById(Long id) {
-        return zonaRepository.findById(id);
-    }
-
-    public Optional<ZonaViaje> getZonaByNombre(String nombre) {
-        return zonaRepository.findByNombreAndActivoTrue(nombre);
-    }
-
-    @Transactional
-    public void eliminarZona(Long id) throws Exception {
-        ZonaViaje zonaViaje = zonaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Zona no encontrada"));
-        zonaRepository.deleteById(id);
-    }
-
-    public ZonaViaje guardarZona(ZonaViaje zona, Set<String> provinciasNombres) {
-        if (zonaRepository.existsByNombreAndActivoTrue(zona.getNombre())) {
-            throw new IllegalArgumentException("Ya existe una zona activa con ese nombre");
-        }
-        Set<Provincia> provincias = provinciasNombres.stream()
-                .map(nombre -> provinciaRepository.findByNombre(nombre)
-                        .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
-                .collect(Collectors.toSet());
-        zona.setProvincias(provincias);
-        return zonaRepository.save(zona);
-    }
-
-    // [MÉTODO MODIFICADO]
+    @Transactional(readOnly = true)
     public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio, LocalDate fechaFin) {
         Map<String, Object> resultado = new HashMap<>();
         List<ZonaViaje> zonas = getZonasActivas();
-
-        // Se llama al servicio con los parámetros de fecha
         List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas(fechaInicio, fechaFin);
 
         zonas.forEach(zona -> {
@@ -203,6 +156,7 @@ public class ZonaViajeService {
                     .filter(tarifa -> tarifa.getZonaViaje() != null
                             && tarifa.getZonaViaje().getId().equals(zona.getId()))
                     .collect(Collectors.toList());
+
             if (tarifasDeLaZona.isEmpty()) {
                 resultado.put(zona.getNombre(), "No hay tarifas");
             } else {
@@ -212,52 +166,47 @@ public class ZonaViajeService {
                 resultado.put(zona.getNombre(), stats);
             }
         });
-
         return resultado;
     }
 
-    @Transactional
-    public Optional<ZonaViaje> actualizarZona(Long zonaId, ZonaViaje nuevosDatos, Set<String> provinciasNombres) {
-        return zonaRepository.findById(zonaId).map(existente -> {
-            zonaRepository.findByNombreAndActivoTrue(nuevosDatos.getNombre()).ifPresent(duplicado -> {
-                if (!Objects.equals(duplicado.getId(), zonaId)) {
-                    throw new IllegalArgumentException("Ya existe otra zona activa con ese nombre");
-                }
-            });
+    private ZonaViajeDTO mapToDTO(ZonaViaje zona) {
+        ZonaViajeDTO dto = new ZonaViajeDTO();
+        dto.setId(zona.getId());
+        dto.setNombre(zona.getNombre());
+        dto.setDescripcion(zona.getDescripcion());
+        dto.setActivo(zona.getActivo());
 
-            existente.setNombre(nuevosDatos.getNombre());
-            existente.setDescripcion(nuevosDatos.getDescripcion());
-            existente.setRegionMapa(nuevosDatos.getRegionMapa());
-            existente.setActivo(nuevosDatos.isActivo());
-            Set<Provincia> provincias = provinciasNombres.stream()
-                    .map(nombre -> provinciaRepository.findByNombre(nombre)
-                            .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
+        if (Hibernate.isInitialized(zona.getProvincias()) && zona.getProvincias() != null) {
+            Set<String> nombresProvincias = zona.getProvincias().stream()
+                    .map(Provincia::getNombre)
                     .collect(Collectors.toSet());
-            existente.setProvincias(provincias);
-            return zonaRepository.save(existente);
-        });
-    }
-
-    public List<TarifaCosto> obtenerTarifasZona(Long zonaId) {
-        return tarifaRepository.findAll().stream()
-                .filter(tarifa -> tarifa.getZonaViaje() != null && tarifa.getZonaViaje().getId().equals(zonaId))
-                .collect(Collectors.toList());
-    }
-
-    public ZonaViaje baja(Long id) throws Exception {
-        ZonaViaje zona = zonaRepository.findById(id)
-                .orElseThrow(() -> new Exception("Zona no encontrada"));
-        if (zona.isActivo()) {
-            zona.setActivo(false);
-            return zonaRepository.save(zona);
+            dto.setProvinciasNombres(nombresProvincias);
         } else {
-            throw new Exception("La zona ya está inactiva");
+            dto.setProvinciasNombres(Collections.emptySet());
+            // Considera loggear una advertencia si prefieres, pero quitamos los logs de
+            // depuración
+            // log.warn("Mapeando DTO para Zona ID {}: ¡Provincias no inicializadas!",
+            // zona.getId());
         }
+        return dto;
     }
 
-    public List<ZonaViaje> getZonasActivas() {
-        return zonaRepository.findAll().stream()
-                .filter(ZonaViaje::isActivo)
-                .collect(Collectors.toList());
+    private Set<Provincia> mapProvinciasFromNombres(Set<String> provinciasNombres) {
+        if (provinciasNombres == null || provinciasNombres.isEmpty()) {
+            return new HashSet<>();
+        }
+        return provinciasNombres.stream()
+                .map(nombre -> provinciaRepository.findByNombre(nombre)
+                        // Lanza la excepción si no se encuentra
+                        .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
+                .collect(Collectors.toSet());
+    }
+
+    @Transactional
+    public void eliminarZona(Long id) throws Exception {
+        if (!zonaRepository.existsById(id)) {
+            throw new Exception("Zona no encontrada para eliminar con ID: " + id);
+        }
+        zonaRepository.deleteById(id);
     }
 }

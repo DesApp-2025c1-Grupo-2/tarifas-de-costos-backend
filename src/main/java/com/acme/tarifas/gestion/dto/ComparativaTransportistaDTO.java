@@ -29,9 +29,17 @@ public class ComparativaTransportistaDTO {
     public static class Comparativa {
         private String transportista;
         private Double costo;
+        private Long tarifaId;
+        private String nombreTarifa;
 
         public Comparativa() {
         }
+
+        public Long getTarifaId() { return tarifaId; }
+        public void setTarifaId(Long tarifaId) { this.tarifaId = tarifaId; }
+
+        public String getNombreTarifa() { return nombreTarifa; }
+        public void setNombreTarifa(String nombreTarifa) { this.nombreTarifa = nombreTarifa; }
 
         public String getTransportista() {
             return transportista;

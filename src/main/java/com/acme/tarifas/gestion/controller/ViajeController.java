@@ -16,22 +16,4 @@ public class ViajeController {
 
     @Autowired
     private ViajeService viajeService;
-
-    /*
-    @PostMapping
-    public ResponseEntity<Viaje> registrarViaje(@RequestBody Viaje viaje) {
-        Viaje nuevo = viajeService.registrarViaje(viaje);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
-    }
-
-
-    @GetMapping("/reporte-rentabilidad")
-    public Map<String, Double> generarReporteRentabilidad(
-            @RequestParam LocalDate inicio,
-            @RequestParam LocalDate fin) {
-        return viajeService.calcularRentabilidadPorPeriodo(inicio, fin);
-    }
-    */
-
-
 }
