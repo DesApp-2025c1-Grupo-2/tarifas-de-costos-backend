@@ -2,6 +2,7 @@ package com.acme.tarifas.gestion.controller;
 
 import com.acme.tarifas.gestion.entity.CargaDeCombustible;
 import com.acme.tarifas.gestion.service.CargaDeCombustibleService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +21,19 @@ public class CargaDeCombustibleController {
 
    @GetMapping
     public List<CargaDeCombustible> obtenerTodasLasCargas() {
-    // Elimina el bloque de prueba si existe
-    return cargaService.obtenerTodasLasCargas(); // Asegúrate que esta sea la línea activa
+
+    return cargaService.obtenerTodasLasCargas();
     }
 
     @PostMapping
-    public ResponseEntity<CargaDeCombustible> crearCarga(@RequestBody CargaDeCombustible carga) {
+    public ResponseEntity<CargaDeCombustible> crearCarga(@Valid @RequestBody CargaDeCombustible carga) {
         CargaDeCombustible nuevaCarga = cargaService.guardarCarga(carga);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCarga);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CargaDeCombustible> actualizarCarga(@PathVariable Long id,
-            @RequestBody CargaDeCombustible carga) {
+            @Valid @RequestBody CargaDeCombustible carga) {
         return cargaService.actualizarCarga(id, carga)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
