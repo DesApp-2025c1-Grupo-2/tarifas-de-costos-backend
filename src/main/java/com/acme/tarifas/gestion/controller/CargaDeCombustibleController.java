@@ -4,10 +4,12 @@ import com.acme.tarifas.gestion.entity.CargaDeCombustible;
 import com.acme.tarifas.gestion.service.CargaDeCombustibleService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat; // Importar
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate; // Importar
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -19,10 +21,12 @@ public class CargaDeCombustibleController {
     @Autowired
     private CargaDeCombustibleService cargaService;
 
-   @GetMapping
-    public List<CargaDeCombustible> obtenerTodasLasCargas() {
-
-    return cargaService.obtenerTodasLasCargas();
+    @GetMapping
+    public List<CargaDeCombustible> obtenerTodasLasCargas(
+            // NUEVO PARÁMETRO
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio) {
+        // Pasa el parámetro al servicio
+        return cargaService.obtenerTodasLasCargas(fechaInicio);
     }
 
     @PostMapping
