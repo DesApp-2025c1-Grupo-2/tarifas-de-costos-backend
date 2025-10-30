@@ -19,10 +19,11 @@ public class CargaDeCombustible {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_cargacombustible")
     private Long id;
 
     @NotBlank(message = "El ID del vehículo es obligatorio.") 
-    @Column(name = "vehiculo_id", nullable = false)
+    @Column(name = "id_vehiculo", nullable = false)
     private String vehiculoId;
 
     @NotNull(message = "La fecha es obligatoria.") 
@@ -44,6 +45,6 @@ public class CargaDeCombustible {
     @Column(name = "precio_total") 
     private Double precioTotal;
 
-    @Column(name = "es_vigente", nullable = false)
+    @Column(name = "esvigente", nullable = false)
     private boolean esVigente = true;
 }
