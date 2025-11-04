@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
+import java.util.Map; // Import quitado si no se usa en crearZona
 import java.util.Optional;
 
 @RestController
@@ -70,16 +70,9 @@ public class ZonaViajeController {
         }
     }
 
-    // --- ENDPOINT MODIFICADO ---
-    @GetMapping("/comparativa-costos")
-    public Map<String, Object> compararCostosPorZona(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
-            @RequestParam(required = false) Long zonaId // <-- AÑADIDO
-    ) {
-        // Pasamos el nuevo parámetro al servicio
-        return zonaService.obtenerComparativaCostos(fechaInicio, fechaFin, zonaId);
-    }
+    // --- ENDPOINT ELIMINADO ---
+    // @GetMapping("/comparativa-costos")
+    // public Map<String, Object> compararCostosPorZona( ... ) { ... }
     // --- FIN DE LA MODIFICACIÓN ---
 
     @GetMapping("/{id}/tarifas")

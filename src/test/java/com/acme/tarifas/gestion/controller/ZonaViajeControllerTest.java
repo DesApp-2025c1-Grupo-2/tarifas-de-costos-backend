@@ -167,19 +167,14 @@ class ZonaViajeControllerTest {
                                 .andExpect(status().isNotFound());
         }
 
-        // --- GET /api/zonas/comparativa-costos ---
-
-        @Test
-        @DisplayName("GET /comparativa-costos - Debe devolver el mapa de comparativa")
-        void cuandoCompararCostosPorZona_debeDevolverMapa() throws Exception {
-                Map<String, Object> mockMapa = Map.of("Zona Norte", "Datos Mock", "Zona Sur", 123.45);
-                when(zonaService.obtenerComparativaCostos(null, null, null)).thenReturn(mockMapa);
-
-                mockMvc.perform(get("/api/zonas/comparativa-costos"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.['Zona Norte']", is("Datos Mock")))
-                                .andExpect(jsonPath("$.['Zona Sur']", is(123.45)));
-        }
+        // --- TEST ELIMINADO ---
+        // @Test
+        // @DisplayName("GET /comparativa-costos - Debe devolver el mapa de
+        // comparativa")
+        // void cuandoCompararCostosPorZona_debeDevolverMapa() throws Exception {
+        // ...
+        // }
+        // --- FIN DE TEST ELIMINADO ---
 
         // --- GET /api/zonas/{id}/tarifas ---
 

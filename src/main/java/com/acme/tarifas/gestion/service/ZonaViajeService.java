@@ -4,7 +4,8 @@ import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.ProvinciaRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
-import com.acme.tarifas.gestion.dto.TipoVehiculoDTO;
+// --- IMPORTS ELIMINADOS ---
+// import com.acme.tarifas.gestion.dto.TipoVehiculoDTO; 
 import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.Provincia;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
@@ -143,52 +144,12 @@ public class ZonaViajeService {
                 .collect(Collectors.toList());
     }
 
-    // --- LÓGICA DEL REPORTE MODIFICADA ---
-    @Transactional(readOnly = true)
-    public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio, LocalDate fechaFin, Long zonaId) { // <--
-                                                                                                                  // AÑADIDO
-                                                                                                                  // zonaId
-        Map<String, Object> resultado = new HashMap<>();
-
-        List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas(fechaInicio, fechaFin);
-
-        Map<String, String> tempVehiculosMap;
-        try {
-            tempVehiculosMap = viajesClient.getTiposVehiculo().stream()
-                    .filter(v -> v.getId() != null && v.getNombre() != null)
-                    .collect(Collectors.toMap(TipoVehiculoDTO::getId, TipoVehiculoDTO::getNombre, (n1, n2) -> n1));
-        } catch (Exception e) {
-            System.err.println("Error al obtener tipos de vehículo: " + e.getMessage());
-            tempVehiculosMap = Collections.emptyMap();
-        }
-
-        final Map<String, String> vehiculosMap = tempVehiculosMap;
-
-        // --- APLICAR FILTRO DE ZONA AQUÍ ---
-        Map<String, List<TarifaCosto>> tarifasPorVehiculoId = todasLasTarifas.stream()
-                .filter(tarifa -> tarifa.getTipoVehiculoId() != null)
-                // Filtra por zonaId SI es que se proveyó uno
-                .filter(tarifa -> zonaId == null
-                        || (tarifa.getZonaViaje() != null && tarifa.getZonaViaje().getId().equals(zonaId)))
-                .collect(Collectors.groupingBy(TarifaCosto::getTipoVehiculoId));
-        // --- FIN DEL FILTRO ---
-
-        tarifasPorVehiculoId.forEach((tipoVehiculoId, tarifasDelVehiculo) -> {
-            String nombreVehiculo = vehiculosMap.getOrDefault(tipoVehiculoId,
-                    "Desconocido (ID: " + tipoVehiculoId + ")");
-
-            if (tarifasDelVehiculo.isEmpty()) {
-                // No lo agregamos si está vacío post-filtro
-            } else {
-                DoubleSummaryStatistics stats = tarifasDelVehiculo.stream()
-                        .mapToDouble(TarifaCosto::getValorTotal)
-                        .summaryStatistics();
-                resultado.put(nombreVehiculo, stats);
-            }
-        });
-
-        return resultado;
-    }
+    // --- LÓGICA DEL REPORTE ELIMINADA ---
+    // @Transactional(readOnly = true)
+    // public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio,
+    // LocalDate fechaFin, Long zonaId) {
+    // ...
+    // }
     // --- FIN DE LA LÓGICA MODIFICADA ---
 
     private ZonaViajeDTO mapToDTO(ZonaViaje zona) {

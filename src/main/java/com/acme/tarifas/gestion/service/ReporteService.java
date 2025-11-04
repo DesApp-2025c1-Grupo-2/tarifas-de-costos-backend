@@ -1,4 +1,3 @@
-// Archivo: src/main/java/com/acme/tarifas/gestion/service/ReporteService.java
 package com.acme.tarifas.gestion.service;
 
 import com.acme.tarifas.gestion.clients.ViajesClient;
@@ -10,7 +9,7 @@ import com.acme.tarifas.gestion.dto.*;
 import com.acme.tarifas.gestion.entity.CargaDeCombustible;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.TarifaCostoHistorial;
-import com.acme.tarifas.gestion.entity.ZonaViaje; // Necesario para ComparativaTransportistaDTO
+import com.acme.tarifas.gestion.entity.ZonaViaje;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,9 +34,7 @@ public class ReporteService {
     private final ViajesClient viajesClient;
     private final CargaDeCombustibleRepository cargaDeCombustibleRepository;
 
-    // Estado esperado para filtrar los viajes finalizados (ignora mayúsculas/minúsculas)
     private static final String ESTADO_VIAJE_FINALIZADO = "fin de viaje";
-
 
     @Autowired
     public ReporteService(TarifaCostoHistorialRepository historialRepository,
@@ -60,52 +58,27 @@ public class ReporteService {
 
         LocalDateTime fin = null;
         if (fechaFin != null) {
-            // Aseguramos que el filtro de fecha final incluya todo el día
             fin = fechaFin.atTime(23, 59, 59);
         }
 
-        // Si no hay filtros de fecha, usamos el método original (sin fechas)
         if (inicio == null && fin == null) {
             return tarifaAdicionalRepository.findFrecuenciaUsoAdicionales();
         }
 
-        // Si hay filtros, usamos el método con join y parámetros
         return tarifaAdicionalRepository.findFrecuenciaUsoAdicionalesByFechaCreacion(inicio, fin);
     }
 
-    public List<TransportistaTarifasDTO> getTransportistasMasUtilizados() {
-        List<Object[]> rawResults = tarifaCostoRepository.countByTransportista();
-
-        // Fetch all transporters once to avoid multiple API calls inside the loop
-        Map<String, TransportistaDTO> transportistasMap = viajesClient.getTransportistas().stream()
-                .collect(Collectors.toMap(TransportistaDTO::getId, Function.identity(), (existing, replacement) -> existing)); // Handle potential duplicates if any
-
-        return rawResults.stream()
-                .map(obj -> {
-                    String transportistaId = (String) obj[0];
-                    Long cantidad = (Long) obj[1];
-
-                    // Look up in the map
-                    TransportistaDTO dto = transportistasMap.get(transportistaId);
-                    String nombreComercial = (dto != null && dto.getNombreComercial() != null) ? dto.getNombreComercial() : "Desconocido (ID: " + transportistaId + ")";
-
-                    return new TransportistaTarifasDTO(nombreComercial, cantidad);
-                })
-                .toList();
-    }
-
-    
-    public ComparativaTransportistaDTO generarComparativaPorServicio(Long zonaId, String tipoVehiculoId, Long tipoCargaId) { // Changed tipoVehiculoId to String
+    public ComparativaTransportistaDTO generarComparativaPorServicio(Long zonaId, String tipoVehiculoId,
+            Long tipoCargaId) {
         List<TarifaCosto> tarifasCoincidentes = tarifaCostoRepository.findAll().stream()
                 .filter(TarifaCosto::isEsVigente)
                 .filter(t -> zonaId == null || (t.getZonaViaje() != null && t.getZonaViaje().getId().equals(zonaId)))
                 .filter(t -> tipoVehiculoId == null || (t.getTipoVehiculoId() != null
-                        && t.getTipoVehiculoId().equals(tipoVehiculoId))) // Direct String comparison
+                        && t.getTipoVehiculoId().equals(tipoVehiculoId)))
                 .filter(t -> tipoCargaId == null
                         || (t.getTipoCargaTarifa() != null && t.getTipoCargaTarifa().getId().equals(tipoCargaId)))
                 .collect(Collectors.toList());
 
-        // Fetch all transportistas and create a map for quick lookup
         Map<String, TransportistaDTO> transportistasMap = viajesClient.getTransportistas().stream()
                 .collect(Collectors.toMap(TransportistaDTO::getId, Function.identity()));
 
@@ -117,8 +90,8 @@ public class ReporteService {
                 .map(t -> {
                     TransportistaDTO transportista = transportistasMap.get(t.getTransportistaId());
                     ComparativaTransportistaDTO.Comparativa c = new ComparativaTransportistaDTO.Comparativa();
-                    // Use getNombreComercial which exists in TransportistaDTO
-                    c.setTransportista(transportista.getNombreComercial() != null ? transportista.getNombreComercial() : "Nombre no disponible");
+                    c.setTransportista(transportista.getNombreComercial() != null ? transportista.getNombreComercial()
+                            : "Nombre no disponible");
                     c.setCosto(t.getValorTotal());
                     c.setTarifaId(t.getId());
                     c.setNombreTarifa(t.getNombreTarifa() != null ? t.getNombreTarifa() : "Tarifa sin nombre");
@@ -131,7 +104,6 @@ public class ReporteService {
         return comparativaDTO;
     }
 
-
     public List<VariacionTarifaDTO> generarComparativaTarifas(LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio != null ? fechaInicio.atStartOfDay() : null;
         LocalDateTime fin = fechaFin != null ? fechaFin.atTime(23, 59, 59) : null;
@@ -141,7 +113,8 @@ public class ReporteService {
         }
 
         List<TarifaCostoHistorial> historiales = historialRepository.findAll().stream()
-                .filter(h -> h.getFechaModificacion() != null && !h.getFechaModificacion().isBefore(inicio) && !h.getFechaModificacion().isAfter(fin))
+                .filter(h -> h.getFechaModificacion() != null && !h.getFechaModificacion().isBefore(inicio)
+                        && !h.getFechaModificacion().isAfter(fin))
                 .sorted(Comparator.comparing(TarifaCostoHistorial::getFechaModificacion))
                 .collect(Collectors.toList());
 
@@ -153,51 +126,45 @@ public class ReporteService {
 
         for (Map.Entry<Long, List<TarifaCostoHistorial>> entry : historialesPorTarifa.entrySet()) {
             List<TarifaCostoHistorial> registros = entry.getValue();
-            if (registros.isEmpty()) continue;
+            if (registros.isEmpty())
+                continue;
 
             Optional<TarifaCosto> tarifaActualOpt = tarifaCostoRepository.findById(entry.getKey());
-            // Considera incluir tarifas no vigentes si quieres ver su historial de aumento antes de ser dadas de baja
-            if (tarifaActualOpt.isEmpty() /*|| !tarifaActualOpt.get().isEsVigente()*/) {
+            if (tarifaActualOpt.isEmpty()) {
                 continue;
             }
 
             TarifaCosto tarifaActual = tarifaActualOpt.get();
             TarifaCostoHistorial registroInicial = registros.get(0);
-             // El valor final ahora es el valor BASE actual de la tarifa, no del último historial
             Double valorFinalActual = tarifaActual.getValorBase();
-            // El valor inicial es el del primer registro DENTRO DEL RANGO
             Double valorInicialRango = registroInicial.getValorBase();
 
-     
-             if (valorInicialRango == null || valorFinalActual == null) {
+            if (valorInicialRango == null || valorFinalActual == null) {
                 continue;
             }
-
 
             VariacionTarifaDTO variacionDTO = new VariacionTarifaDTO(entry.getKey(), tarifaActual.getNombreTarifa());
             variacionDTO.setValorInicial(valorInicialRango);
             variacionDTO.setFechaInicial(registroInicial.getFechaModificacion());
             variacionDTO.setValorFinal(valorFinalActual);
-           
-            variacionDTO.setFechaFinal(registros.get(registros.size() - 1).getFechaModificacion());
 
+            variacionDTO.setFechaFinal(registros.get(registros.size() - 1).getFechaModificacion());
 
             double variacionAbsoluta = valorFinalActual - valorInicialRango;
             variacionDTO.setVariacionAbsoluta(round(variacionAbsoluta, 2));
 
-            if (valorInicialRango != 0) { // Evitar división por cero
+            if (valorInicialRango != 0) {
                 double variacionPorcentual = (variacionAbsoluta / valorInicialRango) * 100;
                 variacionDTO.setVariacionPorcentual(round(variacionPorcentual, 2));
             } else {
-                variacionDTO.setVariacionPorcentual(variacionAbsoluta > 0 ? Double.POSITIVE_INFINITY : 0.0); // O manejar como prefieras
+                variacionDTO.setVariacionPorcentual(variacionAbsoluta > 0 ? Double.POSITIVE_INFINITY : 0.0);
             }
             reporte.add(variacionDTO);
         }
-   
+
         reporte.sort(Comparator.comparing(VariacionTarifaDTO::getTarifaId));
         return reporte;
     }
-
 
     private double round(double value, int places) {
         if (places < 0)
@@ -207,8 +174,6 @@ public class ReporteService {
         return bd.doubleValue();
     }
 
-
-   
     public ReporteVehiculoCombustibleDTO generarReporteUsoCombustible(
             String vehiculoId,
             LocalDate fechaInicio,
@@ -218,20 +183,21 @@ public class ReporteService {
         try {
             vehiculo = viajesClient.getVehiculoById(vehiculoId);
         } catch (Exception e) {
-            System.err.println("Advertencia: No se pudieron obtener los datos del vehículo " + vehiculoId + ": " + e.getMessage());
+            System.err.println(
+                    "Advertencia: No se pudieron obtener los datos del vehículo " + vehiculoId + ": " + e.getMessage());
         }
 
         String patente = (vehiculo != null)
-            ? String.format("%s - %s %s",
-                Optional.ofNullable(vehiculo.getPatente()).orElse("N/A"),
-                Optional.ofNullable(vehiculo.getMarca()).orElse("N/A"),
-                Optional.ofNullable(vehiculo.getModelo()).orElse("N/A"))
-            : "Vehículo no encontrado (ID: " + vehiculoId + ")";
-
+                ? String.format("%s - %s %s",
+                        Optional.ofNullable(vehiculo.getPatente()).orElse("N/A"),
+                        Optional.ofNullable(vehiculo.getMarca()).orElse("N/A"),
+                        Optional.ofNullable(vehiculo.getModelo()).orElse("N/A"))
+                : "Vehículo no encontrado (ID: " + vehiculoId + ")";
 
         List<CargaDeCombustible> cargas = cargaDeCombustibleRepository.findAll().stream()
-                .filter(c -> c.isEsVigente() && Objects.equals(c.getVehiculoId(), vehiculoId)) 
-                .filter(c -> c.getFecha() != null && !c.getFecha().toLocalDate().isBefore(fechaInicio) && !c.getFecha().toLocalDate().isAfter(fechaFin))
+                .filter(c -> c.isEsVigente() && Objects.equals(c.getVehiculoId(), vehiculoId))
+                .filter(c -> c.getFecha() != null && !c.getFecha().toLocalDate().isBefore(fechaInicio)
+                        && !c.getFecha().toLocalDate().isAfter(fechaFin))
                 .collect(Collectors.toList());
 
         long cantidadCargas = cargas.size();
@@ -241,70 +207,89 @@ public class ReporteService {
                 .mapToDouble(CargaDeCombustible::getPrecioTotal)
                 .sum();
 
-  
         double litrosTotales = cargas.stream()
-                .filter(c -> c.getLitrosCargados() != null) 
+                .filter(c -> c.getLitrosCargados() != null)
                 .mapToDouble(CargaDeCombustible::getLitrosCargados)
                 .sum();
- 
 
+        List<ReporteVehiculoCombustibleDTO.CargaEventoDTO> cargasEventos = cargas.stream()
+                .map(c -> new ReporteVehiculoCombustibleDTO.CargaEventoDTO(
+                        c.getFecha().toLocalDate(),
+                        c.getLitrosCargados()))
+                .collect(Collectors.toList());
 
-        
-        long cantidadViajesFinalizados = 0L; 
+        long cantidadViajesFinalizados = 0L;
         double kilometrosTotalesFinalizados = 0.0;
+        List<ReporteVehiculoCombustibleDTO.ViajeEventoDTO> viajesEventos = new ArrayList<>();
 
         try {
             JsonNode viajesResponse = viajesClient.getViajesFiltradosResponse(
-                 vehiculoId,
-                 fechaInicio.toString(),
-                 fechaFin.toString()
-            );
+                    vehiculoId,
+                    fechaInicio.toString(),
+                    fechaFin.toString());
 
-            if (viajesResponse != null) {
-     
-                if (viajesResponse.hasNonNull("data") && viajesResponse.get("data").isArray()) {
-                    ArrayNode dataArray = (ArrayNode) viajesResponse.get("data");
-                    for (JsonNode viajeNode : dataArray) {
-                    
-                        if (viajeNode.hasNonNull("estado") &&
-                            ESTADO_VIAJE_FINALIZADO.equalsIgnoreCase(viajeNode.get("estado").asText()))
-                        {
-                            cantidadViajesFinalizados++; 
+            if (viajesResponse != null && viajesResponse.hasNonNull("data") && viajesResponse.get("data").isArray()) {
+                ArrayNode dataArray = (ArrayNode) viajesResponse.get("data");
 
-                          
-                            if (viajeNode.hasNonNull("kilometros") && viajeNode.get("kilometros").isNumber()) {
-                                kilometrosTotalesFinalizados += viajeNode.get("kilometros").asDouble(0.0);
+                for (JsonNode viajeNode : dataArray) {
+
+                    String estado = viajeNode.hasNonNull("estado") ? viajeNode.get("estado").asText("N/A") : "N/A";
+                    double kmViaje = 0.0;
+
+                    if (viajeNode.hasNonNull("kilometros") && viajeNode.get("kilometros").isNumber()) {
+                        kmViaje = viajeNode.get("kilometros").asDouble(0.0);
+                    }
+
+                    if (ESTADO_VIAJE_FINALIZADO.equalsIgnoreCase(estado)) {
+
+                        cantidadViajesFinalizados++;
+                        kilometrosTotalesFinalizados += kmViaje;
+
+                        // --- CORRECCIÓN AQUÍ ---
+                        // Usar fecha_inicio ya que fecha_fin no está disponible
+                        if (viajeNode.hasNonNull("fecha_inicio") && kmViaje > 0) {
+                            try {
+                                // Parsea la fecha de inicio
+                                LocalDate fechaInicioViaje = LocalDateTime
+                                        .parse(viajeNode.get("fecha_inicio").asText().replace("Z", "")).toLocalDate();
+
+                                // Comprueba que la fecha de inicio esté DENTRO del rango del filtro
+                                if (!fechaInicioViaje.isBefore(fechaInicio) && !fechaInicioViaje.isAfter(fechaFin)) {
+                                    viajesEventos.add(new ReporteVehiculoCombustibleDTO.ViajeEventoDTO(
+                                            fechaInicioViaje, // Usar la fecha de inicio
+                                            kmViaje,
+                                            estado));
+                                }
+                            } catch (DateTimeParseException e) {
+                                System.err.println("Error al parsear fecha_inicio de viaje: "
+                                        + viajeNode.get("fecha_inicio").asText());
                             }
                         }
-                      
                     }
-                } else {
-                     System.err.println("Advertencia: La respuesta de ViajesClient no contiene un array 'data' válido para procesar viajes.");
                 }
             } else {
-                 System.err.println("Advertencia: La respuesta de ViajesClient fue nula.");
+                System.err.println(
+                        "Advertencia: La respuesta de ViajesClient no contiene un array 'data' válido para procesar viajes.");
             }
         } catch (Exception e) {
-             System.err.println("Error procesando respuesta de ViajesClient para vehículo " + vehiculoId + ": " + e.getMessage());
-           
+            System.err.println(
+                    "Error procesando respuesta de ViajesClient para vehículo " + vehiculoId + ": " + e.getMessage());
+
         }
-       
 
+        double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajesFinalizados / cantidadCargas : 0.0;
 
-        double viajesPorCarga = cantidadCargas > 0 ? (double) cantidadViajesFinalizados / cantidadCargas : 0.0; 
-
-        ReporteVehiculoCombustibleDTO dto = new ReporteVehiculoCombustibleDTO(
-            patente,
-            cantidadViajesFinalizados, 
-            cantidadCargas,
-            round(costoTotalCombustible, 2),
-            fechaInicio.toString(),
-            fechaFin.toString(),
-            round(viajesPorCarga, 2),
-            round(kilometrosTotalesFinalizados, 2), 
-            round(litrosTotales, 2) // 
-        );
-
-        return dto;
+        return new ReporteVehiculoCombustibleDTO(
+                patente,
+                cantidadViajesFinalizados,
+                cantidadCargas,
+                round(costoTotalCombustible, 2),
+                fechaInicio.toString(),
+                fechaFin.toString(),
+                round(viajesPorCarga, 2),
+                round(kilometrosTotalesFinalizados, 2),
+                round(litrosTotales, 2),
+                viajesEventos,
+                cargasEventos);
     }
 }
