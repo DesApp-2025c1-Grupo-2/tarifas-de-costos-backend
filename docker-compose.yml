@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  
+  frontend:
+    image: franmarinozzi/front-acme-tarifas:latest
+    container_name: frontend_acme_tarifas
+    ports:
+      - "8080:80" 
+    depends_on:
+      - backend 
+    networks:
+      - acme-network
+
+ 
+  backend:
+    image: franmarinozzi/back-acme-tarifas:latest
+    container_name: backend_acme_tarifas
+    ports:
+      - "7070:7070" 
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/acme_tarifas
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect 
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+    depends_on:
+      - db 
+    networks:
+      - acme-network
+
+  
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: acme_tarifas
+    ports:
+      - "5432:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - acme-network
+
+
+volumes:
+  postgres_data:
+
+
+networks:
+  acme-network:
+    driver: bridge

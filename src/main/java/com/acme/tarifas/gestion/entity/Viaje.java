@@ -1,0 +1,31 @@
+package com.acme.tarifas.gestion.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "Viajes")
+public class Viaje {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_Viaje")
+    private Long id;
+    private LocalDate fechaViaje;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_TarifaCostoUtilizada", nullable = false)
+    @JsonIgnore
+    private TarifaCosto tarifaCostoUtilizada;
+    private Double precioFacturadoCliente;
+    private Double pesoTotalEstimadoKG;
+    private Double volumenTotalEstimadoM3;
+    private String requisitosEspecialesManipulacion;
+    private LocalDateTime fechaRegistroSistema;
+}
