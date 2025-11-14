@@ -5,18 +5,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List; 
+import java.time.LocalDateTime; // Importar
+import java.util.List;
 
 @Repository
 public interface TarifaCostoRepository extends JpaRepository<TarifaCosto, Long> {
 
-
     List<TarifaCosto> findByEsVigenteTrue();
 
-    @Query("SELECT t.transportistaId, COUNT(t) " +
-            "FROM TarifaCosto t " +
-            "WHERE t.transportistaId IS NOT NULL " +
-            "GROUP BY t.transportistaId " +
-            "ORDER BY COUNT(t) DESC")
-    List<Object[]> countByTransportista();
+    // NUEVO MÉTODO
+    List<TarifaCosto> findByEsVigenteTrueAndFechaCreacionAfter(LocalDateTime fechaInicio);
+
+    // --- MÉTODO Y QUERY ELIMINADOS ---
+    // @Query("SELECT t.transportistaId, COUNT(t) ...")
+    // List<Object[]> countByTransportista();
 }

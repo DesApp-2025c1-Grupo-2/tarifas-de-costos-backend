@@ -5,10 +5,12 @@ import com.acme.tarifas.gestion.entity.TarifaAdicional;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.service.TarifaCostoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,9 +44,9 @@ public class TarifaCostoController {
             @RequestParam(required = false) String tipoVehiculo,
             @RequestParam(required = false) Long zona,
             @RequestParam(required = false) Long tipoCarga,
-            @RequestParam(required = false) String transportista) {
-
-        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga, transportista);
+            @RequestParam(required = false) String transportista,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio) {
+        return tarifaService.filtrarTarifas(tipoVehiculo, zona, tipoCarga, transportista, fechaInicio);
     }
 
     @GetMapping("/{id}")
