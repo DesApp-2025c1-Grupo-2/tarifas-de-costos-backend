@@ -19,8 +19,13 @@ public class AdicionalController {
 
     @PostMapping
     public ResponseEntity<Adicional> crearAdicional(@RequestBody Adicional adicional) {
-        Adicional nuevo = adicionalService.guardarAdicional(adicional);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        try {
+            Adicional nuevo = adicionalService.guardarAdicional(adicional);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        } catch (IllegalArgumentException e) {
+            // Devuelve 400 Bad Request si el nombre ya existe
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @GetMapping
@@ -64,8 +69,14 @@ public class AdicionalController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Adicional> actualizarAdicional(@PathVariable Long id, @RequestBody Adicional adicional) {
-        return adicionalService.actualizarAdicional(id, adicional)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            // Lanza la excepción si el nombre está duplicado
+            return adicionalService.actualizarAdicional(id, adicional)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            // Devuelve 400 Bad Request si el nombre ya existe en otro ID
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }

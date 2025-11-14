@@ -1,17 +1,17 @@
 package com.acme.tarifas.gestion.service;
 
+import com.acme.tarifas.gestion.clients.ViajesClient;
 import com.acme.tarifas.gestion.dao.ProvinciaRepository;
 import com.acme.tarifas.gestion.dao.TarifaCostoRepository;
 import com.acme.tarifas.gestion.dao.ZonaViajeRepository;
+// --- IMPORTS ELIMINADOS ---
+// import com.acme.tarifas.gestion.dto.TipoVehiculoDTO; 
 import com.acme.tarifas.gestion.dto.ZonaViajeDTO;
 import com.acme.tarifas.gestion.entity.Provincia;
 import com.acme.tarifas.gestion.entity.TarifaCosto;
 import com.acme.tarifas.gestion.entity.ZonaViaje;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.Hibernate;
-// Quitar los imports de Logger si ya no se usan
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ZonaViajeService {
-
-    // Quitar el logger si ya no se usa
-    // private static final Logger log =
-    // LoggerFactory.getLogger(ZonaViajeService.class);
 
     @Autowired
     private TarifaCostoService tarifaCostoService;
@@ -40,9 +36,12 @@ public class ZonaViajeService {
     @Autowired
     private ProvinciaRepository provinciaRepository;
 
+    @Autowired
+    private ViajesClient viajesClient;
+
     @Transactional(readOnly = true)
     public List<ZonaViajeDTO> getZonasDTO() {
-        List<ZonaViaje> zonas = zonaRepository.findAll(); // Asume @EntityGraph en repo
+        List<ZonaViaje> zonas = zonaRepository.findAll();
         return zonas.stream()
                 .filter(ZonaViaje::getActivo)
                 .map(this::mapToDTO)
@@ -145,29 +144,13 @@ public class ZonaViajeService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio, LocalDate fechaFin) {
-        Map<String, Object> resultado = new HashMap<>();
-        List<ZonaViaje> zonas = getZonasActivas();
-        List<TarifaCosto> todasLasTarifas = tarifaCostoService.getTarifasActivas(fechaInicio, fechaFin);
-
-        zonas.forEach(zona -> {
-            List<TarifaCosto> tarifasDeLaZona = todasLasTarifas.stream()
-                    .filter(tarifa -> tarifa.getZonaViaje() != null
-                            && tarifa.getZonaViaje().getId().equals(zona.getId()))
-                    .collect(Collectors.toList());
-
-            if (tarifasDeLaZona.isEmpty()) {
-                resultado.put(zona.getNombre(), "No hay tarifas");
-            } else {
-                DoubleSummaryStatistics stats = tarifasDeLaZona.stream()
-                        .mapToDouble(TarifaCosto::getValorTotal)
-                        .summaryStatistics();
-                resultado.put(zona.getNombre(), stats);
-            }
-        });
-        return resultado;
-    }
+    // --- LÓGICA DEL REPORTE ELIMINADA ---
+    // @Transactional(readOnly = true)
+    // public Map<String, Object> obtenerComparativaCostos(LocalDate fechaInicio,
+    // LocalDate fechaFin, Long zonaId) {
+    // ...
+    // }
+    // --- FIN DE LA LÓGICA MODIFICADA ---
 
     private ZonaViajeDTO mapToDTO(ZonaViaje zona) {
         ZonaViajeDTO dto = new ZonaViajeDTO();
@@ -183,10 +166,6 @@ public class ZonaViajeService {
             dto.setProvinciasNombres(nombresProvincias);
         } else {
             dto.setProvinciasNombres(Collections.emptySet());
-            // Considera loggear una advertencia si prefieres, pero quitamos los logs de
-            // depuración
-            // log.warn("Mapeando DTO para Zona ID {}: ¡Provincias no inicializadas!",
-            // zona.getId());
         }
         return dto;
     }
@@ -197,7 +176,6 @@ public class ZonaViajeService {
         }
         return provinciasNombres.stream()
                 .map(nombre -> provinciaRepository.findByNombre(nombre)
-                        // Lanza la excepción si no se encuentra
                         .orElseThrow(() -> new IllegalArgumentException("Provincia no encontrada: " + nombre)))
                 .collect(Collectors.toSet());
     }

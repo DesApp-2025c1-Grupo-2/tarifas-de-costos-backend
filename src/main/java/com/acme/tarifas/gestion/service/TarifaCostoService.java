@@ -152,9 +152,17 @@ public class TarifaCostoService {
         });
     }
 
-    public List<TarifaCostoDTO> filtrarTarifas(String tipoVehiculo, Long zona, Long tipoCarga, String transportista) {
-        List<TarifaCosto> todasLasTarifas = tarifaRepository.findAll();
-        Stream<TarifaCosto> stream = todasLasTarifas.stream();
+    public List<TarifaCostoDTO> filtrarTarifas(String tipoVehiculo, Long zona, Long tipoCarga, String transportista,
+            LocalDate fechaInicio) {
+
+        List<TarifaCosto> tarifasBase;
+        if (fechaInicio != null) {
+            tarifasBase = tarifaRepository.findByEsVigenteTrueAndFechaCreacionAfter(fechaInicio.atStartOfDay());
+        } else {
+            tarifasBase = tarifaRepository.findByEsVigenteTrue();
+        }
+
+        Stream<TarifaCosto> stream = tarifasBase.stream();
 
         if (tipoVehiculo != null) {
             stream = stream.filter(
@@ -272,7 +280,6 @@ public class TarifaCostoService {
         historial.setCodigoTarifa(tarifa.getCodigoTarifa());
         historial.setNombreTarifa(tarifa.getNombreTarifa());
 
-        // Se setean los IDs persistentes para el historial
         historial.setTipoVehiculoId(tarifa.getTipoVehiculoId());
         historial.setTransportistaId(tarifa.getTransportistaId());
 
@@ -316,14 +323,12 @@ public class TarifaCostoService {
         return getTarifasActivas(null, null);
     }
 
-    // [NUEVO MÉTODO SOBRECARGADO]
     public List<TarifaCosto> getTarifasActivas(LocalDate fechaInicio, LocalDate fechaFin) {
         LocalDateTime inicio = fechaInicio != null ? fechaInicio.atStartOfDay() : null;
         LocalDateTime fin = fechaFin != null ? fechaFin.atTime(23, 59, 59) : null;
 
         return tarifaRepository.findAll().stream()
                 .filter(TarifaCosto::isEsVigente)
-                // Filtrar por fecha de creación
                 .filter(t -> inicio == null || (t.getFechaCreacion() != null && !t.getFechaCreacion().isBefore(inicio)))
                 .filter(t -> fin == null || (t.getFechaCreacion() != null && !t.getFechaCreacion().isAfter(fin)))
                 .collect(Collectors.toList());
